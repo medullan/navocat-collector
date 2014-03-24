@@ -1,40 +1,96 @@
+require 'meda/collector/disk_streamer'
+require 'meda/collector/google_analytics_streamer'
+
 module Meda
   module Collector
     class Connection
+
+      class StreamerThread < Thread
+      end
 
       RDB = 0
 
       def initialize(options={})
         @options = options
+        @disk_threads = []
+        @ga_threads = []
+
+        at_exit do
+          stop_streams
+        end
       end
 
       def identify(params)
-        dataset = get_dataset_from_params(params)
+        dataset, user_params = extract_dataset_from_params(params)
         dataset.identify_user(params)
       end
 
       def profile(params)
-        dataset = get_dataset_from_params(params)
-        id = params.delete('profile_id')
-        dataset.set_profile(id, params)
+        dataset, profile_params = extract_dataset_from_params(params)
+        profile_id = profile_params.delete(:profile_id)
+        dataset.set_profile(profile_id, profile_params)
       end
 
-      def event(params)
-        dataset = get_dataset_from_params(params)
-        dataset.add_event(params)
+      def track(params)
+        dataset, track_params = extract_dataset_from_params(params)
+        dataset.add_event(track_params)
+      end
+
+      def page(params)
+        dataset, page_params = extract_dataset_from_params(params)
+        dataset.add_pageview(page_params)
+      end
+
+      def datasets
+        return [{}]
+        @datasets ||= Meda::Dataset.all
       end
 
       def create_dataset(dataset_name, rdb_index)
+        Meda::Dataset.create(dataset_name, rbd_index)
+        @datasets = nil
+        dataset
       end
 
       def destroy_dataset(dataset_name)
+        Meda::Dataset.destroy(dataset_name)
+        @datasets = nil
+        true
+      end
+
+      def start_disk_streams
+        puts '* Starting Meda disk streamers'
+
+        datasets.each do |dataset|
+          disk_stream = Meda::Collector::DiskStreamer.new(dataset)
+          @disk_threads << StreamerThread.new { disk_stream.run }
+        end
+        true
+      end
+
+      def start_ga_streams
+        puts '* Starting Meda Google Analytics streamers'
+
+        datasets.each do |dataset|
+          ga_stream = Meda::Collector::GoogleAnalyticsStreamer.new(dataset)
+          @ga_threads << StreamerThread.new { ga_stream.run }
+        end
+        true
+      end
+
+      def stop_streams
+        @disk_threads.each {|t| t[:should_exit] = true }
+        @ga_threads.each {|t| t[:should_exit] = true }
       end
 
       protected
 
-      def get_dataset_from_params(params)
+      def extract_dataset_from_params(params)
+        extra_params = params.symbolize_keys
+        dataset_name = extra_params.delete(:dataset)
+        token = extra_params.delete(:token)
 
-        return Meda::Dataset.new('day_members', 1);
+        return Meda::Dataset.new('day_members', 1), extra_params
 
         # if params[:dataset].present?
         #   dataset = get_dataset_by_name(params[:dataset])
@@ -47,12 +103,21 @@ module Meda
         # dataset
       end
 
-      def get_dataset_by_name
+      def get_dataset_by_name(name)
         # find in redis and return dataset object
+        id = redis.get("dataset:lookup:name:#{name}")
+        if dataset_id
+          rdb = redis.hget("dataset:#{id}", rdb)
+          Meda::Dataset.new(name, rdb)
+        end
       end
 
-      def get_dataset_by_token
-        # find in redis and return dataset object
+      def get_dataset_by_token(token)
+        id = redis.get("dataset:lookup:token:#{token}")
+        if dataset_id
+          rdb = redis.hget("dataset:#{id}", rdb)
+          Meda::Dataset.new(name, rdb)
+        end
       end
 
       def redis

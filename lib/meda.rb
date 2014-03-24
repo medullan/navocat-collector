@@ -1,4 +1,5 @@
-require "meda/version"
+Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
+require "active_support/all"
 
 module Meda
 
@@ -30,14 +31,5 @@ end
 Meda.configure do |config|
 end
 
-# require "meda/*"
-
-require "meda/dataset"
-require "meda/funnel"
-require "meda/goal"
-require "meda/profile"
-require "meda/collector/connection"
-require "meda/collector/app"
-require "active_support/all"
-
+Meda
 
