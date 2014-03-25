@@ -9,7 +9,7 @@ The collector is written in Sinatra and deployed with the puma webserver.
 
 Add this line to your application's Gemfile:
 
-    gem 'meda'
+    gem 'meda', :git => '{git url to this repo}'
 
 And then execute:
 
