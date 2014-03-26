@@ -42,20 +42,17 @@ module Meda
       end
 
       def datasets
-        return [{}]
         @datasets ||= Meda::Dataset.all
       end
 
       def create_dataset(dataset_name, rdb_index)
-        Meda::Dataset.create(dataset_name, rbd_index)
         @datasets = nil
-        dataset
+        Meda::Dataset.create(dataset_name, rdb_index)
       end
 
       def destroy_dataset(dataset_name)
-        Meda::Dataset.destroy(dataset_name)
         @datasets = nil
-        true
+        Meda::Dataset.destroy(dataset_name)
       end
 
       def start_disk_streams
@@ -69,6 +66,7 @@ module Meda
       end
 
       def start_ga_streams
+        return
         puts '* Starting Meda Google Analytics streamers'
 
         datasets.each do |dataset|
@@ -90,7 +88,7 @@ module Meda
         dataset_name = extra_params.delete(:dataset)
         token = extra_params.delete(:token)
 
-        return Meda::Dataset.new('day_members', 1), extra_params
+        return Meda::Dataset.new('test', 1), extra_params
 
         # if params[:dataset].present?
         #   dataset = get_dataset_by_name(params[:dataset])

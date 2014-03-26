@@ -129,17 +129,17 @@ module Meda
       end
 
       def page_params_from_utm
-        {
+        request_environment.merge({
           :name => params[:utmp],
           :profile_id => cookies[:'_meda_profile_id']
-        }
+        })
       end
 
       def event_params_from_utm
-        {
+        request_environment.merge({
           :name => params[:utme],
           :profile_id => cookies[:'_meda_profile_id']
-        }
+        })
       end
 
     end

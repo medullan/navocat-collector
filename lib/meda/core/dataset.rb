@@ -24,8 +24,6 @@ module Meda
     end
 
     def add_event(event_props)
-      puts "Add event #{event_props}"
-
       event_props[:time] ||= DateTime.now.to_s
       event_props[:category] ||= 'none'
       event = Meda::Event.new(event_props)
@@ -33,8 +31,6 @@ module Meda
     end
 
     def add_pageview(page_props)
-      puts "Add pageview #{page_props}"
-
       page_props[:time] ||= DateTime.now.to_s
       pageview = Meda::Pageview.new(page_props)
       add_hit(pageview)
@@ -88,10 +84,10 @@ module Meda
       redis_meta.sadd("datasets", id)
       redis_meta.set("dataset:lookup:name:#{name}", id)
       redis_meta.set("dataset:lookup:token:#{token}", id)
-      redis_meta.hmset("dataset:#{id}", {
-        'id' => id, 'name' => name, 'token' => token, 'rdb' => rdb,
+      redis_meta.mapped_hmset("dataset:#{id}", {
+        'id' => id, 'name' => name, 'token' => token, 'rdb' => rdb
       })
-      Meda::Dataset.new(name, db)
+      Meda::Dataset.new(name, rdb)
     end
 
     # UNTESTED
@@ -115,8 +111,8 @@ module Meda
     def self.all
       ids = redis_meta.smembers('datasets')
       ids.map do |id|
-        name = redis_meta.hget("dataset:#{id}", name)
-        rdb = redis_meta.hget("dataset:#{id}", rdb)
+        name = redis_meta.hget("dataset:#{id}", 'name')
+        rdb = redis_meta.hget("dataset:#{id}", 'rdb')
         Meda::Dataset.new(name, rdb)
       end
     end
