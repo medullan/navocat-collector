@@ -7,6 +7,7 @@ module Meda
       name = props.delete(:name)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
+      profile_props = {}
       super(name, time, profile_id, props)
     end
 
@@ -21,7 +22,7 @@ module Meda
     def validate!
       raise('Hit name is required') if name.blank?
       raise('Hit time is required') if time.blank?
-      raise('Hit profile id is required') if profile_id.blank?
+      # raise('Hit profile id is required') if profile_id.blank?
     end
 
     def hour

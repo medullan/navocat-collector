@@ -42,8 +42,13 @@ module Meda
 
     def add_hit(hit)
       hit.id = UUIDTools::UUID.timestamp_create.hexdigest
-      profile = get_profile_by_id(hit.profile_id)
-      hit.profile_props = profile.hashed_attributes
+      if hit.profile_id
+        profile = get_profile_by_id(hit.profile_id)
+        hit.profile_props = profile.hashed_attributes
+      else
+        # Hit has no profile
+        # Leave it anonymous-ish for now. Figure out what to do later.
+      end
 
       hit.validate! # blows up if missing attrs
       enqueue_hit_to_disk(hit)
@@ -54,11 +59,9 @@ module Meda
       hit_key = "new_#{hit.hit_type_plural}"
       range_key = "new_#{hit.hit_type_plural}:#{hit.hour}"
 
-      puts "#{hit_key} --- #{range_key}"
-
       redis.pipelined do
         redis.zadd(hit_key, hit.hour_value.to_s, range_key)
-        redis.zadd(range_key, hit.time_value.to_s, "#{hit.to_json}\n")
+        redis.zadd(range_key, hit.time_value.to_s, hit.to_json)
       end
     end
 
