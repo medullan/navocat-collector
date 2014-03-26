@@ -39,6 +39,7 @@ module Meda
 
     def as_json
       {
+        :id => id,
         :name => name,
         :time => time,
         :props => props,
