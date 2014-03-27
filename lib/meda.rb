@@ -21,10 +21,14 @@ module Meda
       :password => nil
     }
 
-    attr_accessor :redis
+    attr_accessor :redis, :data_path, :log_path, :log_level
 
     def initialize
       @redis = REDIS_DEFAULTS.dup
+    end
+
+    def []=(key, val)
+      send("#{key}=", val)
     end
   end
 end

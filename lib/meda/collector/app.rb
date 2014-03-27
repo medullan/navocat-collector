@@ -8,8 +8,6 @@ module Meda
 
     class App < Sinatra::Base
 
-      connection = Meda::Collector::Connection.new
-      set :connection, connection
       set :public_folder, 'static'
 
       helpers Sinatra::Cookies
@@ -96,7 +94,7 @@ module Meda
       # Config
 
       configure :production, :development do
-        enable :logging
+        set :connection, Meda::Collector::Connection.new
       end
 
       protected

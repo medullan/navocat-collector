@@ -1,3 +1,4 @@
+require 'logger'
 require 'meda/collector/disk_streamer'
 require 'meda/collector/google_analytics_streamer'
 
@@ -14,6 +15,7 @@ module Meda
         @options = options
         @disk_threads = []
         @ga_threads = []
+        @stream = true if options[:stream]
 
         at_exit do
           stop_streams
@@ -21,24 +23,32 @@ module Meda
       end
 
       def identify(params)
-        dataset, user_params = extract_dataset_from_params(params)
-        dataset.identify_user(params)
+        process_request do
+          dataset, user_params = extract_dataset_from_params(params)
+          response = dataset.identify_user(params)
+        end
       end
 
       def profile(params)
-        dataset, profile_params = extract_dataset_from_params(params)
-        profile_id = profile_params.delete(:profile_id)
-        dataset.set_profile(profile_id, profile_params)
+        process_request do
+          dataset, profile_params = extract_dataset_from_params(params)
+          profile_id = profile_params.delete(:profile_id)
+          dataset.set_profile(profile_id, profile_params)
+        end
       end
 
       def track(params)
-        dataset, track_params = extract_dataset_from_params(params)
-        dataset.add_event(track_params)
+        process_request do
+          dataset, track_params = extract_dataset_from_params(params)
+          dataset.add_event(track_params)
+        end
       end
 
       def page(params)
-        dataset, page_params = extract_dataset_from_params(params)
-        dataset.add_pageview(page_params)
+        process_request do
+          dataset, page_params = extract_dataset_from_params(params)
+          dataset.add_pageview(page_params)
+        end
       end
 
       def datasets
@@ -57,6 +67,7 @@ module Meda
 
       def start_disk_streams
         puts '* Starting Meda disk streamers'
+        logger.info 'Starting Meda disk streamers'
 
         datasets.each do |dataset|
           disk_stream = Meda::Collector::DiskStreamer.new(dataset)
@@ -65,9 +76,12 @@ module Meda
         true
       end
 
+      # Unimplemented
+
       def start_ga_streams
         return
         puts '* Starting Meda Google Analytics streamers'
+        logger.info 'Starting Google Analytics streamers'
 
         datasets.each do |dataset|
           ga_stream = Meda::Collector::GoogleAnalyticsStreamer.new(dataset)
@@ -76,9 +90,37 @@ module Meda
         true
       end
 
+      def start_streams
+        return if @streaming
+        @streaming = true
+        start_disk_streams
+        start_ga_streams
+      end
+
       def stop_streams
+        @streaming = false
         @disk_threads.each {|t| t[:should_exit] = true }
         @ga_threads.each {|t| t[:should_exit] = true }
+      end
+
+      def process_request(&block)
+        begin
+          start_streams
+          yield if block_given?
+        rescue StandardError => e
+          logger.error(e)
+          raise e
+        end
+      end
+
+      def logger
+        if @logger.nil? && Meda.configuration.log_path.present?
+          FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
+          FileUtils.touch(Meda.configuration.log_path)
+          @logger = Logger.new(Meda.configuration.log_path)
+          @logger.level = Meda.configuration.log_level || Logger::INFO
+        end
+        @logger
       end
 
       protected
