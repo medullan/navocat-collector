@@ -1,6 +1,6 @@
-require 'logger'
 require 'meda/collector/disk_streamer'
 require 'meda/collector/google_analytics_streamer'
+require 'meda/collector/loggable'
 
 module Meda
   module Collector
@@ -10,6 +10,8 @@ module Meda
       end
 
       RDB = 0
+
+      include Meda::Collector::Loggable
 
       def initialize(options={})
         @options = options
@@ -79,7 +81,6 @@ module Meda
       # Unimplemented
 
       def start_ga_streams
-        return
         puts '* Starting Meda Google Analytics streamers'
         logger.info 'Starting Google Analytics streamers'
 
@@ -111,16 +112,6 @@ module Meda
           logger.error(e)
           raise e
         end
-      end
-
-      def logger
-        if @logger.nil? && Meda.configuration.log_path.present?
-          FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
-          FileUtils.touch(Meda.configuration.log_path)
-          @logger = Logger.new(Meda.configuration.log_path)
-          @logger.level = Meda.configuration.log_level || Logger::INFO
-        end
-        @logger
       end
 
       protected

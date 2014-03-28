@@ -9,6 +9,7 @@ module Meda
   class Dataset
 
     attr_reader :name, :rdb
+    # attr_accessor :ga_account
 
     def initialize(name, rdb=1)
       @name = name
@@ -62,23 +63,22 @@ module Meda
     end
 
     def enqueue_hit_to_ga(hit)
-      # unimplemented
+      hit_key = "ga_new_#{hit.hit_type_plural}"
+      redis.rpush(hit_key, hit.to_ga_json)
     end
 
     def set_profile(profile_id, profile_info)
       redis.mapped_hmset("profile:#{profile_id}", profile_info)
     end
 
-    # def dump_to_disk(path)
-    #   dump_events(File.join(path, 'events.csv', ))
-    #   dump_event_props(File.join(path, 'event_props.csv'))
-    #   dump_profile_props(File.join(path, 'profile_props.csv'))
-    # end
+    def ga_account
+      "UA-47758842-2" # temporary, of course
+    end
 
     # UNTESTED
     # add dataset to redis
 
-    def self.create(name, rdb)
+    def self.create(name, rdb, ga=nil)
       id = UUIDTools::UUID.timestamp_create.hexdigest
       token = SecureRandom.hex(16)
       redis_meta.sadd("datasets", id)

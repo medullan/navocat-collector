@@ -120,24 +120,45 @@ module Meda
 
       def request_environment
         {
-          :remote_address => request.env['REMOTE_ADDR'],
-          :http_referer => request.env['HTTP_REFERER'],
-          :http_user_agent => request.env['HTTP_USER_AGENT']
+          :user_ip => request.env['REMOTE_ADDR'],
+          :referrer => request.env['HTTP_REFERER'],
+          :user_agent => request.env['HTTP_USER_AGENT']
         }
       end
 
       def page_params_from_utm
-        request_environment.merge({
-          :name => params[:utmp],
-          :profile_id => cookies[:'_meda_profile_id']
-        })
+        {
+          :profile_id => cookies[:'_meda_profile_id'],
+          :name => params[:utmdt] || params[:utmp],
+          :hostname => params[:utmhn],
+          :referrer => params[:utmr] || request.env['HTTP_REFERER'],
+          :user_ip => params[:utmip] || request.env['REMOTE_ADDR'],
+          :user_agent => request.env['HTTP_USER_AGENT'],
+          :path => params[:utmp],
+          :title => params[:utmdt],
+          :user_language => params[:utmul],
+          :screen_depth => params[:utmsc],
+          :screen_resolution => params[:utmsr]
+        }
       end
 
       def event_params_from_utm
-        request_environment.merge({
+        parsed_utme = params[:utme].match(/\d\((.+)\*(.+)\*(.+)\*(.+)\)/) # '5(object*action*label*value)'
+        {
+          :profile_id => cookies[:'_meda_profile_id'],
           :name => params[:utme],
-          :profile_id => cookies[:'_meda_profile_id']
-        })
+          :category => parsed_utme[1],
+          :action => parsed_utme[2],
+          :label => parsed_utme[3],
+          :value => parsed_utme[4],
+          :hostname => params[:utmhn],
+          :referrer => params[:utmr] || request.env['HTTP_REFERER'],
+          :user_ip => params[:utmip] || request.env['REMOTE_ADDR'],
+          :user_agent => request.env['HTTP_USER_AGENT'],
+          :user_language => params[:utmul],
+          :screen_depth => params[:utmsc],
+          :screen_resolution => params[:utmsr]
+        }
       end
 
     end

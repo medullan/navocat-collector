@@ -43,12 +43,24 @@ module Meda
         :name => name,
         :time => time,
         :props => props,
+        :profile_id => profile_id,
         :profile_props => profile_props
       }
     end
 
+    def as_ga_json
+      props.merge({
+        :client_id => profile_id,
+        :cache_buster => id
+      })
+    end
+
     def to_json
       as_json.to_json
+    end
+
+    def to_ga_json
+      as_ga_json.to_json
     end
 
   end

@@ -1,8 +1,11 @@
 require 'uuidtools'
+require 'meda/collector/loggable'
 
 module Meda
   module Collector
     class DiskStreamer
+
+      include Meda::Collector::Loggable
 
       attr_reader :dataset, :uuid
       attr_accessor :stop
@@ -61,16 +64,6 @@ module Meda
 
       def redis
         @redis ||= Redis.new(Meda.configuration.redis.merge(:db => dataset.rdb))
-      end
-
-      def logger
-        if @logger.nil? && Meda.configuration.log_path.present?
-          FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
-          FileUtils.touch(Meda.configuration.log_path)
-          @logger = Logger.new(Meda.configuration.log_path)
-          @logger.level = Meda.configuration.log_level || Logger::INFO
-        end
-        @logger
       end
 
     end
