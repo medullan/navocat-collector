@@ -63,7 +63,7 @@ module Meda
 
     def stream_hit_to_disk(hit)
       data_path = Meda.configuration.data_path
-      directory = File.join(data_path, hit.hit_type_plural, hit.day) # i.e. 'meda_data/events/2014-04-01'
+      directory = File.join(data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
       unless @data_paths[directory]
         # create the data directory if it does not exist
         @data_paths[directory] = FileUtils.mkdir_p(directory)
@@ -107,11 +107,14 @@ module Meda
       redis do |r|
         r.mapped_hmset("profile:#{profile_id}", profile_info)
       end
-      puts "set profile vars #{profile_info}"
     end
 
     def after_identify(&block)
       @after_identify = block
+    end
+
+    def path_name
+      name.downcase.gsub(' ', '_')
     end
 
     protected
