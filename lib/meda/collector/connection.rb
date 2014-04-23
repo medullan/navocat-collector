@@ -1,60 +1,71 @@
-require 'meda/collector/disk_streamer'
-require 'meda/collector/google_analytics_streamer'
-require 'meda/collector/loggable'
-
 module Meda
   module Collector
     class Connection
 
-      class StreamerThread < Thread
-      end
+      DISK_POOL_DEFAULT = 2
+      GA_POOL_DEFAULT = 2
 
-      RDB = 0
-
-      include Meda::Collector::Loggable
+      attr_reader :disk_pool, :ga_pool
 
       def initialize(options={})
         @options = options
-        @disk_threads = []
-        @ga_threads = []
-        @stream = true if options[:stream]
+        @disk_pool = Meda::WorkerPool.new({
+          :size => Meda.configuration.disk_pool
+        })
+        @ga_pool = Meda::WorkerPool.new({
+          :size => Meda.configuration.google_analytics_pool
+        })
+
+        Meda.datasets # pre-fetch
 
         at_exit do
-          stop_streams
+          @disk_pool.shutdown
+          @ga_pool.shutdown
         end
       end
 
       def identify(params)
-        process_request do
-          dataset, user_params = extract_dataset_from_params(params)
-          response = dataset.identify_user(params)
+        process_request(params) do |dataset, user_params|
+          dataset.identify_user(user_params)
         end
       end
 
       def profile(params)
-        process_request do
-          dataset, profile_params = extract_dataset_from_params(params)
+        process_request(params) do |dataset, profile_params|
           profile_id = profile_params.delete(:profile_id)
           dataset.set_profile(profile_id, profile_params)
         end
+        true
       end
 
       def track(params)
-        process_request do
-          dataset, track_params = extract_dataset_from_params(params)
-          dataset.add_event(track_params)
+        process_request(params) do |dataset, track_params|
+          hit = dataset.add_event(track_params)
+          disk_pool.submit do
+            dataset.stream_hit_to_disk(hit)
+          end
+          if dataset.stream_to_ga?
+            ga_pool.submit do
+              dataset.stream_hit_to_ga(hit)
+            end
+          end
         end
+        true
       end
 
       def page(params)
-        process_request do
-          dataset, page_params = extract_dataset_from_params(params)
-          dataset.add_pageview(page_params)
+        process_request(params) do |dataset, page_params|
+          hit = dataset.add_pageview(page_params)
+          disk_pool.submit do
+            dataset.stream_hit_to_disk(hit)
+          end
+          if dataset.stream_to_ga?
+            ga_pool.submit do
+              dataset.stream_hit_to_ga(hit)
+            end
+          end
         end
-      end
-
-      def datasets
-        @datasets ||= Meda::Dataset.all
+        true
       end
 
       def create_dataset(dataset_name, rdb_index)
@@ -67,92 +78,31 @@ module Meda
         Meda::Dataset.destroy(dataset_name)
       end
 
-      def start_disk_streams
-        puts '* Starting Meda disk streamers'
-        logger.info 'Starting Meda disk streamers'
+      # protected
 
-        datasets.each do |dataset|
-          disk_stream = Meda::Collector::DiskStreamer.new(dataset)
-          @disk_threads << StreamerThread.new { disk_stream.run }
-        end
-        true
-      end
-
-      # Unimplemented
-
-      def start_ga_streams
-        puts '* Starting Meda Google Analytics streamers'
-        logger.info 'Starting Google Analytics streamers'
-
-        datasets.each do |dataset|
-          ga_stream = Meda::Collector::GoogleAnalyticsStreamer.new(dataset)
-          @ga_threads << StreamerThread.new { ga_stream.run }
-        end
-        true
-      end
-
-      def start_streams
-        return if @streaming
-        @streaming = true
-        start_disk_streams
-        start_ga_streams
-      end
-
-      def stop_streams
-        @streaming = false
-        @disk_threads.each {|t| t[:should_exit] = true }
-        @ga_threads.each {|t| t[:should_exit] = true }
-      end
-
-      def process_request(&block)
+      def process_request(params, &block)
         begin
-          start_streams
-          yield if block_given?
+          dataset, other_params = extract_dataset_from_params(params)
+          yield(dataset, other_params) if block_given?
         rescue StandardError => e
-          logger.error(e)
+          Meda.logger.error(e)
+          puts e
           raise e
         end
       end
 
-      protected
-
       def extract_dataset_from_params(params)
+        if params[:dataset].blank?
+          raise 'Cannot find dataset. Token param blank.'
+        end
         extra_params = params.symbolize_keys
-        dataset_name = extra_params.delete(:dataset)
-        token = extra_params.delete(:token)
-
-        return Meda::Dataset.new('test', 1), extra_params
-
-        # if params[:dataset].present?
-        #   dataset = get_dataset_by_name(params[:dataset])
-        # elsif params[:token].present?
-        #   dataset = get_dataset_by_token(params[:token])
-        # else
-        #   raise ('Dataset not found')
-        # end
-        # raise ('Dataset not found') if dataset.nil?
-        # dataset
-      end
-
-      def get_dataset_by_name(name)
-        # find in redis and return dataset object
-        id = redis.get("dataset:lookup:name:#{name}")
-        if dataset_id
-          rdb = redis.hget("dataset:#{id}", rdb)
-          Meda::Dataset.new(name, rdb)
+        token = extra_params.delete(:dataset)
+        dataset = Meda.datasets[token]
+        if dataset
+          return dataset, extra_params
+        else
+          raise "No dataset found for token param #{token}"
         end
-      end
-
-      def get_dataset_by_token(token)
-        id = redis.get("dataset:lookup:token:#{token}")
-        if dataset_id
-          rdb = redis.hget("dataset:#{id}", rdb)
-          Meda::Dataset.new(name, rdb)
-        end
-      end
-
-      def redis
-        @redis ||= Redis.new(Meda.configuration.redis.merge(options[:redis]).merge(:db => RDB))
       end
 
     end

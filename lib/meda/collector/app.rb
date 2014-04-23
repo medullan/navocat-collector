@@ -27,7 +27,6 @@ module Meda
 
       get '/identify.json' do
         user = settings.connection.identify(params)
-        set_profile_id_in_cookie(user.profile_id)
         user.marshal_dump.to_json
       end
 
@@ -40,7 +39,6 @@ module Meda
       # Profile
 
       get '/profile.json' do
-        get_profile_id_from_cookie
         settings.connection.profile(params)
         respond_with_ok
       end
@@ -53,7 +51,7 @@ module Meda
 
       # Accept google analytics __utm.gif formatted hits
 
-      get '/__utm.gif' do
+      get '/:dataset/__utm.gif' do
         get_profile_id_from_cookie
         if params[:utmt] == 'event'
           settings.connection.track(event_params_from_utm)
@@ -66,7 +64,6 @@ module Meda
       # Page
 
       get '/page.json' do
-        get_profile_id_from_cookie
         settings.connection.page(params)
         respond_with_ok
       end
@@ -129,7 +126,6 @@ module Meda
       def page_params_from_utm
         {
           :profile_id => cookies[:'_meda_profile_id'],
-          :name => params[:utmdt] || params[:utmp],
           :hostname => params[:utmhn],
           :referrer => params[:utmr] || request.env['HTTP_REFERER'],
           :user_ip => params[:utmip] || request.env['REMOTE_ADDR'],
@@ -146,7 +142,6 @@ module Meda
         parsed_utme = params[:utme].match(/\d\((.+)\*(.+)\*(.+)\*(.+)\)/) # '5(object*action*label*value)'
         {
           :profile_id => cookies[:'_meda_profile_id'],
-          :name => params[:utme],
           :category => parsed_utme[1],
           :action => parsed_utme[2],
           :label => parsed_utme[3],

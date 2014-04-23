@@ -10,10 +10,6 @@ module Meda
       @attributes = attributes
     end
 
-    def hashed_attributes
-      Hash[attributes.map{|k,v| [Digest::SHA1.hexdigest(k), Digest::SHA1.hexdigest(v)]}]
-    end
-
   end
 end
 

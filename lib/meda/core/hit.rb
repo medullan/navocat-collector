@@ -1,14 +1,13 @@
 module Meda
-  class Hit < Struct.new(:name, :time, :profile_id, :props)
+  class Hit < Struct.new(:time, :profile_id, :props)
 
     attr_accessor :profile_props, :id
 
     def initialize(props)
-      name = props.delete(:name)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
       profile_props = {}
-      super(name, time, profile_id, props)
+      super(time, profile_id, props)
     end
 
     def hit_type
@@ -20,13 +19,15 @@ module Meda
     end
 
     def validate!
-      raise('Hit name is required') if name.blank?
       raise('Hit time is required') if time.blank?
-      # raise('Hit profile id is required') if profile_id.blank?
     end
 
     def hour
       DateTime.parse(time).strftime("%Y-%m-%d-%H:00:00")
+    end
+
+    def day
+      DateTime.parse(time).strftime("%Y-%m-%d")
     end
 
     def hour_value
@@ -40,15 +41,14 @@ module Meda
     def as_json
       {
         :id => id,
-        :name => name,
-        :time => time,
-        :props => props,
-        :profile_id => profile_id,
-        :profile_props => profile_props
+        :ht => time,
+        :hp => props,
+        :pi => profile_id,
+        :pp => profile_props
       }
     end
 
-    def as_ga_json
+    def as_ga
       props.merge({
         :client_id => profile_id,
         :cache_buster => id
@@ -60,7 +60,7 @@ module Meda
     end
 
     def to_ga_json
-      as_ga_json.to_json
+      as_ga.to_json
     end
 
   end
