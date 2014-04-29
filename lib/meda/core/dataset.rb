@@ -74,6 +74,7 @@ module Meda
         File.open(path, 'a') do |f|
           f.puts(hit.to_json)
         end
+        Meda.logger.debug("Writing hit #{hit.id} to #{path}")
       rescue StandardError => e
         Meda.logger.error("Failure writing hit #{hit.id} to #{path}")
         Meda.logger.error(e)
@@ -95,6 +96,7 @@ module Meda
           ga_hit.add_custom_dimension(val['index'], dim)
         end
         ga_hit.track!
+        Meda.logger.debug("Writing hit #{hit.id} to Google Analytics")
       rescue StandardError => e
         Meda.logger.error("Failure writing hit #{hit.id} to GA")
         Meda.logger.error(e)
