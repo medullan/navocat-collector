@@ -2,6 +2,7 @@ require File.dirname(File.absolute_path(__FILE__)) + '/meda/version.rb'
 Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
 require "active_support/all"
 require "connection_pool"
+require 'psych'
 
 module Meda
 
@@ -43,7 +44,7 @@ module Meda
     if @datasets.nil?
       @datasets = {}
       begin
-        config = YAML.load(File.open('datasets.yml'))
+        config = Psych.load(File.open('datasets.yml'))
         config.each do |d_name, d_config|
           d = Meda::Dataset.new(d_name)
           d_config.each_pair { |key, val| d.send("#{key}=", val) }
@@ -80,7 +81,7 @@ end
 
 Meda.configure do |config|
   begin
-    app_config = YAML.load(File.open('application.yml'))[ENV['RACK_ENV'] || 'development']
+    app_config = Psych.load(File.open('application.yml'))[ENV['RACK_ENV'] || 'development']
     app_config.each_pair { |key, val| config[key] = val }
   rescue Errno::ENOENT
     puts "Warning: Missing application.yml, please configure manually"
