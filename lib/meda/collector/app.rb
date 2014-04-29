@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/cookies'
+require 'sinatra/json'
 require 'meda'
 require 'meda/collector/connection'
 
@@ -11,6 +12,7 @@ module Meda
       set :public_folder, 'static'
 
       helpers Sinatra::Cookies
+      helpers Sinatra::JSON
 
       get '/' do
         "Meda version #{Meda::VERSION}"
@@ -25,9 +27,10 @@ module Meda
 
       # Identify
 
-      get '/identify.json' do
-        user = settings.connection.identify(params)
-        user.marshal_dump.to_json
+      post '/identify.json', :provides => :json do
+        identify_data = json_from_request
+        user = settings.connection.identify(identify_data)
+        json({"profile_id" => user.profile_id})
       end
 
       get '/identify.gif' do
@@ -38,8 +41,9 @@ module Meda
 
       # Profile
 
-      get '/profile.json' do
-        settings.connection.profile(params)
+      post '/profile.json', :provides => :json do
+        profile_data = json_from_request
+        settings.connection.profile(profile_data)
         respond_with_ok
       end
 
@@ -63,8 +67,9 @@ module Meda
 
       # Page
 
-      get '/page.json' do
-        settings.connection.page(params)
+      post '/page.json', :provides => :json do
+        page_data = json_from_request
+        settings.connection.page(page_data)
         respond_with_ok
       end
 
@@ -76,9 +81,9 @@ module Meda
 
       # Track
 
-      get '/track.json' do
-        get_profile_id_from_cookie
-        settings.connection.track(params)
+      post '/track.json', :provides => :json do
+        track_data = json_from_request
+        settings.connection.track(track_data)
         respond_with_ok
       end
 
@@ -96,8 +101,17 @@ module Meda
 
       protected
 
+      def json_from_request
+        begin
+          JSON.parse(request.body.read).symbolize_keys
+        rescue StandardError => e
+          status 422
+          json({'error' => 'Request body is invalid'})
+        end
+      end
+
       def respond_with_ok
-        {"status" => "ok"}.to_json
+        json({"status" => "ok"})
       end
 
       def respond_with_pixel

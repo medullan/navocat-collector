@@ -9,10 +9,10 @@ module Meda
 
       def initialize(options={})
         @options = options
-        @disk_pool = Meda::WorkerPool.new({
+        @disk_pool = options[:disk_pool] || Meda::WorkerPool.new({
           :size => Meda.configuration.disk_pool
         })
-        @ga_pool = Meda::WorkerPool.new({
+        @ga_pool = options[:ga_pool] || Meda::WorkerPool.new({
           :size => Meda.configuration.google_analytics_pool
         })
 
@@ -68,6 +68,12 @@ module Meda
         true
       end
 
+      def join_threads(&block)
+        while @disk_pool.active? || @ga_pool.active? do
+        end
+        yield if block_given?
+      end
+
       def create_dataset(dataset_name, rdb_index)
         @datasets = nil
         Meda::Dataset.create(dataset_name, rdb_index)
@@ -78,14 +84,14 @@ module Meda
         Meda::Dataset.destroy(dataset_name)
       end
 
-      # protected
+      protected
 
       def process_request(params, &block)
         begin
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
         rescue StandardError => e
-          Meda.logger.error(e)
+          Meda.logger.error(e) if Meda.logger
           puts e
           raise e
         end

@@ -1,5 +1,6 @@
 require 'rack/test'
 require 'meda'
+require 'meda/collector'
 
 module RSpecMixin
   include Rack::Test::Methods

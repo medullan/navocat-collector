@@ -23,6 +23,10 @@ module Meda
       @pool.submit(block)
     end
 
+    def active?
+      @pool.getActiveCount > 0
+    end
+
     def shutdown(wait=true)
       @pool.shutdown
     end
