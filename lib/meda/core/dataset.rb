@@ -5,12 +5,16 @@ require 'digest'
 require 'csv'
 require 'securerandom'
 require 'staccato'
+require 'logger'
 
 module Meda
   class Dataset
 
     attr_reader :data_uuid, :name
     attr_accessor :google_analytics, :rdb, :token
+
+    # Readers primarily used for tests, not especially thread-safe :p
+    attr_reader :last_hit, :last_disk_hit, :last_ga_hit
 
     def initialize(name, rdb=1)
       @name = name
@@ -45,6 +49,7 @@ module Meda
 
     def add_hit(hit)
       hit.id = UUIDTools::UUID.timestamp_create.hexdigest
+      hit.dataset = self
       if hit.profile_id
         profile = get_profile_by_id(hit.profile_id)
         hit.profile_props = profile.attributes.clone
@@ -52,7 +57,7 @@ module Meda
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
       end
-
+      @last_hit = hit
       hit.validate! # blows up if missing attrs
       hit
     end
@@ -74,16 +79,20 @@ module Meda
         File.open(path, 'a') do |f|
           f.puts(hit.to_json)
         end
-        Meda.logger.debug("Writing hit #{hit.id} to #{path}")
+        @last_disk_hit = {
+          :hit => hit, :path => path, :data => hit.to_json
+        }
+        logger.debug("Writing hit #{hit.id} to #{path}")
       rescue StandardError => e
-        Meda.logger.error("Failure writing hit #{hit.id} to #{path}")
-        Meda.logger.error(e)
+        logger.error("Failure writing hit #{hit.id} to #{path}")
+        logger.error(e)
         raise e
       end
       true
     end
 
     def stream_hit_to_ga(hit)
+      @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
       return unless stream_to_ga?
       tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id)
       begin
@@ -93,13 +102,15 @@ module Meda
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
         google_analytics['custom_dimensions'].each_pair do |dim, val|
-          ga_hit.add_custom_dimension(val['index'], dim)
+          ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
         end
-        ga_hit.track!
-        Meda.logger.debug("Writing hit #{hit.id} to Google Analytics")
+        @last_ga_hit[:staccato_hit] = ga_hit
+        @last_ga_hit[:response] = ga_hit.track!
+        logger.debug("Writing hit #{hit.id} to Google Analytics")
+        logger.debug(ga_hit.inspect)
       rescue StandardError => e
-        Meda.logger.error("Failure writing hit #{hit.id} to GA")
-        Meda.logger.error(e)
+        logger.error("Failure writing hit #{hit.id} to GA")
+        logger.error(e)
         raise e
       end
       true
@@ -184,6 +195,10 @@ module Meda
         conn.select(@rdb)
         yield(conn) if block_given?
       end
+    end
+
+    def logger
+      @logger ||= Meda.logger || Logger.new(STDOUT)
     end
 
   end

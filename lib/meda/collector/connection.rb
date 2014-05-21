@@ -2,8 +2,8 @@ module Meda
   module Collector
     class Connection
 
-      DISK_POOL_DEFAULT = 2
-      GA_POOL_DEFAULT = 2
+      DISK_POOL_DEFAULT = 1
+      GA_POOL_DEFAULT = 1
 
       attr_reader :disk_pool, :ga_pool
 

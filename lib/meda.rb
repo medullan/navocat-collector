@@ -18,6 +18,10 @@ module Meda
   def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)
+    datasets
+    logger
+    redis
+    true
   end
 
   def self.logger

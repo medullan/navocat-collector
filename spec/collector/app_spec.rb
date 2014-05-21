@@ -10,9 +10,13 @@ describe "Collector Application" do
   profile_id = nil
 
   before(:all) do
-    dataset = Meda::Dataset.new('test', 1)
+    dataset = Meda::Dataset.new('test', 15)
     dataset.token = token
-    dataset.google_analytics = {'record' => false}
+    dataset.google_analytics = {
+      'record' => true,
+      'tracking_id' => 'UA-666-1',
+      'custom_dimensions' => {}
+    }
     Meda.datasets[token] = dataset
   end
 
@@ -58,7 +62,14 @@ describe "Collector Application" do
         'title' => 'foo', 'hostname' => 'http://www.example.com'
       }
       post 'page.json', post_data.to_json, :content_type => 'application/json'
+      app.settings.connection.join_threads
+
       expect(last_response).to be_ok
+      expect(dataset.last_hit).to be_present
+      expect(dataset.last_disk_hit).to be_present
+      path = dataset.last_disk_hit[:path]
+      expect(File.read(path)).to match(dataset.last_disk_hit[:data])
+      expect(dataset.last_ga_hit).to be_present
     end
 
   end
@@ -71,6 +82,8 @@ describe "Collector Application" do
         'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
       }
       post 'track.json', post_data.to_json, :content_type => 'application/json'
+      app.settings.connection.join_threads
+
       expect(last_response).to be_ok
     end
 

@@ -33,5 +33,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rdebug"
   spec.add_development_dependency "rspec", "~> 2.14.1"
   spec.add_development_dependency "rack-test", "~> 0.6.2"
+  spec.add_development_dependency "webmock"
 end
 
