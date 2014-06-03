@@ -171,8 +171,8 @@ module Meda
       end
 
       def mask_ip(ip)
-          name, match, hostname = ip.rpartition('.')
-          return name + '.0'
+          subnet, match, hostname = ip.rpartition('.')
+          return subnet + '.0'
       end
 
     end
