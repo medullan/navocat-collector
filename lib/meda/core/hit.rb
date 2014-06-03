@@ -51,7 +51,9 @@ module Meda
     def as_ga
       props.merge({
         :client_id => profile_id,
-        :cache_buster => id
+        :cache_buster => id,
+        :anonymize_ip => 1,
+        :user_id => profile_id
       })
     end
 
