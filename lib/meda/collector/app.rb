@@ -95,7 +95,7 @@ module Meda
 
       # Config
 
-      configure :production, :development do
+      configure do
         set :connection, Meda::Collector::Connection.new
       end
 

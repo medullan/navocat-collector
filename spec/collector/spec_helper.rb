@@ -1,4 +1,11 @@
+ENV['RACK_ENV'] = 'test'
+
+puts 'Loading test environment'
+require 'rspec'
+require 'webmock/rspec'
 require 'rack/test'
+
+puts 'Loading meda'
 require 'meda'
 require 'meda/collector'
 
@@ -9,6 +16,15 @@ end
 
 RSpec.configure { |c| c.include RSpecMixin }
 
+WebMock.disable_net_connect!
+
+Meda.configure do |config|
+  config.data_path = 'meda_data'
+  config.log_path = 'log/test.log'
+  config.log_level = 0
+end
+
 # Also needs to set up and tear down a redis server for the test
 # Needs to flush keys between every spec
 
+puts 'Running examples'

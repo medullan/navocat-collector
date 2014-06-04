@@ -1,7 +1,7 @@
 module Meda
   class Hit < Struct.new(:time, :profile_id, :props)
 
-    attr_accessor :profile_props, :id
+    attr_accessor :profile_props, :id, :dataset
 
     def initialize(props)
       time = props.delete(:time)
