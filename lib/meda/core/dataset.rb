@@ -1,4 +1,3 @@
-require 'redis'
 require 'ostruct'
 require 'uuidtools'
 require 'digest'
@@ -10,28 +9,24 @@ require 'logger'
 module Meda
   class Dataset
 
-    attr_reader :data_uuid, :name
-    attr_accessor :google_analytics, :rdb, :token
+    attr_reader :data_uuid, :name, :meda_config
+    attr_accessor :google_analytics, :token
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit
 
-    def initialize(name, rdb=1)
+    def initialize(name, meda_config={})
       @name = name
-      @rdb = rdb
+      @meda_config = meda_config
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
     end
 
-    def identify_user(info)
-      user_hash = find_or_create_user(info)
-      user = OpenStruct.new({
-        :user_id => user_hash['user_id'],
-        :profile_id => user_hash['profile_id']
-      })
-      @after_identify.call(self, user)
-      return user
+    def identify_profile(info)
+      profile = store.find_or_create_profile(info)
+      @after_identify.call(self, profile)
+      return profile
     end
 
     def add_event(event_props)
@@ -51,8 +46,9 @@ module Meda
       hit.id = UUIDTools::UUID.timestamp_create.hexdigest
       hit.dataset = self
       if hit.profile_id
-        profile = get_profile_by_id(hit.profile_id)
-        hit.profile_props = profile.attributes.clone
+        profile = store.get_profile_by_id(hit.profile_id).dup
+        profile.delete('profile_id')
+        hit.profile_props = profile
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
@@ -62,13 +58,16 @@ module Meda
       hit
     end
 
+    def set_profile(profile_id, profile_info)
+      store.set_profile(profile_id, profile_info)
+    end
+
     def stream_to_ga?
-      !!google_analytics['record']
+      !!google_analytics && !!google_analytics['record']
     end
 
     def stream_hit_to_disk(hit)
-      data_path = Meda.configuration.data_path
-      directory = File.join(data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
+      directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
       unless @data_paths[directory]
         # create the data directory if it does not exist
         @data_paths[directory] = FileUtils.mkdir_p(directory)
@@ -116,12 +115,6 @@ module Meda
       true
     end
 
-    def set_profile(profile_id, profile_info)
-      redis do |r|
-        r.mapped_hmset("profile:#{profile_id}", profile_info)
-      end
-    end
-
     def after_identify(&block)
       @after_identify = block
     end
@@ -130,72 +123,16 @@ module Meda
       name.downcase.gsub(' ', '_')
     end
 
+    def store
+      if @profile_store.nil?
+        FileUtils.mkdir_p(meda_config.mapdb_path)
+        mapdb_path = File.join(meda_config.mapdb_path, path_name)
+        @profile_store = Meda::ProfileStore.new(mapdb_path)
+      end
+      @profile_store
+    end
+
     protected
-
-    def find_or_create_user(info)
-      user_id = lookup_user(info)
-      if user_id
-        get_user_by_id(user_id)
-      else
-        create_user(info)
-      end
-    end
-
-    def get_user_by_id(user_id)
-      redis do |r|
-        r.hgetall("user:#{user_id}")
-      end
-    end
-
-    def get_profile_by_id(profile_id)
-      redis do |r|
-        profile_info = r.hgetall("profile:#{profile_id}")
-        Meda::Profile.new(self, profile_info)
-      end
-    end
-
-    # Uses one criteria at a time, in order, until a unique match is found
-
-    def lookup_user(info)
-      lookup_keys = info.map{|k,v| hashed_user_lookup_key(k,v)}
-      user_id = nil
-      user_ids = nil
-      test_keys = []
-      while (user_id.nil? && lookup_keys.length > 0) do
-        test_keys << lookup_keys.shift
-        redis do |r|
-          user_ids = r.sinter(test_keys)
-        end
-        user_id = user_ids.first if user_ids.length == 1
-      end
-      user_id
-    end
-
-    def create_user(info)
-      user_info = {
-        'user_id' => UUIDTools::UUID.timestamp_create.hexdigest,
-        'profile_id' => UUIDTools::UUID.timestamp_create.hexdigest
-      }.merge(info)
-
-      redis do |r|
-        r.pipelined do |rp|
-          rp.mapped_hmset("user:#{user_info['user_id']}", user_info)
-          user_info.each_pair{|k, v| rp.sadd(hashed_user_lookup_key(k,v), user_info['user_id'])}
-        end
-      end
-      return user_info
-    end
-
-    def hashed_user_lookup_key(k,v)
-      "user:lookup:#{Digest::SHA1.hexdigest(k.to_s)}:#{Digest::SHA1.hexdigest(v.to_s)}"
-    end
-
-    def redis(&block)
-      Meda.redis.with do |conn|
-        conn.select(@rdb)
-        yield(conn) if block_given?
-      end
-    end
 
     def logger
       @logger ||= Meda.logger || Logger.new(STDOUT)

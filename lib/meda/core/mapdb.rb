@@ -1,6 +1,5 @@
 require 'java'
 require 'forwardable'
-require 'tempfile'
 require_relative '../../../lib/mapdb-0.9.8.jar'
 
 module MapDB
@@ -49,8 +48,8 @@ module MapDB
     extend Forwardable
     attr_reader :mapdb, :type
 
-    def initialize(dbname=nil)
-      if dbname.nil?
+    def initialize(path=nil)
+      if path.nil?
         @type = :MemoryDB
         @mapdb = Java::OrgMapdb::DBMaker.
           newMemoryDB().
@@ -59,7 +58,7 @@ module MapDB
       else
         @type = :FileDB
         @mapdb = Java::OrgMapdb::DBMaker.
-          newFileDB(Java::JavaIo::File.new("#{dbname}")).
+          newFileDB(Java::JavaIo::File.new("#{path}")).
           closeOnJvmShutdown().
           transactionDisable().
           mmapFileEnable().

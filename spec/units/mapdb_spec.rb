@@ -1,4 +1,5 @@
 require_relative '../../lib/meda/core/mapdb'
+require 'tempfile'
 
 shared_examples_for "a mapdb tree" do
   describe '#put' do

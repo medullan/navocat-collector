@@ -1,15 +1,12 @@
 require File.dirname(File.absolute_path(__FILE__)) + '/meda/version.rb'
 Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
 require "active_support/all"
-require "connection_pool"
 require 'psych'
 
 module Meda
 
-  REDIS_POOL_DEFAULT = 1 # thread
-  REDIS_TIMEOUT_DEFAULT = 5 # seconds
-  DISK_POOL_DEFAULT = 2 # threads
-  GA_POOL_DEFAULT = 2 # threads
+  MEDA_CONFIG_FILE = 'meda.yml'
+  DATASETS_CONFIG_FILE = 'datasets.yml'
 
   class << self
     attr_accessor :configuration
@@ -20,7 +17,6 @@ module Meda
     yield(configuration)
     datasets
     logger
-    redis
     true
   end
 
@@ -34,23 +30,13 @@ module Meda
     @logger
   end
 
-  def self.redis
-    if @redis_pool.nil? && Meda.configuration.redis.present?
-      pool_size = Meda.configuration.redis['pool'] || REDIS_POOL_DEFAULT
-      @redis_pool = ConnectionPool.new(size: pool_size, timeout: REDIS_TIMEOUT_DEFAULT) do
-        Redis.new(Meda.configuration.redis)
-      end
-    end
-    @redis_pool
-  end
-
   def self.datasets
     if @datasets.nil?
       @datasets = {}
       begin
-        config = Psych.load(File.open('datasets.yml'))
+        config = Psych.load(File.open(Meda::DATASETS_CONFIG_FILE))
         config.each do |d_name, d_config|
-          d = Meda::Dataset.new(d_name)
+          d = Meda::Dataset.new(d_name, Meda.configuration)
           d_config.each_pair { |key, val| d.send("#{key}=", val) }
           @datasets[d.token] = d
         end
@@ -63,18 +49,21 @@ module Meda
 
   class Configuration
 
-    REDIS_DEFAULTS = {
-      :host => 'localhost',
-      :port => 6379,
-      :password => nil
+    DEFAULTS = {
+      :mapdb_path => File.join(Dir.pwd, 'db'),
+      :data_path => File.join(Dir.pwd, 'data'),
+      :log_path => File.join(Dir.pwd, 'log/server.log'),
+      :log_level => 1,
+      :disk_pool => 2,
+      :google_analytics_pool => 2
     }
 
-    attr_accessor :redis, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool
+    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool
 
     def initialize
-      @redis = REDIS_DEFAULTS.dup
-      @disk_pool = DISK_POOL_DEFAULT
-      @google_analytics_pool = GA_POOL_DEFAULT
+      DEFAULTS.each do |key,val|
+        self[key] = val
+      end
     end
 
     def []=(key, val)
@@ -85,7 +74,7 @@ end
 
 Meda.configure do |config|
   begin
-    app_config = Psych.load(File.open('application.yml'))[ENV['RACK_ENV'] || 'development']
+    app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
     app_config.each_pair { |key, val| config[key] = val }
   rescue Errno::ENOENT
     puts "Warning: Missing application.yml, please configure manually"

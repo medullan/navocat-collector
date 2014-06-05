@@ -26,7 +26,7 @@ module Meda
 
       def identify(params)
         process_request(params) do |dataset, user_params|
-          dataset.identify_user(user_params)
+          dataset.identify_profile(user_params)
         end
       end
 
@@ -83,16 +83,6 @@ module Meda
         while @disk_pool.active? || @ga_pool.active? do
         end
         yield if block_given?
-      end
-
-      def create_dataset(dataset_name, rdb_index)
-        @datasets = nil
-        Meda::Dataset.create(dataset_name, rdb_index)
-      end
-
-      def destroy_dataset(dataset_name)
-        @datasets = nil
-        Meda::Dataset.destroy(dataset_name)
       end
 
       protected

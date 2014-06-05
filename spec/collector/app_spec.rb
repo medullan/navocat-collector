@@ -12,7 +12,7 @@ describe "Collector Application" do
   client_id = nil
 
   before(:all) do
-    dataset = Meda::Dataset.new('test', 15)
+    dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.token = token
     dataset.google_analytics = {
       'record' => true,
@@ -40,8 +40,8 @@ describe "Collector Application" do
       post 'identify.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_ok
       body = JSON.parse(last_response.body)
-      expect(body['profile_id']).to be_present
-      profile_id = body['profile_id']
+      expect(body['id']).to be_present
+      profile_id = body['id']
     end
 
   end
@@ -49,7 +49,7 @@ describe "Collector Application" do
   describe 'profile.json' do
 
     it 'posts profile info' do
-      post_data = {'dataset' => token, 'profile_id' => profile_id, 'member_id' => member_id}
+      post_data = {'dataset' => token, 'profile_id' => profile_id, 'state' => 'Maine', 'weight' => '200'}
       post 'profile.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_ok
     end

@@ -29,8 +29,8 @@ module Meda
 
       post '/identify.json', :provides => :json do
         identify_data = json_from_request
-        user = settings.connection.identify(identify_data)
-        json({"profile_id" => user.profile_id})
+        profile = settings.connection.identify(identify_data)
+        json(profile)
       end
 
       get '/identify.gif' do
@@ -129,7 +129,7 @@ module Meda
 
       def json_from_request
         begin
-          JSON.parse(request.body.read).symbolize_keys
+          ActiveSupport::HashWithIndifferentAccess.new(JSON.parse(request.body.read))
         rescue StandardError => e
           status 422
           json({'error' => 'Request body is invalid'})
@@ -172,15 +172,15 @@ module Meda
       #
 
       def request_environment
-        {
+        ActiveSupport::HashWithIndifferentAccess.new({
           :user_ip => request.env['REMOTE_ADDR'],
           :referrer => request.env['HTTP_REFERER'],
           :user_agent => request.env['HTTP_USER_AGENT']
-        }
+        })
       end
 
       def page_params_from_utm
-        {
+        ActiveSupport::HashWithIndifferentAccess.new({
           :profile_id => cookies[:'_meda_profile_id'],
           :hostname => params[:utmhn],
           :referrer => params[:utmr] || request.env['HTTP_REFERER'],
@@ -191,12 +191,12 @@ module Meda
           :user_language => params[:utmul],
           :screen_depth => params[:utmsc],
           :screen_resolution => params[:utmsr]
-        }
+        })
       end
 
       def event_params_from_utm
         parsed_utme = params[:utme].match(/\d\((.+)\*(.+)\*(.+)\*(.+)\)/) # '5(object*action*label*value)'
-        {
+        ActiveSupport::HashWithIndifferentAccess.new({
           :profile_id => cookies[:'_meda_profile_id'],
           :category => parsed_utme[1],
           :action => parsed_utme[2],
@@ -209,7 +209,7 @@ module Meda
           :user_language => params[:utmul],
           :screen_depth => params[:utmsc],
           :screen_resolution => params[:utmsr]
-        }
+        })
       end
 
       def mask_ip(ip)

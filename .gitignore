@@ -19,4 +19,6 @@ meda_data
 .DS_STORE
 dump.rdb
 log
+data/
+db/
 
