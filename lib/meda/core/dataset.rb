@@ -46,9 +46,11 @@ module Meda
       hit.id = UUIDTools::UUID.timestamp_create.hexdigest
       hit.dataset = self
       if hit.profile_id
-        profile = store.get_profile_by_id(hit.profile_id).dup
-        profile.delete('profile_id')
-        hit.profile_props = profile
+        profile = store.get_profile_by_id(hit.profile_id)
+        if profile
+          profile.delete('id')
+          hit.profile_props = profile
+        end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.

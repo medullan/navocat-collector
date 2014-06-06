@@ -34,8 +34,8 @@ module Meda
       end
 
       get '/identify.gif' do
-        user = settings.connection.identify(params)
-        set_profile_id_in_cookie(user.profile_id)
+        profile = settings.connection.identify(params)
+        set_profile_id_in_cookie(profile['id'])
         respond_with_pixel
       end
 
