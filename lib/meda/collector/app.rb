@@ -142,7 +142,7 @@ module Meda
           :profile_id => cookies[:'_meda_profile_id'],
           :hostname => params[:utmhn],
           :referrer => params[:utmr] || request.env['HTTP_REFERER'],
-          :user_ip => mask_ip(params[:utmip]) || mask_ip(request.env['REMOTE_ADDR']),
+          :user_ip => mask_ip(params[:utmip] || request.env['REMOTE_ADDR']),
           :user_agent => request.env['HTTP_USER_AGENT'],
           :path => params[:utmp],
           :title => params[:utmdt],
@@ -171,8 +171,8 @@ module Meda
       end
 
       def mask_ip(ip)
-          subnet, match, hostname = ip.rpartition('.')
-          return subnet + '.0'
+        subnet, match, hostname = ip.rpartition('.')
+        return subnet + '.0'
       end
 
     end
