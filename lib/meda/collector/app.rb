@@ -162,7 +162,7 @@ module Meda
           :value => parsed_utme[4],
           :hostname => params[:utmhn],
           :referrer => params[:utmr] || request.env['HTTP_REFERER'],
-          :user_ip => mask_ip(params[:utmip]) || mask_ip(request.env['REMOTE_ADDR']),
+          :user_ip => mask_ip(params[:utmip] || request.env['REMOTE_ADDR']),
           :user_agent => request.env['HTTP_USER_AGENT'],
           :user_language => params[:utmul],
           :screen_depth => params[:utmsc],
