@@ -69,11 +69,14 @@ module Meda
 
       post '/page.json', :provides => :json do
         page_data = json_from_request
+        page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
         settings.connection.page(page_data)
         respond_with_ok
       end
 
       get '/page.gif' do
+        get_user_ip_from_header_param
+        get_user_id_for_logged_in_user
         get_profile_id_from_cookie
         settings.connection.page(params.merge(request_environment))
         respond_with_pixel
@@ -83,11 +86,14 @@ module Meda
 
       post '/track.json', :provides => :json do
         track_data = json_from_request
+        track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
         settings.connection.track(track_data)
         respond_with_ok
       end
 
       get '/track.gif' do
+        get_user_ip_from_header_param
+        get_user_id_for_logged_in_user
         get_profile_id_from_cookie
         settings.connection.track(params)
         respond_with_pixel
@@ -110,6 +116,17 @@ module Meda
         end
       end
 
+      def get_user_ip_from_header_param
+        params[:user_ip] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+      end
+        
+      def get_user_id_for_logged_in_user
+        if(params['profile_id'] !=  '351bb960ecd711e3a0a822000ab93e79')
+          params['user_id'] = params['profile_id']
+        end
+      end
+
+      end
       def respond_with_ok
         json({"status" => "ok"})
       end
