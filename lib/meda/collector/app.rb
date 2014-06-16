@@ -132,7 +132,6 @@ module Meda
         end
       end
 
-      end
       def respond_with_ok
         json({"status" => "ok"})
       end
