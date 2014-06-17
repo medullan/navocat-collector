@@ -69,16 +69,12 @@ module Meda
 
       post '/page.json', :provides => :json do
         page_data = json_from_request
-        if(page_data['profile_id'] !=  '351bb960ecd711e3a0a822000ab93e79')
-          page_data['user_id'] = page_data['profile_id']
-        end
-        page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+        page_data[:user_ip] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
         settings.connection.page(page_data)
         respond_with_ok
       end
 
       get '/page.gif' do
-        get_user_ip_from_header_param
         get_user_id_for_logged_in_user
         get_profile_id_from_cookie
         settings.connection.page(params.merge(request_environment))
@@ -89,9 +85,6 @@ module Meda
 
       post '/track.json', :provides => :json do
         track_data = json_from_request
-        if(track_data['profile_id'] !=  '351bb960ecd711e3a0a822000ab93e79')
-          track_data['user_id'] = track_data['profile_id']
-        end
         track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
         settings.connection.track(track_data)
         respond_with_ok
@@ -99,7 +92,6 @@ module Meda
 
       get '/track.gif' do
         get_user_ip_from_header_param
-        get_user_id_for_logged_in_user
         get_profile_id_from_cookie
         settings.connection.track(params)
         respond_with_pixel

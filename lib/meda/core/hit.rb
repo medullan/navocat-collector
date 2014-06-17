@@ -1,13 +1,14 @@
 module Meda
-  class Hit < Struct.new(:time, :profile_id, :props)
+  class Hit < Struct.new(:time, :profile_id, :props, :client_id)
 
     attr_accessor :profile_props, :id, :dataset
 
     def initialize(props)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
+      client_id = props.delete(:client_id)
       profile_props = {}
-      super(time, profile_id, props)
+      super(time, profile_id, props, client_id)
     end
 
     def hit_type
