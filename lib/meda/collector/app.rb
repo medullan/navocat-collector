@@ -75,7 +75,7 @@ module Meda
       end
 
       get '/page.gif' do
-        get_user_id_for_logged_in_user
+        get_user_ip_from_header_param
         get_profile_id_from_cookie
         settings.connection.page(params.merge(request_environment))
         respond_with_pixel
