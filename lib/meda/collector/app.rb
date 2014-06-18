@@ -69,40 +69,49 @@ module Meda
 
       post '/page.json', :provides => :json do
         page_data = json_from_request
-        if(validate_param(page_data) == true)
+        if validate_request(page_data)
+          respond_with_bad_request
+        else
           page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
           settings.connection.page(page_data)
           respond_with_ok
-        else
-          respond_with_bad_request
         end
       end
 
       get '/page.gif' do
-        get_user_ip_from_header_param
-        get_profile_id_from_cookie
-        settings.connection.page(params.merge(request_environment))
-        respond_with_pixel
+        if validate_request(params)
+          respond_with_bad_request
+        else
+          get_user_ip_from_header_param
+          get_profile_id_from_cookie
+          settings.connection.page(params.merge(request_environment))
+          respond_with_pixel
+        end
       end
 
       # Track
 
       post '/track.json', :provides => :json do
         track_data = json_from_request
-        if(validate_param(track_data) == true)
+        if validate_request(track_data)
+          respond_with_bad_request
+        else
+          
           track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
           settings.connection.track(track_data)
           respond_with_ok
-        else 
-          respond_with_bad_request
         end
       end
 
       get '/track.gif' do
-        get_user_ip_from_header_param
-        get_profile_id_from_cookie
-        settings.connection.track(params)
-        respond_with_pixel
+        if validate_request(params)
+          respond_with_bad_request
+        else
+          get_user_ip_from_header_param
+          get_profile_id_from_cookie
+          settings.connection.track(params)
+          respond_with_pixel
+        end
       end
 
       # Config
@@ -131,6 +140,7 @@ module Meda
       end
 
       def respond_with_bad_request
+        status 400
         json({"status"=>"bad request"})
       end
 
@@ -147,15 +157,11 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
-      def validate_param(param)
-        # due to limitations in jruby
-        begin
-          param[:profile_id].length
-          param[:client_id].length
-          param[:dataset].length
-          return true
-        rescue StandardError => e
-          return false
+      def validate_request(request_params)
+        if request_params.inspect.include? "profile_id" and request_params.inspect.include? "client_id" and request_params.inspect.include? "dataset"
+          false
+        else
+          true
         end
       end
       #
