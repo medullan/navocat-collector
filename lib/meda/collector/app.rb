@@ -69,9 +69,13 @@ module Meda
 
       post '/page.json', :provides => :json do
         page_data = json_from_request
-        page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
-        settings.connection.page(page_data)
-        respond_with_ok
+        if(validate_param(page_data) == true)
+          page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+          settings.connection.page(page_data)
+          respond_with_ok
+        else
+          respond_with_bad_request
+        end
       end
 
       get '/page.gif' do
@@ -85,9 +89,13 @@ module Meda
 
       post '/track.json', :provides => :json do
         track_data = json_from_request
-        track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
-        settings.connection.track(track_data)
-        respond_with_ok
+        if(validate_param(track_data) == true)
+          track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+          settings.connection.track(track_data)
+          respond_with_ok
+        else 
+          respond_with_bad_request
+        end
       end
 
       get '/track.gif' do
@@ -139,6 +147,17 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
+      def validate_param(param)
+        # due to limitations in jruby
+        begin
+          param[:profile_id].length
+          param[:client_id].length
+          param[:dataset].length
+          return true
+        rescue StandardError => e
+          return false
+        end
+      end
       #
 
       def request_environment
