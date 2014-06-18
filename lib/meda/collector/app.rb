@@ -122,6 +122,10 @@ module Meda
         json({"status" => "ok"})
       end
 
+      def respond_with_bad_request
+        json({"status"=>"bad request"})
+      end
+
       def respond_with_pixel
         img_path = File.expand_path('../../../../assets/images/1x1.gif', __FILE__)
         send_file(open(img_path), :type => 'image/gif', :disposition => 'inline')
