@@ -2,6 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 puts 'Loading test environment'
 require 'rspec'
+require 'rr'
 require 'webmock/rspec'
 require 'rack/test'
 

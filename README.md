@@ -29,6 +29,8 @@ gem 'puma'
 
 The application configuration file (meda.yml) defines the location of the data files, log files and other essential functionality. Add this file in the root of the project, and it will be loaded automatically when the server starts. You should provide different configuration options for different Rack environments (RACK_ENV).
 
+Check `CONFIGURATION.md` for comprehensive configuration information.
+
 This example file demonstrates all acceptable configuration options.
 
 ```yaml
@@ -106,5 +108,11 @@ $ puma --environment development --port 8000 --threads 0:4
 $ puma --environment production --port 80 --threads 32:32
 ```
 
+## Contributing
 
+Add specs for all new functionality. Run unit tests with RSpec.
+
+```bash
+$ bundle exec rspec -fd
+```
 
