@@ -1,28 +1,90 @@
 # Medullan Analytics Toolkit
 
-The meda gem currently provides a collector application that is used to gather
-analytics events from web browsers, mobile apps or back-end servers.
+The meda gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
 
 The collector is written in Sinatra and deployed with the puma webserver.
 
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'meda', :git => '{git url to this repo}'
-
-And then execute:
-
-    $ bundle
-
 ## Dependencies
 
-The collector application requires ruby 2.0.x or later, and a running redis server, version 2.6.x or later.
+The collector application requires jRuby 1.7+ and Java 1.6+.
 
-## Usage
+To store profile data, the collector uses MapDB, a pure-java embedded key-value store database. The jar files for MapDB are included in the meda gem, and are plaform independent.
 
-Add a `config.ru` file to your project to configure the rack environment for the collector.
-A sample file may look like this:
+## Basic Application Setup
+
+To create your own collector application, create a new git repo that will use the meda gem.
+
+### Gemfile
+
+Add a Gemfile to the repo, and `bundle install`. Note that your git user must have access to this github repo, or you must use a github url that includes the credentials of a github user that has access.
+
+```ruby
+# Gemfile
+source 'https://rubygems.org'
+gem 'meda', :git => 'github.com/medullan/meda.git'
+gem 'puma'
+```
+
+### meda.yml
+
+The application configuration file (meda.yml) defines the location of the data files, log files and other essential functionality. Add this file in the root of the project, and it will be loaded automatically when the server starts. You should provide different configuration options for different Rack environments (RACK_ENV).
+
+This example file demonstrates all acceptable configuration options.
+
+```yaml
+# meda.yml
+development:
+  disk_pool: 2
+  google_analytics_pool: 2
+  mapdb_path: db
+  data_path: data
+  log_path: log/development.log
+  log_level: 0
+
+production:
+  disk_pool: 4
+  google_analytics_pool: 16
+  mapdb_path: db
+  data_path: meda_data
+  log_path: log/production.log
+  log_level: 1
+```
+
+### datasets.yml
+
+The dataset configuration file (datasets.yml) defines the buckets into which analytics data is collected, and how that data is treated. The data for each dataset is stored in a separate MapDB database, and also in a separate path on the filesystem.
+
+Here is a sample file:
+
+```yaml
+# datasets.yml (sample)
+production:
+  token: afc0a6c8c73211e3aaf844fb42fffe8c
+  google_analytics:
+    record: true
+    tracking_id: UA-47758842
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+
+staging:
+  token: b6822676c73211e3aaf844fb42fffe8c
+  google_analytics:
+    record: false
+
+development:
+  token: c2e02c92c73211e3aaf844fb42fffe8c
+  google_analytics:
+    record: false
+```
+
+### config.ru
+
+Add a `config.ru` file to your project to configure the rack environment to run the collector. A sample file may look like this:
 
 ```ruby
 # config.ru
@@ -32,33 +94,17 @@ require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
 
-Meda.configure do |config|
-  config.redis = {
-    :host => 'localhost',
-    :port => 6379,
-    :password => nil
-  }
-end
-
 run Meda::Collector::App
-
-connection = Meda::Collector::Connection.new
-connection.start_disk_streams
-connection.start_ga_streams
 ```
 
 ## Run the collector
 
-Puma is a multi-threaded, multi-process web server.
-For now, run it with 0-16 threads and a single process (workers).
-This command will start a single process with the `config.ru` file.
+We suggest running the collector in Puma. Puma is a multi-threaded web server that has great performance on jRuby! If you have added it to your Gemfile, then you can just run it like this:
 
+```bash
+$ puma --environment development --port 8000 --threads 0:4
+$ puma --environment production --port 80 --threads 32:32
 ```
-$ puma --port 8000 --threads 0:16 --workers 1
-```
 
-## Create datasets
-
-TBD...
 
 

@@ -22,7 +22,7 @@ module Meda
 
       get '/static/:file' do
         path = File.join(settings.public_folder, params[:file])
-        send_file path
+        send_file(path)
       end
 
       # Identify
