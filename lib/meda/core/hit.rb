@@ -1,5 +1,9 @@
 module Meda
-  class Hit < Struct.new(:time, :profile_id, :props, :client_id)
+
+  # Each hit represents a single user activity, a pageview, event, etc.
+  # A hit's JSON representation is written to disk and to GA.
+
+  class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
     attr_accessor :profile_props, :id, :dataset
 
@@ -8,7 +12,7 @@ module Meda
       profile_id = props.delete(:profile_id)
       client_id = props.delete(:client_id)
       profile_props = {}
-      super(time, profile_id, props, client_id)
+      super(time, profile_id, client_id, props)
     end
 
     def hit_type
@@ -53,9 +57,9 @@ module Meda
     def as_ga
       props.merge({
         :client_id => client_id,
+        :user_id => profile_id,
         :cache_buster => id,
-        :anonymize_ip => 1,
-        :user_id => profile_id
+        :anonymize_ip => 1
       })
     end
 

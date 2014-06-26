@@ -9,6 +9,7 @@ end
 
 module Meda
 
+  # Implements a simple jRuby interface to a FixedThreadPool from java.util.concurrent
   class WorkerPool
     def initialize(options={})
       pool_size = options[:size] || self.class.default_size

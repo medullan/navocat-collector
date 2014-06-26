@@ -1,5 +1,11 @@
 module Meda
   module Collector
+
+    # Implements a connection to the meda database. The connection class can be used through the Sinatra app,
+    # or standalone for ruby code that is driving a meda instance. Most of the logic for each operation is
+    # delegated to an instance of Meda::Dataset.
+    #
+    # The connection implements thread pools for writing to disk and for transmission to Google Analytics.
     class Connection
 
       DISK_POOL_DEFAULT = 1

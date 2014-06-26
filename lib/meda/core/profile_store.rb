@@ -3,6 +3,8 @@ require 'uuidtools'
 require 'digest'
 
 module Meda
+
+  # Implements persistence of profile data into the MapDB
   class ProfileStore
 
     attr_reader :mapdb, :path, :tree
@@ -13,8 +15,7 @@ module Meda
       @tree = @mapdb.tree(:meda)
     end
 
-    # Create a new profile with the given identifying info
-
+    # Create a new profile with the identifying info in the given hash
     def create_profile(info)
       profile_id = UUIDTools::UUID.timestamp_create.hexdigest
       # Create the main record, ie "profile:12341234123412341234124"
@@ -27,8 +28,7 @@ module Meda
       ActiveSupport::HashWithIndifferentAccess.new({'id' => profile_id})
     end
 
-    # Add additional identifying info to existing profile
-
+    # Add additional identifying info in the given hash to an existing profile
     def alias_profile(profile_id, info)
       # Create additional for each alias attribute.
       if @tree.key?(profile_key(profile_id))
@@ -41,6 +41,7 @@ module Meda
       end
     end
 
+    # Find or create a profile for the identifying info in the given hash
     def find_or_create_profile(info)
       profile_id = lookup_profile(info)
       if profile_id
@@ -50,6 +51,7 @@ module Meda
       end
     end
 
+    # Return a hash with the profile info for the given profile_id
     def get_profile_by_id(profile_id)
       if @tree.key?(profile_key(profile_id))
         ActiveSupport::HashWithIndifferentAccess.new(@tree.decode(profile_key(profile_id)))
@@ -58,8 +60,7 @@ module Meda
       end
     end
 
-    # Set additional hash values on profile attributes
-
+    # Set additional attributes on a profile from the given profile_info hash
     def set_profile(profile_id, profile_info)
       if @tree.key?(profile_key(profile_id))
         existing_profile = @tree.decode(profile_key(profile_id))
@@ -69,8 +70,7 @@ module Meda
       end
     end
 
-    # Uses one criteria at a time, in order, until a match is found
-
+    # Uses one criteria at a time from the given hash, in order, until a match is found
     def lookup_profile(info)
       lookup_keys = info.map{|k,v| key_hashed_profile_lookup(k,v)}
       while (lookup_keys.length > 0) do
@@ -80,12 +80,12 @@ module Meda
       false
     end
 
-    # Generate keys
-
+    # TreeMap key for hashed profile lookup key
     def key_hashed_profile_lookup(k,v)
       "profile:lookup:#{Digest::SHA1.hexdigest(k.to_s)}:#{Digest::SHA1.hexdigest(v.to_s)}"
     end
 
+    # TreeMap key for profile data
     def profile_key(id)
       "profile:#{id}"
     end

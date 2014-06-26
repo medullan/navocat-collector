@@ -2,8 +2,10 @@ require 'java'
 require 'forwardable'
 require_relative '../../../lib/mapdb-0.9.8.jar'
 
+# Implements a jRuby interface to the embedded MapDB database
 module MapDB
 
+  # Represents a MapDB "TreeMap" inside a MapDB database
   class Tree
     extend Forwardable
     attr_reader :tree, :mapdb
@@ -44,10 +46,15 @@ module MapDB
     alias :count :size
   end
 
+  # Represents a single database inside MapDB.
+  # A DB can be "memory" or "file" type.
   class DB
     extend Forwardable
     attr_reader :mapdb, :type
 
+    # Creates a new MapDB database.
+    # If a path is given, then a FileDB will be created at that location.
+    # When a path if omitted, a MemoryDB is created.
     def initialize(path=nil)
       if path.nil?
         @type = :MemoryDB

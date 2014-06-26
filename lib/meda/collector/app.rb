@@ -7,6 +7,11 @@ require 'meda/collector/connection'
 module Meda
   module Collector
 
+    # Extends Sinatra:Base to create a Sinatra application implementing the collector's REST API.
+    # All operations are delegated to an instance of Meda::Collector::Connection, which implements
+    # the desired operation on the given dataset.
+    #
+    # All routes require the dataset's token to be passed in the "dataset" parameter.
     class App < Sinatra::Base
 
       set :public_folder, 'static'
@@ -14,47 +19,60 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
+      # @method get_index
+      # @overload get "/"
+      # Says hello and gives version number. Useful only to test if service is installed.
       get '/' do
         "Meda version #{Meda::VERSION}"
       end
 
-      # Serve any files from the /static directory
-
+      # @method get_static
+      # @overload get "/static/:file"
+      # Serves any files in the project's public directory, usually named "static"
       get '/static/:file' do
         path = File.join(settings.public_folder, params[:file])
         send_file(path)
       end
 
-      # Identify
-
+      # @method post_identify_json
+      # @overload post "/identify.json"
+      # Identifies the user, and returns a meda profile_id
       post '/identify.json', :provides => :json do
         identify_data = json_from_request
         profile = settings.connection.identify(identify_data)
         json(profile)
       end
 
+      # @method get_identify_gif
+      # @overload get "/identify.gif"
+      # Identifies the user, and sets a cookie with the meda profile_id
       get '/identify.gif' do
         profile = settings.connection.identify(params)
         set_profile_id_in_cookie(profile['id'])
         respond_with_pixel
       end
 
-      # Profile
-
+      # @method post_profile_json
+      # @overload post "/profile.json"
+      # Sets attributes on the given profile
       post '/profile.json', :provides => :json do
         profile_data = json_from_request
         settings.connection.profile(profile_data)
         respond_with_ok
       end
 
+      # @method get_profile_gif
+      # @overload get "/profile.gif"
+      # Sets attributes on the given profile
       get '/profile.gif' do
         get_profile_id_from_cookie
         settings.connection.profile(params)
         respond_with_pixel
       end
 
+      # @method get_utm_gif
+      # @overload get "/:dataset/__utm.gif"
       # Accept google analytics __utm.gif formatted hits
-
       get '/:dataset/__utm.gif' do
         get_profile_id_from_cookie
         if params[:utmt] == 'event'
@@ -65,8 +83,9 @@ module Meda
         respond_with_pixel
       end
 
-      # Page
-
+      # @method post_page_json
+      # @overload post "/page.json"
+      # Record a pageview
       post '/page.json', :provides => :json do
         page_data = json_from_request
         if validate_request(page_data)
@@ -82,6 +101,9 @@ module Meda
         end
       end
 
+      # @method get_page_gif
+      # @overload get "/page.gif"
+      # Record a pageview
       get '/page.gif' do
         if validate_request(params)
           respond_with_bad_request
@@ -93,8 +115,9 @@ module Meda
         end
       end
 
-      # Track
-
+      # @method post_track_json
+      # @overload post "/track.json"
+      # Record an event
       post '/track.json', :provides => :json do
         track_data = json_from_request
         if validate_request(track_data)
@@ -108,6 +131,9 @@ module Meda
         end
       end
 
+      # @method get_track_gif
+      # @overload get "/track.gif"
+      # Record an event
       get '/track.gif' do
         if validate_request(params)
           respond_with_bad_request

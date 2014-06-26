@@ -1,6 +1,8 @@
 require 'meda/core/hit'
 
 module Meda
+
+  # Represents an "event" type analytics hit.
   class Event < Meda::Hit
 
     def hit_type

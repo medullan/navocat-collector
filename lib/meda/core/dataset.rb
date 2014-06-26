@@ -7,6 +7,11 @@ require 'staccato'
 require 'logger'
 
 module Meda
+
+  # Dataset manages a single "bucket" of data in a meda instance.
+  # Each Dataset has its own configuration, and its data is stored in a separate DB.
+  # This class implements most of the logic for each operation (identify, track, etc),
+  # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config
