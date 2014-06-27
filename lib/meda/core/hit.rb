@@ -45,6 +45,7 @@ module Meda
         :ht => time,
         :hp => props,
         :pi => profile_id,
+        :ci => client_id,
         :pp => profile_props
       }
     end
