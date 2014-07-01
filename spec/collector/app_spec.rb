@@ -58,6 +58,17 @@ describe "Collector Application" do
 
   describe 'page.json' do
 
+    it 'fail to post page info' do
+      post_data = {
+        'dataset' => token, 'profile_id' => profile_id,
+        'title' => 'foo', 'hostname' => 'http://www.example.com'
+      }
+      post 'page.json', post_data.to_json, :content_type => 'application/json'
+      app.settings.connection.join_threads
+
+      expect(last_response).to be_bad_request
+    end
+
     it 'posts page info' do
       post_data = {
         'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
@@ -77,6 +88,17 @@ describe "Collector Application" do
   end
 
   describe 'track.json' do
+
+    it 'fail to post event info' do
+      post_data = {
+        'dataset' => token, 'client_id' => client_id,
+        'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
+      }
+      post 'track.json', post_data.to_json, :content_type => 'application/json'
+      app.settings.connection.join_threads
+
+      expect(last_response).to be_bad_request
+    end
 
     it 'posts event info' do
       post_data = {
