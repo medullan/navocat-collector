@@ -72,7 +72,11 @@ module Meda
         if validate_request(page_data)
           respond_with_bad_request
         else
-          page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+
+          if request.env['HTTP_X_FORWARDED_FOR']
+            page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+          end
+          
           settings.connection.page(page_data)
           respond_with_ok
         end
@@ -96,8 +100,9 @@ module Meda
         if validate_request(track_data)
           respond_with_bad_request
         else
-          
-          track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+          if request.env['HTTP_X_FORWARDED_FOR']
+            track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+          end
           settings.connection.track(track_data)
           respond_with_ok
         end

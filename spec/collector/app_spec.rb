@@ -6,8 +6,10 @@ describe "Collector Application" do
 
   token = '3423432423423423423423'
   member_id = '384739284793284293'
+  HTTP_X_FORWARDED_FOR = '192.10.118.94'
   dataset = nil
   profile_id = nil
+  client_id = nil
 
   before(:all) do
     dataset = Meda::Dataset.new('test', 15)
@@ -58,7 +60,7 @@ describe "Collector Application" do
 
     it 'posts page info' do
       post_data = {
-        'dataset' => token, 'profile_id' => profile_id,
+        'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
         'title' => 'foo', 'hostname' => 'http://www.example.com'
       }
       post 'page.json', post_data.to_json, :content_type => 'application/json'
@@ -78,7 +80,7 @@ describe "Collector Application" do
 
     it 'posts event info' do
       post_data = {
-        'dataset' => token, 'profile_id' => profile_id,
+        'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
         'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
       }
       post 'track.json', post_data.to_json, :content_type => 'application/json'
