@@ -58,59 +58,65 @@ describe "Collector Application" do
 
   describe 'page.json' do
 
-    it 'fail to post page info' do
-      post_data = {
-        'dataset' => token, 'profile_id' => profile_id,
-        'title' => 'foo', 'hostname' => 'http://www.example.com'
-      }
-      post 'page.json', post_data.to_json, :content_type => 'application/json'
-      app.settings.connection.join_threads
+    context 'with missing client_id' do
+      it 'responds with bad request' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id,
+          'title' => 'foo', 'hostname' => 'http://www.example.com'
+        }
+        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        app.settings.connection.join_threads
 
-      expect(last_response).to be_bad_request
+        expect(last_response).to be_bad_request
+      end
     end
 
-    it 'posts page info' do
-      post_data = {
-        'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-        'title' => 'foo', 'hostname' => 'http://www.example.com'
-      }
-      post 'page.json', post_data.to_json, :content_type => 'application/json'
-      app.settings.connection.join_threads
+    context 'with dataset, profile_id, client_id, and page params' do
+      it 'records the pageview' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'title' => 'foo', 'hostname' => 'http://www.example.com'
+        }
+        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        app.settings.connection.join_threads
 
-      expect(last_response).to be_ok
-      expect(dataset.last_hit).to be_present
-      expect(dataset.last_disk_hit).to be_present
-      path = dataset.last_disk_hit[:path]
-      expect(File.read(path)).to match(dataset.last_disk_hit[:data])
-      expect(dataset.last_ga_hit).to be_present
+        expect(last_response).to be_ok
+        expect(dataset.last_hit).to be_present
+        expect(dataset.last_disk_hit).to be_present
+        path = dataset.last_disk_hit[:path]
+        expect(File.read(path)).to match(dataset.last_disk_hit[:data])
+        expect(dataset.last_ga_hit).to be_present
+      end
     end
-
   end
 
   describe 'track.json' do
 
-    it 'fail to post event info' do
-      post_data = {
-        'dataset' => token, 'client_id' => client_id,
-        'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
-      }
-      post 'track.json', post_data.to_json, :content_type => 'application/json'
-      app.settings.connection.join_threads
+    context 'with missing client_id' do
+      it 'responds with bad request' do
+        post_data = {
+          'dataset' => token, 'client_id' => client_id,
+          'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
+        }
+        post 'track.json', post_data.to_json, :content_type => 'application/json'
+        app.settings.connection.join_threads
 
-      expect(last_response).to be_bad_request
+        expect(last_response).to be_bad_request
+      end
     end
 
-    it 'posts event info' do
-      post_data = {
-        'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-        'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
-      }
-      post 'track.json', post_data.to_json, :content_type => 'application/json'
-      app.settings.connection.join_threads
+    context 'with dataset, profile_id, client_id, and event params' do
+      it 'records the event' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
+        }
+        post 'track.json', post_data.to_json, :content_type => 'application/json'
+        app.settings.connection.join_threads
 
-      expect(last_response).to be_ok
+        expect(last_response).to be_ok
+      end
     end
-
   end
 end
 
