@@ -75,12 +75,24 @@ module Meda
       # Accept google analytics __utm.gif formatted hits
       get '/:dataset/__utm.gif' do
         get_profile_id_from_cookie
+
         if params[:utmt] == 'event'
-          settings.connection.track(event_params_from_utm)
+          utm_data = event_params_from_utm
+          if valid_hit_request?(utm_data)
+            settings.connection.track(utm_data)
+            respond_with_pixel
+          else
+            respond_with_bad_request
+          end
         else
-          settings.connection.page(page_params_from_utm)
+          utm_data = page_params_from_utm
+          if valid_hit_request?(utm_data)
+            settings.connection.page(utm_data)
+            respond_with_pixel
+          else
+            respond_with_bad_request
+          end
         end
-        respond_with_pixel
       end
 
       # @method post_page_json
@@ -88,16 +100,14 @@ module Meda
       # Record a pageview
       post '/page.json', :provides => :json do
         page_data = json_from_request
-        if validate_request(page_data)
-          respond_with_bad_request
-        else
-
+        if valid_hit_request?(page_data)
           if request.env['HTTP_X_FORWARDED_FOR']
-            page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+            page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
           end
-          
           settings.connection.page(page_data)
           respond_with_ok
+        else
+          respond_with_bad_request
         end
       end
 
@@ -105,13 +115,13 @@ module Meda
       # @overload get "/page.gif"
       # Record a pageview
       get '/page.gif' do
-        if validate_request(params)
-          respond_with_bad_request
-        else
+        if valid_hit_request?(params)
           get_user_ip_from_header_param
           get_profile_id_from_cookie
           settings.connection.page(params.merge(request_environment))
           respond_with_pixel
+        else
+          respond_with_bad_request
         end
       end
 
@@ -120,14 +130,14 @@ module Meda
       # Record an event
       post '/track.json', :provides => :json do
         track_data = json_from_request
-        if validate_request(track_data)
-          respond_with_bad_request
-        else
+        if valid_hit_request?(track_data)
           if request.env['HTTP_X_FORWARDED_FOR']
-            track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+            track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
           end
           settings.connection.track(track_data)
           respond_with_ok
+        else
+          respond_with_bad_request
         end
       end
 
@@ -135,13 +145,13 @@ module Meda
       # @overload get "/track.gif"
       # Record an event
       get '/track.gif' do
-        if validate_request(params)
-          respond_with_bad_request
-        else
+        if valid_hit_request?(params)
           get_user_ip_from_header_param
           get_profile_id_from_cookie
           settings.connection.track(params)
           respond_with_pixel
+        else
+          respond_with_bad_request
         end
       end
 
@@ -163,7 +173,7 @@ module Meda
       end
 
       def get_user_ip_from_header_param
-        params['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0] 
+        params['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
       end
 
       def respond_with_ok
@@ -188,15 +198,11 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
-      def validate_request(request_params)
-        if request_params.inspect.include? "profile_id" and request_params.inspect.include? "client_id" and request_params.inspect.include? "dataset"
-          false
-        else
-          true
-        end
+      def valid_hit_request?(request_params)
+        [:dataset, :profile_id, :client_id].all? {|p| request_params[p].present? }
       end
-      #
 
+      # Extracts hit params from request environment
       def request_environment
         ActiveSupport::HashWithIndifferentAccess.new({
           :user_ip => request.env['REMOTE_ADDR'],
@@ -205,6 +211,7 @@ module Meda
         })
       end
 
+      # Extracts pageview hit params from __utm request
       def page_params_from_utm
         ActiveSupport::HashWithIndifferentAccess.new({
           :profile_id => cookies[:'_meda_profile_id'],
@@ -220,6 +227,7 @@ module Meda
         })
       end
 
+      # Extracts event hit params from __utm request
       def event_params_from_utm
         parsed_utme = params[:utme].match(/\d\((.+)\*(.+)\*(.+)\*(.+)\)/) # '5(object*action*label*value)'
         ActiveSupport::HashWithIndifferentAccess.new({
@@ -238,6 +246,7 @@ module Meda
         })
       end
 
+      # De-identifies an IP address by zero-ing out the final octet
       def mask_ip(ip)
         subnet, match, hostname = ip.rpartition('.')
         return subnet + '.0'

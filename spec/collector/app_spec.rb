@@ -9,7 +9,7 @@ describe "Collector Application" do
   HTTP_X_FORWARDED_FOR = '192.10.118.94'
   dataset = nil
   profile_id = nil
-  client_id = nil
+  client_id = 'abcd1234abcd1234'
 
   before(:all) do
     dataset = Meda::Dataset.new('test', Meda.configuration)
