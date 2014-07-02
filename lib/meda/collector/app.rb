@@ -101,9 +101,6 @@ module Meda
       post '/page.json', :provides => :json do
         page_data = json_from_request
         if valid_hit_request?(page_data)
-          if request.env['HTTP_X_FORWARDED_FOR']
-            page_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
-          end
           settings.connection.page(page_data)
           respond_with_ok
         else
@@ -116,9 +113,8 @@ module Meda
       # Record a pageview
       get '/page.gif' do
         if valid_hit_request?(params)
-          get_user_ip_from_header_param
           get_profile_id_from_cookie
-          settings.connection.page(params.merge(request_environment))
+          settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -131,9 +127,6 @@ module Meda
       post '/track.json', :provides => :json do
         track_data = json_from_request
         if valid_hit_request?(track_data)
-          if request.env['HTTP_X_FORWARDED_FOR']
-            track_data['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
-          end
           settings.connection.track(track_data)
           respond_with_ok
         else
@@ -146,9 +139,8 @@ module Meda
       # Record an event
       get '/track.gif' do
         if valid_hit_request?(params)
-          get_user_ip_from_header_param
           get_profile_id_from_cookie
-          settings.connection.track(params)
+          settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -165,15 +157,12 @@ module Meda
 
       def json_from_request
         begin
-          ActiveSupport::HashWithIndifferentAccess.new(JSON.parse(request.body.read))
-        rescue StandardError => e
+          params_hash = request_environment.merge(JSON.parse(request.body.read))
+          ActiveSupport::HashWithIndifferentAccess.new(params_hash)
+        rescue JSON::ParserError => e
           status 422
           json({'error' => 'Request body is invalid'})
         end
-      end
-
-      def get_user_ip_from_header_param
-        params['user_ip'] = request.env['HTTP_X_FORWARDED_FOR'].split(', ')[0]
       end
 
       def respond_with_ok
@@ -205,10 +194,17 @@ module Meda
       # Extracts hit params from request environment
       def request_environment
         ActiveSupport::HashWithIndifferentAccess.new({
-          :user_ip => request.env['REMOTE_ADDR'],
-          :referrer => request.env['HTTP_REFERER'],
-          :user_agent => request.env['HTTP_USER_AGENT']
+          :user_ip => remote_ip,
+          :referrer => request.referrer,
+          :user_agent => request.user_agent
         })
+      end
+
+      # Replace Sinatra's default request.ip call.
+      # Default gives proxy IPs instead of remote client IP
+      def remote_ip
+        request.env['HTTP_X_FORWARDED_FOR'].present? ?
+          request.env['HTTP_X_FORWARDED_FOR'].strip.split(/[,\s]+/)[0] : request.ip
       end
 
       # Extracts pageview hit params from __utm request
@@ -216,9 +212,9 @@ module Meda
         ActiveSupport::HashWithIndifferentAccess.new({
           :profile_id => cookies[:'_meda_profile_id'],
           :hostname => params[:utmhn],
-          :referrer => params[:utmr] || request.env['HTTP_REFERER'],
-          :user_ip => mask_ip(params[:utmip] || request.env['REMOTE_ADDR']),
-          :user_agent => request.env['HTTP_USER_AGENT'],
+          :referrer => params[:utmr] || request.referrer,
+          :user_ip => params[:utmip] || remote_ip,
+          :user_agent => request.user_agent,
           :path => params[:utmp],
           :title => params[:utmdt],
           :user_language => params[:utmul],
@@ -237,19 +233,13 @@ module Meda
           :label => parsed_utme[3],
           :value => parsed_utme[4],
           :hostname => params[:utmhn],
-          :referrer => params[:utmr] || request.env['HTTP_REFERER'],
-          :user_ip => mask_ip(params[:utmip] || request.env['REMOTE_ADDR']),
-          :user_agent => request.env['HTTP_USER_AGENT'],
+          :referrer => params[:utmr] || request.referrer,
+          :user_ip => params[:utmip] || remote_ip,
+          :user_agent => request.user_agent,
           :user_language => params[:utmul],
           :screen_depth => params[:utmsc],
           :screen_resolution => params[:utmsr]
         })
-      end
-
-      # De-identifies an IP address by zero-ing out the final octet
-      def mask_ip(ip)
-        subnet, match, hostname = ip.rpartition('.')
-        return subnet + '.0'
       end
 
     end

@@ -46,7 +46,7 @@ module Meda
 
       def track(params)
         params = get_user_id_for_logged_in_user(params)
-        
+
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
           disk_pool.submit do
@@ -109,6 +109,7 @@ module Meda
           raise 'Cannot find dataset. Token param blank.'
         end
         extra_params = params.symbolize_keys
+        extra_params[:user_ip] = mask_ip(extra_params[:user_ip]) if extra_params[:user_ip]
         token = extra_params.delete(:dataset)
         dataset = Meda.datasets[token]
         if dataset
@@ -116,6 +117,12 @@ module Meda
         else
           raise "No dataset found for token param #{token}"
         end
+      end
+
+      # De-identifies an IP address by zero-ing out the final octet
+      def mask_ip(ip)
+        subnet, match, hostname = ip.rpartition('.')
+        return subnet + '.0'
       end
 
     end

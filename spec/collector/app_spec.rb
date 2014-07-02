@@ -6,7 +6,6 @@ describe "Collector Application" do
 
   token = '3423432423423423423423'
   member_id = '384739284793284293'
-  HTTP_X_FORWARDED_FOR = '192.10.118.94'
   dataset = nil
   profile_id = nil
   client_id = 'abcd1234abcd1234'
@@ -86,6 +85,42 @@ describe "Collector Application" do
         path = dataset.last_disk_hit[:path]
         expect(File.read(path)).to match(dataset.last_disk_hit[:data])
         expect(dataset.last_ga_hit).to be_present
+      end
+    end
+
+    context 'with explicit user_ip set' do
+      it 'records a pageview with that IP de-identified' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'user_ip' => '123.123.123.123'
+        }
+        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
+      end
+    end
+
+    context 'with REMOTE_ADDR header' do
+      it 'records a pageview with that IP de-identified' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'title' => 'foo', 'hostname' => 'http://www.example.com'
+        }
+        post 'page.json', post_data.to_json, { :content_type => 'application/json',
+          'REMOTE_ADDR' => '123.123.123.123' }
+        expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
+      end
+    end
+
+    context 'with X_FORWARDED_FOR header set by a proxy server' do
+      it 'records a pageview with that IP de-identified' do
+        post_data = {
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'title' => 'foo', 'hostname' => 'http://www.example.com'
+        }
+        post 'page.json', post_data.to_json, { :content_type => 'application/json',
+          'REMOTE_ADDR' => '1.2.3.4', 'HTTP_X_FORWARDED_FOR' => '123.123.123.123, boops' }
+
+        expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
       end
     end
   end
