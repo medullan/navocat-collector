@@ -39,8 +39,8 @@ describe "Collector Application" do
       post 'identify.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_ok
       body = JSON.parse(last_response.body)
-      expect(body['id']).to be_present
-      profile_id = body['id']
+      expect(body['profile_id']).to be_present
+      profile_id = body['profile_id']
     end
 
   end

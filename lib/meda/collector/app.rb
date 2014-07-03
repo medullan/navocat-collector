@@ -40,7 +40,11 @@ module Meda
       post '/identify.json', :provides => :json do
         identify_data = json_from_request
         profile = settings.connection.identify(identify_data)
-        json(profile)
+        if profile
+          json({'profile_id' => profile[:id]})
+        else
+          respond_with_bad_request
+        end
       end
 
       # @method get_identify_gif
