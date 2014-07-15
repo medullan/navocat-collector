@@ -62,7 +62,7 @@ module Meda
       # @overload post "/profile.json"
       # Sets attributes on the given profile
       post '/profile.json', :provides => :json do
-        profile_data = json_from_request
+        profile_data = raw_json_from_request
         print_out_params(profile_data)
         settings.connection.profile(profile_data)
         respond_with_ok
@@ -168,8 +168,12 @@ module Meda
       protected
 
       def json_from_request
+        request_environment.merge(raw_json_from_request)
+      end
+
+      def raw_json_from_request
         begin
-          params_hash = request_environment.merge(JSON.parse(request.body.read))
+          params_hash = JSON.parse(request.body.read)
           ActiveSupport::HashWithIndifferentAccess.new(params_hash)
         rescue JSON::ParserError => e
           status 422
