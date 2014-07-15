@@ -39,6 +39,7 @@ module Meda
       # Identifies the user, and returns a meda profile_id
       post '/identify.json', :provides => :json do
         identify_data = json_from_request
+        print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
         if profile
           json({'profile_id' => profile[:id]})
@@ -52,6 +53,7 @@ module Meda
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/identify.gif' do
         profile = settings.connection.identify(params)
+        print_out_params(params)
         set_profile_id_in_cookie(profile['id'])
         respond_with_pixel
       end
@@ -61,6 +63,7 @@ module Meda
       # Sets attributes on the given profile
       post '/profile.json', :provides => :json do
         profile_data = json_from_request
+        print_out_params(profile_data)
         settings.connection.profile(profile_data)
         respond_with_ok
       end
@@ -70,6 +73,7 @@ module Meda
       # Sets attributes on the given profile
       get '/profile.gif' do
         get_profile_id_from_cookie
+        print_out_params(params)
         settings.connection.profile(params)
         respond_with_pixel
       end
@@ -104,6 +108,7 @@ module Meda
       # Record a pageview
       post '/page.json', :provides => :json do
         page_data = json_from_request
+        print_out_params(page_data)
         if valid_hit_request?(page_data)
           settings.connection.page(page_data)
           respond_with_ok
@@ -117,6 +122,7 @@ module Meda
       # Record a pageview
       get '/page.gif' do
         if valid_hit_request?(params)
+          print_out_params(params)
           get_profile_id_from_cookie
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
@@ -130,6 +136,7 @@ module Meda
       # Record an event
       post '/track.json', :provides => :json do
         track_data = json_from_request
+        print_out_params(track_data)
         if valid_hit_request?(track_data)
           settings.connection.track(track_data)
           respond_with_ok
@@ -143,6 +150,7 @@ module Meda
       # Record an event
       get '/track.gif' do
         if valid_hit_request?(params)
+          print_out_params(params)
           get_profile_id_from_cookie
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
@@ -171,6 +179,10 @@ module Meda
 
       def respond_with_ok
         json({"status" => "ok"})
+      end
+
+      def print_out_params(params)
+        puts params
       end
 
       def respond_with_bad_request
