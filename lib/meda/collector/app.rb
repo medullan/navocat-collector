@@ -216,6 +216,7 @@ module Meda
         ActiveSupport::HashWithIndifferentAccess.new({
           :user_ip => remote_ip,
           :referrer => request.referrer,
+          :user_language => request.env['HTTP_ACCEPT_LANGUAGE'],
           :user_agent => request.user_agent
         })
       end
