@@ -121,9 +121,9 @@ module Meda
       # @overload get "/page.gif"
       # Record a pageview
       get '/page.gif' do
+        get_profile_id_from_cookie
         if valid_hit_request?(params)
           print_out_params(params)
-          get_profile_id_from_cookie
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
@@ -149,9 +149,8 @@ module Meda
       # @overload get "/track.gif"
       # Record an event
       get '/track.gif' do
+        get_profile_id_from_cookie
         if valid_hit_request?(params)
-          print_out_params(params)
-          get_profile_id_from_cookie
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
@@ -208,7 +207,7 @@ module Meda
       end
 
       def valid_hit_request?(request_params)
-        [:dataset, :profile_id, :client_id].all? {|p| request_params[p].present? }
+        [:dataset, :cb, :client_id].all? {|p| request_params[p].present? }
       end
 
       # Extracts hit params from request environment
