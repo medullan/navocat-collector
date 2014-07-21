@@ -108,7 +108,7 @@ module Meda
       # Record a pageview
       post '/page.json', :provides => :json do
         page_data = json_from_request
-        print_out_params(page_data)
+        print_out_params(page_data) 
         if valid_hit_request?(page_data)
           settings.connection.page(page_data)
           respond_with_ok
@@ -207,7 +207,7 @@ module Meda
       end
 
       def valid_hit_request?(request_params)
-        [:dataset, :cb, :client_id].all? {|p| request_params[p].present? }
+        [:dataset, :profile_id, :client_id].all? {|p| request_params[p].present? }
       end
 
       # Extracts hit params from request environment
