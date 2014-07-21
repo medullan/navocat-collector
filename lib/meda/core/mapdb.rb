@@ -17,6 +17,7 @@ module MapDB
 
     def encode(key, value)
       @tree.put key, Marshal.dump(value).to_java_bytes
+      @mapdb.commit()
     end
 
     def decode(key)
@@ -67,7 +68,7 @@ module MapDB
         @mapdb = Java::OrgMapdb::DBMaker.
           newFileDB(Java::JavaIo::File.new("#{path}")).
           closeOnJvmShutdown().
-          transactionDisable().
+ #         transactionDisable().
           mmapFileEnable().
           asyncWriteEnable().
           make()
