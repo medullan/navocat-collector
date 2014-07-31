@@ -79,7 +79,7 @@ module Meda
         # create the data directory if it does not exist
         @data_paths[directory] = FileUtils.mkdir_p(directory)
       end
-      filename = "#{hit.hour}-#{self.data_uuid}.json"
+      filename = "#{hit.hour}-#{self.data_uuid}.json".gsub(':', '-')  #Replace : with - because can't save files with : on windows
       path = File.join(directory, filename)
       begin
         File.open(path, 'a') do |f|
