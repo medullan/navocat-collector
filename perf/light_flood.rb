@@ -9,7 +9,7 @@ HOST = 'aimprod.medullan.com'
 PROTOCOL = 'https'
 PORT = '443'
 TOKEN = 'c6002a7018be11e48c210800200c9a66'
-LOOPS = 100  #this was orignally 100, should play with this number to see how the perf test responds
+LOOPS = 10  #this was orignally 100, should play with this number to see how the perf test responds
 
 loads = ARGV.map {|c| c.to_i }
 loads.each do |c|
@@ -22,7 +22,7 @@ loads.each do |c|
         :connect_timeout => '3000', :response_timeout => '10000'
       })
       header [{:name => 'Content-Type', :value => 'application/json'}]
-
+      
       random_variable :variableName => 'client_id', :minimumValue => 99999999, :maximumValue => 999999999
       random_variable :variableName => 'ip1', :minimumValue => 1, :maximumValue => 127
       random_variable :variableName => 'ip2', :minimumValue => 1, :maximumValue => 127
@@ -57,44 +57,7 @@ loads.each do |c|
       }
       post :name => 'PROFILE', :url => '/profile.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
 
-      # Record 10 pageviews
 
-      params = {
-        :dataset => TOKEN,
-        :profile_id => '${profile_id}',
-        :client_id => '${client_id}',
-        :hostname => 'https://www.example.com',
-        :user_ip => "${ip1}.${ip2}.${ip3}.${ip4}",
-        :referrer => 'https://www.medullan.com',
-        :title => "Page Title ${__Random(1,999999999)}",
-        :path => "/${__Random(1,99)}/${__Random(1,99)}/${__Random(1,99)}.html"
-      }
-      10.times do
-        post :name => 'PAGE', :url => '/page.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
-      end
-
-      # Take a breath
-      test_action :duration => 1000
-
-      # Record 10 events
-
-      params = {
-        :dataset => TOKEN,
-        :profile_id => '${profile_id}',
-        :client_id => '${client_id}',
-        :hostname => 'https://www.example.com',
-        :user_ip => "${ip1}.${ip2}.${ip3}.${ip4}",
-        :referrer => 'https://www.medullan.com',
-        :title => "Page Title ${__Random(1,999999999)}",
-        :path => "/${__Random(1,99)}/${__Random(1,99)}/${__Random(1,99)}.html",
-        :category => 'Category',
-        :action => 'Action',
-        :label => 'Label',
-        :value => '100'
-      }
-      10.times do
-        post :name => 'EVENT', :url => '/track.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
-      end
 
     end
   end.run(
