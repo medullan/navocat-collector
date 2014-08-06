@@ -31,13 +31,18 @@ loads.each do |c|
 
       # Identify the user by member id, and extract profile_id
 
-      params = {
-        :dataset => TOKEN,
-        :member_id => '${__UUID()}'
-      }
-      post :name => 'IDENTIFY', :url => '/identify.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false' do
-        extract :name => 'profile_id', :regex => %q{.*"profile_id":"([^"]+)".*}
+      #params = {
+      #  :dataset => TOKEN,
+      #  :member_id => '${__UUID()}'
+      #}
+      #post :name => 'IDENTIFY', :url => '/identify.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false' do
+      #  extract :name => 'profile_id', :regex => %q{.*"profile_id":"([^"]+)".*}
+      #end
+
+      10.times do
+        get name: 'meda_home', url: '/'
       end
+
 
       # Add profile attributes
 
@@ -55,7 +60,7 @@ loads.each do |c|
         :some_long_string_key_7 => "sdkfjhdsfdsfhdsf dshfdsfhdsfds fksjdfhsdjfdsk fksjd fksdjfhds fdfsdk skdjfhsd",
         :some_long_string_key_8 => "sdkjfdsfdsfdsf sdkfhdsfdsfdsf dshf kdsfkdsfdfdfsd fdfdjfhjsdkfjshkdf sdfskdjfks"
       }
-      post :name => 'PROFILE', :url => '/profile.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
+      #post :name => 'PROFILE', :url => '/profile.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
 
 
 
