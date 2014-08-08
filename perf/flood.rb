@@ -9,7 +9,7 @@ HOST = 'aimprod.medullan.com'
 PROTOCOL = 'https'
 PORT = '443'
 TOKEN = 'c6002a7018be11e48c210800200c9a66'
-LOOPS = 100  #this was orignally 100, should play with this number to see how the perf test responds
+LOOPS = 1  #this was orignally 100, should play with this number to see how the perf test responds
 
 loads = ARGV.map {|c| c.to_i }
 loads.each do |c|
@@ -35,9 +35,11 @@ loads.each do |c|
         :dataset => TOKEN,
         :member_id => '${__UUID()}'
       }
-      post :name => 'IDENTIFY', :url => '/identify.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false' do
+
+      post :name => 'IDENTIFY', :url => '/identify.json', :raw_body => params.to_json.to_s, :use_keepalive => 'true' do
         extract :name => 'profile_id', :regex => %q{.*"profile_id":"([^"]+)".*}
       end
+
 
       # Add profile attributes
 
@@ -55,7 +57,7 @@ loads.each do |c|
         :some_long_string_key_7 => "sdkfjhdsfdsfhdsf dshfdsfhdsfds fksjdfhsdjfdsk fksjd fksdjfhds fdfsdk skdjfhsd",
         :some_long_string_key_8 => "sdkjfdsfdsfdsf sdkfhdsfdsfdsf dshf kdsfkdsfdfdfsd fdfdjfhjsdkfjshkdf sdfskdjfks"
       }
-      post :name => 'PROFILE', :url => '/profile.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
+      post :name => 'PROFILE', :url => '/profile.json', :raw_body => params.to_json.to_s, :use_keepalive => 'true'
 
       # Record 10 pageviews
 
@@ -70,7 +72,7 @@ loads.each do |c|
         :path => "/${__Random(1,99)}/${__Random(1,99)}/${__Random(1,99)}.html"
       }
       10.times do
-        post :name => 'PAGE', :url => '/page.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
+        post :name => 'PAGE', :url => '/page.json', :raw_body => params.to_json.to_s, :use_keepalive => 'true'
       end
 
       # Take a breath
@@ -93,7 +95,7 @@ loads.each do |c|
         :value => '100'
       }
       10.times do
-        post :name => 'EVENT', :url => '/track.json', :raw_body => params.to_json.to_s, :use_keepalive => 'false'
+        post :name => 'EVENT', :url => '/track.json', :raw_body => params.to_json.to_s, :use_keepalive => 'true'
       end
 
     end

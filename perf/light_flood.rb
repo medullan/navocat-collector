@@ -9,7 +9,13 @@ HOST = 'aimprod.medullan.com'
 PROTOCOL = 'https'
 PORT = '443'
 TOKEN = 'c6002a7018be11e48c210800200c9a66'
-LOOPS = 10  #this was orignally 100, should play with this number to see how the perf test responds
+
+#HOST = 'localhost'
+#PROTOCOL = 'http'
+#PORT = '9292'
+#TOKEN = 'PERF_TOKEN'
+
+LOOPS = 1  #this was orignally 100, should play with this number to see how the perf test responds
 
 loads = ARGV.map {|c| c.to_i }
 loads.each do |c|
@@ -39,8 +45,16 @@ loads.each do |c|
       #  extract :name => 'profile_id', :regex => %q{.*"profile_id":"([^"]+)".*}
       #end
 
+      get name: 'meda_home 1', url: '/', :use_keepalive => 'true'
+
+      get name: 'meda_home 2', url: '/', :use_keepalive => 'true'
+
       10.times do
-        get name: 'meda_home', url: '/'
+        get name: 'meda_home 3', url: '/', :use_keepalive => 'true'
+      end
+
+      10.times do
+        get name: 'meda_other 4', url: '/', :use_keepalive => 'true'
       end
 
 

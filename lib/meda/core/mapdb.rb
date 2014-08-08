@@ -1,6 +1,6 @@
 require 'java'
 require 'forwardable'
-require_relative '../../../lib/mapdb-1.0.4.jar'
+require_relative '../../../lib/mapdb-1.0.6.jar'
 
 # Implements a jRuby interface to the embedded MapDB database
 module MapDB
