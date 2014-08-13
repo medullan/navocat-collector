@@ -41,7 +41,6 @@ module Meda
           profile_id = profile_params.delete(:profile_id)
           dataset.set_profile(profile_id, profile_params)
         end
-        true
       end
 
       def track(params)

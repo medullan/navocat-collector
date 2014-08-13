@@ -65,6 +65,7 @@ module Meda
       if @tree.key?(profile_key(profile_id))
         existing_profile = @tree.decode(profile_key(profile_id))
         @tree.encode(profile_key(profile_id), existing_profile.merge(profile_info))
+        true
       else
         false # no profile
       end

@@ -55,6 +55,16 @@ describe "Collector Application" do
 
   end
 
+  describe 'profile.json' do
+
+    it 'posts profile with bad profile_id' do
+      post_data = {'dataset' => token, 'profile_id' => 'some-bad-profile-id', 'state' => 'Maine', 'weight' => '200'}
+      post 'profile.json', post_data.to_json, :content_type => 'application/json'
+      expect(last_response).to be_bad_request
+    end
+
+  end
+
   describe 'page.json' do
 
     context 'with missing client_id' do

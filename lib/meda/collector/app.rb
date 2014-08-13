@@ -64,9 +64,15 @@ module Meda
       post '/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         print_out_params(profile_data)
-        settings.connection.profile(profile_data)
-        respond_with_ok
+        result = settings.connection.profile(profile_data)
+        puts "RESULT is: #{result}"
+        if result 
+          respond_with_ok
+        else
+          respond_with_bad_request
+        end
       end
+
 
       # @method get_profile_gif
       # @overload get "/profile.gif"
