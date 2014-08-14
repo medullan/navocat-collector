@@ -43,6 +43,13 @@ module Meda
         end
       end
 
+      def get_profile_by_id(params)
+        process_request(params) do |dataset, profile_params|
+          profile_id = profile_params.delete(:profile_id)
+          profile = dataset.get_profile(profile_id)
+        end
+      end
+
       def track(params)
         params = get_user_id_for_logged_in_user(params)
 

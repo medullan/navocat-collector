@@ -65,9 +65,24 @@ module Meda
         profile_data = raw_json_from_request
         print_out_params(profile_data)
         result = settings.connection.profile(profile_data)
-        puts "RESULT is: #{result}"
         if result 
           respond_with_ok
+        else
+          respond_with_bad_request
+        end
+      end
+
+
+      # @method post_getprofile_json
+      # @overload post "/getprofile.json"
+      # Displays a profile for given profile_id
+      # NOTE: This needs to be modified in keeping with the RESTful interface
+      # Did not get the time to
+      post '/getprofile.json', :provides => :json do
+        profile_data = raw_json_from_request
+        profile = settings.connection.get_profile_by_id(profile_data)
+        if profile 
+          profile.to_json
         else
           respond_with_bad_request
         end

@@ -69,6 +69,10 @@ module Meda
       store.set_profile(profile_id, profile_info)
     end
 
+    def get_profile(profile_id)
+      store.get_profile_by_id(profile_id)
+    end
+
     def stream_to_ga?
       !!google_analytics && !!google_analytics['record']
     end

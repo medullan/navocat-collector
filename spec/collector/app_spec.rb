@@ -65,6 +65,30 @@ describe "Collector Application" do
 
   end
 
+  describe 'getprofile.json' do
+
+    it 'get profile info' do
+      post_data = {'dataset' => token, 'profile_id' => profile_id}
+      post 'getprofile.json', post_data.to_json, :content_type => 'application/json' 
+      body = JSON.parse(last_response.body)
+      expect(body['state']).to be_present
+      state = body['state']
+      expect(state).to eq('Maine')
+    end
+
+  end
+
+
+  describe 'getprofile.json' do
+
+    it 'get profile info with bad profile_id' do
+      post_data = {'dataset' => token, 'profile_id' => 'some-bad-profile-id'}
+      post 'getprofile.json', post_data.to_json, :content_type => 'application/json' 
+      expect(last_response).to be_bad_request
+    end
+
+  end
+
   describe 'page.json' do
 
     context 'with missing client_id' do
