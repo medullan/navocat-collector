@@ -112,6 +112,9 @@ module Meda
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
         google_analytics['custom_dimensions'].each_pair do |dim, val|
+          #The naming of profile fields in the json request to fields in the dataset.yml must be identical 
+          #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA 
+          #puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
           ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
         end
         @last_ga_hit[:staccato_hit] = ga_hit
