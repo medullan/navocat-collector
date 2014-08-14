@@ -6,8 +6,8 @@ require 'meda/version'
 Gem::Specification.new do |spec|
   spec.name          = "meda"
   spec.version       = Meda::VERSION
-  spec.authors       = ["Max Lord"]
-  spec.email         = ["mlord@medullan.com"]
+  spec.authors       = ['Max Lord','Sheldon Hall']
+  spec.email         = ["shall@medullan.com"]
   spec.summary       = %q{Medullan analytics platform}
   spec.description   = %q{Medullan analytics, not for the masses}
   spec.homepage      = ""
