@@ -51,7 +51,7 @@ module Meda
       end
 
       def track(params)
-        params = get_user_id_for_logged_in_user(params)
+        #params = get_user_id_for_logged_in_user(params)
 
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
@@ -68,7 +68,7 @@ module Meda
       end
 
       def page(params)
-        params = get_user_id_for_logged_in_user(params)
+        #params = get_user_id_for_logged_in_user(params)
 
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)

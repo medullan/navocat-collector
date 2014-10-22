@@ -56,7 +56,7 @@ module Meda
 
     def as_ga
 
-      if(profile_id != '351bb960ecd711e3a0a822000ab93e79')
+      if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
         props.merge({
           :user_id => profile_id
         })
