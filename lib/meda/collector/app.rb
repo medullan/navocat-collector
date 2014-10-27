@@ -20,24 +20,24 @@ module Meda
       helpers Sinatra::JSON
 
       # @method get_index
-      # @overload get "/"
+      # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
-      get '/' do
+      get '/meda' do
         "Meda version #{Meda::VERSION}"
       end
 
       # @method get_static
-      # @overload get "/static/:file"
+      # @overload get "/meda/static/:file"
       # Serves any files in the project's public directory, usually named "static"
-      get '/static/:file' do
+      get '/meda/static/:file' do
         path = File.join(settings.public_folder, params[:file])
         send_file(path)
       end
 
       # @method post_identify_json
-      # @overload post "/identify.json"
+      # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
-      post '/identify.json', :provides => :json do
+      post '/meda/identify.json', :provides => :json do
         identify_data = raw_json_from_request
         print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
@@ -49,9 +49,9 @@ module Meda
       end
 
       # @method get_identify_gif
-      # @overload get "/identify.gif"
+      # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
-      get '/identify.gif' do
+      get '/meda/identify.gif' do
         profile = settings.connection.identify(params)
         print_out_params(params)
         set_profile_id_in_cookie(profile['id'])
@@ -59,9 +59,9 @@ module Meda
       end
 
       # @method post_profile_json
-      # @overload post "/profile.json"
+      # @overload post "/meda/profile.json"
       # Sets attributes on the given profile
-      post '/profile.json', :provides => :json do
+      post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         print_out_params(profile_data)
         result = settings.connection.profile(profile_data)
@@ -74,11 +74,11 @@ module Meda
 
 
       # @method post_getprofile_json
-      # @overload post "/getprofile.json"
+      # @overload post "/meda/getprofile.json"
       # Displays a profile for given profile_id
       # NOTE: This needs to be modified in keeping with the RESTful interface
       # Did not get the time to
-      post '/getprofile.json', :provides => :json do
+      post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
         profile = settings.connection.get_profile_by_id(profile_data)
         if profile 
@@ -90,9 +90,9 @@ module Meda
 
 
       # @method get_profile_gif
-      # @overload get "/profile.gif"
+      # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
-      get '/profile.gif' do
+      get '/meda/profile.gif' do
         get_profile_id_from_cookie
         print_out_params(params)
         settings.connection.profile(params)
@@ -100,9 +100,9 @@ module Meda
       end
 
       # @method get_utm_gif
-      # @overload get "/:dataset/__utm.gif"
+      # @overload get "/meda/:dataset/__utm.gif"
       # Accept google analytics __utm.gif formatted hits
-      get '/:dataset/__utm.gif' do
+      get '/meda/:dataset/__utm.gif' do
         get_profile_id_from_cookie
 
         if params[:utmt] == 'event'
@@ -125,9 +125,9 @@ module Meda
       end
 
       # @method post_page_json
-      # @overload post "/page.json"
+      # @overload post "/meda/page.json"
       # Record a pageview
-      post '/page.json', :provides => :json do
+      post '/meda/page.json', :provides => :json do
         page_data = json_from_request
         print_out_params(page_data) 
         if valid_hit_request?(page_data)
@@ -139,9 +139,9 @@ module Meda
       end
 
       # @method get_page_gif
-      # @overload get "/page.gif"
+      # @overload get "/meda/page.gif"
       # Record a pageview
-      get '/page.gif' do
+      get '/meda/page.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
           print_out_params(params)
@@ -153,9 +153,9 @@ module Meda
       end
 
       # @method post_track_json
-      # @overload post "/track.json"
+      # @overload post "/meda/track.json"
       # Record an event
-      post '/track.json', :provides => :json do
+      post '/meda/track.json', :provides => :json do
         track_data = json_from_request
         print_out_params(track_data)
         if valid_hit_request?(track_data)
@@ -167,9 +167,9 @@ module Meda
       end
 
       # @method get_track_gif
-      # @overload get "/track.gif"
+      # @overload get "/meda/track.gif"
       # Record an event
-      get '/track.gif' do
+      get '/meda/track.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
           settings.connection.track(request_environment.merge(params))
