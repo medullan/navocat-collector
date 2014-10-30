@@ -27,7 +27,7 @@ describe "Collector Application" do
 
   describe 'index' do
     it 'says hello world' do
-      get '/'
+      get '/meda'
       last_response.should be_ok
     end
   end
@@ -36,7 +36,7 @@ describe "Collector Application" do
 
     it 'identifies a new user' do
       post_data = {'dataset' => token, 'member_id' => member_id}
-      post 'identify.json', post_data.to_json, :content_type => 'application/json'
+      post 'meda/identify.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_ok
       body = JSON.parse(last_response.body)
       expect(body['profile_id']).to be_present
@@ -49,7 +49,7 @@ describe "Collector Application" do
 
     it 'posts profile info' do
       post_data = {'dataset' => token, 'profile_id' => profile_id, 'state' => 'Maine', 'weight' => '200'}
-      post 'profile.json', post_data.to_json, :content_type => 'application/json'
+      post 'meda/profile.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_ok
     end
 
@@ -59,7 +59,7 @@ describe "Collector Application" do
 
     it 'posts profile with bad profile_id' do
       post_data = {'dataset' => token, 'profile_id' => 'some-bad-profile-id', 'state' => 'Maine', 'weight' => '200'}
-      post 'profile.json', post_data.to_json, :content_type => 'application/json'
+      post 'meda/profile.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_bad_request
     end
 
@@ -69,7 +69,7 @@ describe "Collector Application" do
 
     it 'get profile info' do
       post_data = {'dataset' => token, 'profile_id' => profile_id}
-      post 'getprofile.json', post_data.to_json, :content_type => 'application/json' 
+      post 'meda/getprofile.json', post_data.to_json, :content_type => 'application/json' 
       body = JSON.parse(last_response.body)
       expect(body['state']).to be_present
       state = body['state']
@@ -83,7 +83,7 @@ describe "Collector Application" do
 
     it 'get profile info with bad profile_id' do
       post_data = {'dataset' => token, 'profile_id' => 'some-bad-profile-id'}
-      post 'getprofile.json', post_data.to_json, :content_type => 'application/json' 
+      post 'meda/getprofile.json', post_data.to_json, :content_type => 'application/json' 
       expect(last_response).to be_bad_request
     end
 
@@ -97,7 +97,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com'
         }
-        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
 
         expect(last_response).to be_bad_request
@@ -110,7 +110,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com'
         }
-        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
 
         expect(last_response).to be_ok
@@ -128,7 +128,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com', 'user_ip' => '123.123.123.123'
         }
-        post 'page.json', post_data.to_json, :content_type => 'application/json'
+        post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
       end
     end
@@ -139,7 +139,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com'
         }
-        post 'page.json', post_data.to_json, { :content_type => 'application/json',
+        post 'meda/page.json', post_data.to_json, { :content_type => 'application/json',
           'REMOTE_ADDR' => '123.123.123.123' }
         expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
       end
@@ -151,7 +151,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com'
         }
-        post 'page.json', post_data.to_json, { :content_type => 'application/json',
+        post 'meda/page.json', post_data.to_json, { :content_type => 'application/json',
           'REMOTE_ADDR' => '1.2.3.4', 'HTTP_X_FORWARDED_FOR' => '123.123.123.123, boops' }
 
         expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
@@ -167,7 +167,7 @@ describe "Collector Application" do
           'dataset' => token, 'client_id' => client_id,
           'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
         }
-        post 'track.json', post_data.to_json, :content_type => 'application/json'
+        post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
 
         expect(last_response).to be_bad_request
@@ -180,7 +180,7 @@ describe "Collector Application" do
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
           'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
         }
-        post 'track.json', post_data.to_json, :content_type => 'application/json'
+        post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
 
         expect(last_response).to be_ok
