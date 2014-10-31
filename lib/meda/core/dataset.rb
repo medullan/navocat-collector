@@ -107,7 +107,6 @@ module Meda
       #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id) 
       tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id) 
       begin
-
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
         elsif hit.hit_type == 'event'
