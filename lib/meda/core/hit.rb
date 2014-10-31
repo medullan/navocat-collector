@@ -57,18 +57,13 @@ module Meda
     def as_ga
 
       if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
-        props.merge({
-          :user_id => profile_id
-        })
+        props[:user_id] = profile_id
       end
+        
+      props[:cache_buster] = id
+      props[:anonymize_ip] = 1
 
-        props.merge({
-          :client_id => client_id,
-        #  :user_id => profile_id,
-          :cache_buster => id,
-          :anonymize_ip => 1
-        })
-
+      props
     end
 
     def to_json
