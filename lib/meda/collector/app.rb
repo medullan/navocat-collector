@@ -3,6 +3,7 @@ require 'sinatra/cookies'
 require 'sinatra/json'
 require 'meda'
 require 'meda/collector/connection'
+require 'logger'
 
 module Meda
   module Collector
@@ -39,7 +40,7 @@ module Meda
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
         identify_data = raw_json_from_request
-        print_out_params(identify_data)
+        #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
         if profile
           json({'profile_id' => profile[:id]})
@@ -53,7 +54,7 @@ module Meda
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
         profile = settings.connection.identify(params)
-        print_out_params(params)
+        #print_out_params(params)
         set_profile_id_in_cookie(profile['id'])
         respond_with_pixel
       end
@@ -63,7 +64,7 @@ module Meda
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
-        print_out_params(profile_data)
+        #print_out_params(profile_data)
         result = settings.connection.profile(profile_data)
         if result 
           respond_with_ok
@@ -94,7 +95,7 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
-        print_out_params(params)
+        #print_out_params(params)
         settings.connection.profile(params)
         respond_with_pixel
       end
@@ -129,7 +130,7 @@ module Meda
       # Record a pageview
       post '/meda/page.json', :provides => :json do
         page_data = json_from_request
-        print_out_params(page_data) 
+        #print_out_params(page_data) 
         if valid_hit_request?(page_data)
           settings.connection.page(page_data)
           respond_with_ok
@@ -144,8 +145,8 @@ module Meda
       get '/meda/page.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
-          print_out_params(params)
-          settings.connection.page(request_environment.merge(params))
+          #print_out_params(params)
+          settings.connection.page(clean_path(request_environment.merge(params)))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -157,7 +158,7 @@ module Meda
       # Record an event
       post '/meda/track.json', :provides => :json do
         track_data = json_from_request
-        print_out_params(track_data)
+        #print_out_params(track_data)
         if valid_hit_request?(track_data)
           settings.connection.track(track_data)
           respond_with_ok
@@ -172,7 +173,7 @@ module Meda
       get '/meda/track.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
-          settings.connection.track(request_environment.merge(params))
+          settings.connection.track(clean_path(request_environment.merge(params)))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -186,6 +187,29 @@ module Meda
       end
 
       protected
+
+      # Clean the path variable to only include query string params if the url is in a whitelist
+      def clean_path(params)
+        begin
+          current_path = params[:path]
+          if current_path.include? "?" 
+
+            #Replace whitelist with commented line below to test sample.html locally
+            #whitelisted_paths = [/\/sample\.html\?toolid=3563/,/\/sample\.html\?.*Fcreate_account$/,/\/sample\.html\?.*Fcreate_account&_58_resume=$/]
+            
+            whitelisted_paths = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
+            regex_of_paths = Regexp.union(whitelisted_paths)
+
+            if (!regex_of_paths.match(current_path)) 
+              params[:path] = current_path[0..(current_path.index("?")-1)]
+            end
+          end
+        rescue StandardError => e
+          logger.error("Failure cleaning path: #{params[:path]}")
+          logger.error(e)
+        end
+        params
+      end
 
       def json_from_request
         request_environment.merge(raw_json_from_request)
@@ -228,7 +252,7 @@ module Meda
       end
 
       def valid_hit_request?(request_params)
-        [:dataset, :profile_id, :client_id].all? {|p| request_params[p].present? }
+        [:dataset, :profile_id, :client_id, :path].all? {|p| request_params[p].present? }
       end
 
       # Extracts hit params from request environment
