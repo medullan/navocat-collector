@@ -95,7 +95,7 @@ describe "Collector Application" do
       it 'responds with bad request' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com'
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
         }
         post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
@@ -108,7 +108,7 @@ describe "Collector Application" do
       it 'records the pageview' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com'
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
         }
         post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads
@@ -126,7 +126,7 @@ describe "Collector Application" do
       it 'records a pageview with that IP de-identified' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com', 'user_ip' => '123.123.123.123'
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'user_ip' => '123.123.123.123', 'path' => '/'
         }
         post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
         expect(dataset.last_hit.props[:user_ip]).to eq('123.123.123.0')
@@ -137,7 +137,7 @@ describe "Collector Application" do
       it 'records a pageview with that IP de-identified' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com'
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
         }
         post 'meda/page.json', post_data.to_json, { :content_type => 'application/json',
           'REMOTE_ADDR' => '123.123.123.123' }
@@ -149,7 +149,7 @@ describe "Collector Application" do
       it 'records a pageview with that IP de-identified' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com'
+          'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
         }
         post 'meda/page.json', post_data.to_json, { :content_type => 'application/json',
           'REMOTE_ADDR' => '1.2.3.4', 'HTTP_X_FORWARDED_FOR' => '123.123.123.123, boops' }
@@ -177,7 +177,7 @@ describe "Collector Application" do
     context 'with dataset, profile_id, client_id, and event params' do
       it 'records the event' do
         post_data = {
-          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id,
+          'dataset' => token, 'profile_id' => profile_id, 'client_id' => client_id, 'path' => '/',
           'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
         }
         post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
