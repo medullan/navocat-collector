@@ -132,7 +132,7 @@ module Meda
         page_data = json_from_request
         #print_out_params(page_data) 
         if valid_hit_request?(page_data)
-          settings.connection.page(page_data)
+          settings.connection.page(get_saved_client_id(clean_path(request_environment.merge(page_data))))
           respond_with_ok
         else
           respond_with_bad_request
@@ -146,7 +146,7 @@ module Meda
         get_profile_id_from_cookie
         if valid_hit_request?(params)
           #print_out_params(params)
-          settings.connection.page(clean_path(request_environment.merge(params)))
+          settings.connection.page(get_saved_client_id(clean_path(request_environment.merge(params))))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -160,7 +160,7 @@ module Meda
         track_data = json_from_request
         #print_out_params(track_data)
         if valid_hit_request?(track_data)
-          settings.connection.track(track_data)
+          settings.connection.track(get_saved_client_id(clean_path(request_environment.merge(track_data))))
           respond_with_ok
         else
           respond_with_bad_request
@@ -173,7 +173,7 @@ module Meda
       get '/meda/track.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
-          settings.connection.track(clean_path(request_environment.merge(params)))
+          settings.connection.track(get_saved_client_id(clean_path(request_environment.merge(params))))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -212,7 +212,7 @@ module Meda
       end
 
       def json_from_request
-        request_environment.merge(raw_json_from_request)
+        raw_json_from_request
       end
 
       def raw_json_from_request
@@ -255,11 +255,43 @@ module Meda
         [:dataset, :profile_id, :client_id, :path].all? {|p| request_params[p].present? }
       end
 
+      def get_saved_client_id(data)
+        begin
+          #data should already be validated for this request
+          profile_id = data[:profile_id]
+          if profile_id != '471bb8f0593711e48c1e44fb42fffeaa' 
+            temp = ActiveSupport::HashWithIndifferentAccess.new({
+              :dataset => data[:dataset],
+              :profile_id => profile_id,
+              :client_id => data[:client_id]
+            })
+            current_path = data[:path]
+            if (current_path.include? "/pilot/landingpage") || (current_path.include? "/members/myblue/dashboard") 
+              settings.connection.profile(temp)
+            else
+              profile = settings.connection.get_profile_by_id(temp)
+              if profile 
+                profile_client_id = profile[:client_id]
+                if profile_client_id
+                  data[:client_id] = profile_client_id
+                end
+              end
+            end
+          end
+        rescue StandardError => e
+          logger.error("Failure getting client_id from profile")
+          logger.error(e)
+        end
+        data
+      end
+
       # Extracts hit params from request environment
       def request_environment
+        referrer = request.referrer 
+        params[:referrer] ||= referrer ||= ""
         ActiveSupport::HashWithIndifferentAccess.new({
           :user_ip => remote_ip,
-          :referrer => request.referrer,
+          :referrer => params[:referrer],
           :user_language => request.env['HTTP_ACCEPT_LANGUAGE'],
           :user_agent => request.user_agent
         })
