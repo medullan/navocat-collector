@@ -64,7 +64,7 @@ module Meda
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
-        print_out_params(profile_data)
+        #print_out_params(profile_data)
         result = settings.connection.profile(profile_data)
         if result 
           respond_with_ok
@@ -95,7 +95,7 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
-        print_out_params(params)
+        #print_out_params(params)
         settings.connection.profile(params)
         respond_with_pixel
       end
