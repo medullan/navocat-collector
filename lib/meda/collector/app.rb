@@ -66,7 +66,7 @@ module Meda
         profile_data = raw_json_from_request
         #print_out_params(profile_data)
         result = settings.connection.profile(profile_data)
-        if result 
+        if result
           respond_with_ok
         else
           respond_with_bad_request
@@ -82,7 +82,7 @@ module Meda
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
         profile = settings.connection.get_profile_by_id(profile_data)
-        if profile 
+        if profile
           profile.to_json
         else
           respond_with_bad_request
@@ -130,9 +130,9 @@ module Meda
       # Record a pageview
       post '/meda/page.json', :provides => :json do
         page_data = json_from_request
-        #print_out_params(page_data) 
+        #print_out_params(page_data)
         if valid_hit_request?(page_data)
-          settings.connection.page(get_saved_client_id(clean_path(request_environment.merge(page_data))))
+          settings.connection.page(get_saved_client_id(request_environment.merge(page_data)))
           respond_with_ok
         else
           respond_with_bad_request
@@ -146,7 +146,7 @@ module Meda
         get_profile_id_from_cookie
         if valid_hit_request?(params)
           #print_out_params(params)
-          settings.connection.page(get_saved_client_id(clean_path(request_environment.merge(params))))
+          settings.connection.page(get_saved_client_id(request_environment.merge(params)))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -160,7 +160,7 @@ module Meda
         track_data = json_from_request
         #print_out_params(track_data)
         if valid_hit_request?(track_data)
-          settings.connection.track(get_saved_client_id(clean_path(request_environment.merge(track_data))))
+          settings.connection.track(get_saved_client_id(request_environment.merge(track_data)))
           respond_with_ok
         else
           respond_with_bad_request
@@ -173,7 +173,7 @@ module Meda
       get '/meda/track.gif' do
         get_profile_id_from_cookie
         if valid_hit_request?(params)
-          settings.connection.track(get_saved_client_id(clean_path(request_environment.merge(params))))
+          settings.connection.track(get_saved_client_id(request_environment.merge(params)))
           respond_with_pixel
         else
           respond_with_bad_request
@@ -187,29 +187,6 @@ module Meda
       end
 
       protected
-
-      # Clean the path variable to only include query string params if the url is in a whitelist
-      def clean_path(params)
-        begin
-          current_path = params[:path]
-          if current_path.include? "?" 
-
-            #Replace whitelist with commented line below to test sample.html locally
-            #whitelisted_paths = [/\/sample\.html\?toolid=3563/,/\/sample\.html\?.*Fcreate_account$/,/\/sample\.html\?.*Fcreate_account&_58_resume=$/]
-            
-            whitelisted_paths = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
-            regex_of_paths = Regexp.union(whitelisted_paths)
-
-            if (!regex_of_paths.match(current_path)) 
-              params[:path] = current_path[0..(current_path.index("?")-1)]
-            end
-          end
-        rescue StandardError => e
-          logger.error("Failure cleaning path: #{params[:path]}")
-          logger.error(e)
-        end
-        params
-      end
 
       def json_from_request
         raw_json_from_request
@@ -259,18 +236,18 @@ module Meda
         begin
           #data should already be validated for this request
           profile_id = data[:profile_id]
-          if profile_id != '471bb8f0593711e48c1e44fb42fffeaa' 
+          if profile_id != '471bb8f0593711e48c1e44fb42fffeaa'
             temp = ActiveSupport::HashWithIndifferentAccess.new({
               :dataset => data[:dataset],
               :profile_id => profile_id,
               :client_id => data[:client_id]
             })
             current_path = data[:path]
-            if (current_path.include? "/pilot/landingpage") || (current_path.include? "/members/myblue/dashboard") 
+            if (current_path.include? "/pilot/landingpage") || (current_path.include? "/members/myblue/dashboard")
               settings.connection.profile(temp)
             else
               profile = settings.connection.get_profile_by_id(temp)
-              if profile 
+              if profile
                 profile_client_id = profile[:client_id]
                 if profile_client_id
                   data[:client_id] = profile_client_id
@@ -287,7 +264,7 @@ module Meda
 
       # Extracts hit params from request environment
       def request_environment
-        referrer = request.referrer 
+        referrer = request.referrer
         params[:referrer] ||= referrer ||= ""
         ActiveSupport::HashWithIndifferentAccess.new({
           :user_ip => remote_ip,
@@ -343,4 +320,3 @@ module Meda
 
   end
 end
-
