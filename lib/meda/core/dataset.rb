@@ -14,7 +14,7 @@ module Meda
   # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
-    attr_reader :data_uuid, :name, :meda_config
+    attr_reader :data_uuid, :name, :meda_config, :hit_filter
     attr_accessor :google_analytics, :token
 
     # Readers primarily used for tests, not especially thread-safe :p
@@ -26,6 +26,7 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
+      @hit_filter = Meda::HitFilter.new({})
     end
 
     def identify_profile(info)
@@ -60,6 +61,12 @@ module Meda
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
       end
+
+      #The need to lines calls a custom filter for every client to transform the
+      #hit data specific to their needs
+
+      hit_filter.google_analytics = google_analytics
+      hit = hit_filter.filter_hit(hit)
       @last_hit = hit
       hit.validate! # blows up if missing attrs
       hit
@@ -104,8 +111,8 @@ module Meda
     def stream_hit_to_ga(hit)
       @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
       return unless stream_to_ga?
-      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id) 
-      tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id) 
+      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id)
+      tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
       begin
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
@@ -114,9 +121,9 @@ module Meda
         end
         if(hit.profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
           google_analytics['custom_dimensions'].each_pair do |dim, val|
-            #The naming of profile fields in the json request to fields in the dataset.yml must be identical 
-            #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA 
-            #puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
+            #The naming of profile fields in the json request to fields in the dataset.yml must be identical
+            #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA
+            puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
             ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
           end
         end
@@ -157,4 +164,3 @@ module Meda
 
   end
 end
-
