@@ -64,21 +64,10 @@ module Meda
 
     def filter_profile_data(hit)
       begin
-
-        if !!google_analytics && !!google_analytics['record']
-
-          google_analytics[:custom_dimensions].each_pair do |key, value|
-            if hit.profile_props.has_key? key && value.has_key? :mapping
-              begin
-                value_to_map = hit.profile_props[key]
-                hit.profile_props[key] = value[:mapping][value_to_map]
-              rescue StandardError => e
-                logger.error("Failure filtering #{name} ")
-                logger.error(e)
-              end
-            end
+        if !!google_analytics && !!google_analytics['record'] && hit.profile_props
+          google_analytics['custom_dimensions'].each_pair do |dimensionName, dimensionConfiguration| 
+            filter_profile_data_property(hit.profile_props, dimensionName, dimensionConfiguration['mapping']) 
           end
-
         end
       rescue StandardError => e
         logger.error("Failure cleaning path: ")
@@ -86,6 +75,18 @@ module Meda
       end
 
       hit
+    end
+
+    def filter_profile_data_property(profile_props, key, mappings)
+      begin
+        if profile_props[key] and mappings
+          value_to_map = profile_props[key]
+          profile_props[key] = mappings[value_to_map]
+        end
+      rescue StandardError => e
+        logger.error("Failure filtering #{name} ")
+        logger.error(e)
+      end
     end
 
     protected
