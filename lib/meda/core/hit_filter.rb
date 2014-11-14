@@ -64,87 +64,29 @@ module Meda
 
     def filter_profile_data(hit)
       begin
-
-        if !!google_analytics && !!google_analytics['record']
-
-          hit = filter_gender(hit)
-          hit = filter_member_type(hit)
-          hit = filter_option(hit)
-          hit = filter_health_and_consumer_segmentation(hit)
-          hit = filter_health_segmentation(hit)
-          hit = filter_consumer_segmentation(hit)
+        if !!google_analytics && !!google_analytics['record'] && hit.profile_props
+          google_analytics['custom_dimensions'].each_pair do |dimensionName, dimensionConfiguration| 
+            filter_profile_data_property(hit.profile_props, dimensionName, dimensionConfiguration['mapping']) 
+          end
         end
       rescue StandardError => e
         logger.error("Failure cleaning path: ")
         logger.error(e)
       end
+
       hit
     end
 
-    def filter_gender(hit)
+    def filter_profile_data_property(profile_props, key, mappings)
       begin
-        value_to_map = hit.profile_props[:gender]
-        hit.profile_props[:gender] = google_analytics['custom_dimensions']['gender']['mapping'][value_to_map]
+        if profile_props[key] and mappings
+          value_to_map = profile_props[key]
+          profile_props[key] = mappings[value_to_map]
+        end
       rescue StandardError => e
-        logger.error("Failure filtering gender ")
+        logger.error("Failure filtering #{name} ")
         logger.error(e)
       end
-      hit
-    end
-
-    def filter_member_type(hit)
-      begin
-        value_to_map = hit.profile_props[:memberType]
-        hit.profile_props[:memberType] = google_analytics['custom_dimensions']['memberType']['mapping'][value_to_map]
-      rescue StandardError => e
-        logger.error("Failure filtering memberType ")
-        logger.error(e)
-      end
-      hit
-    end
-
-    def filter_option(hit)
-      begin
-        value_to_map = hit.profile_props[:Option]
-        hit.profile_props[:Option] = google_analytics['custom_dimensions']['Option']['mapping'][value_to_map]
-      rescue StandardError => e
-        logger.error("Failure filtering Option ")
-        logger.error(e)
-      end
-      hit
-    end
-
-    def filter_health_and_consumer_segmentation(hit)
-      begin
-        value_to_map = hit.profile_props[:healthAndConsumerSegmentation]
-        hit.profile_props[:healthAndConsumerSegmentation] = google_analytics['custom_dimensions']['healthAndConsumerSegmentation']['mapping'][value_to_map]
-      rescue StandardError => e
-        logger.error("Failure filtering healthAndConsumerSegmentation ")
-        logger.error(e)
-      end
-      hit
-    end
-
-    def filter_health_segmentation(hit)
-      begin
-        value_to_map = hit.profile_props[:healthSegmentation]
-        hit.profile_props[:healthSegmentation] = google_analytics['custom_dimensions']['healthSegmentation']['mapping'][value_to_map]
-      rescue StandardError => e
-        logger.error("Failure filtering healthSegmentation ")
-        logger.error(e)
-      end
-      hit
-    end
-
-    def filter_consumer_segmentation(hit)
-      begin
-        value_to_map = hit.profile_props[:consumerSegmentation]
-        hit.profile_props[:consumerSegmentation] = google_analytics['custom_dimensions']['consumerSegmentation']['mapping'][value_to_map]
-      rescue StandardError => e
-        logger.error("Failure filtering consumerSegmentation ")
-        logger.error(e)
-      end
-      hit
     end
 
     protected
