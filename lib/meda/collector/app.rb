@@ -65,9 +65,13 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         #print_out_params(profile_data)
-        result = settings.connection.profile(profile_data)
-        if result
-          respond_with_ok
+        if valid_request?(profile_data)
+          result = settings.connection.profile(profile_data)
+          if result
+            respond_with_ok
+          else
+            respond_with_bad_request
+          end
         else
           respond_with_bad_request
         end
@@ -81,11 +85,15 @@ module Meda
       # Did not get the time to
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
-        profile = settings.connection.get_profile_by_id(profile_data)
-        if profile
-          profile.to_json
+        if valid_request?(profile_data)
+          profile = settings.connection.get_profile_by_id(profile_data)
+          if profile
+            profile.to_json
+          else
+            respond_with_bad_request
+          end
         else
-          respond_with_bad_request
+            respond_with_bad_request
         end
       end
 
@@ -96,8 +104,12 @@ module Meda
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
         #print_out_params(params)
-        settings.connection.profile(params)
-        respond_with_pixel
+        if valid_request?(params)
+          settings.connection.profile(params)
+          respond_with_pixel
+        else
+          respond_with_bad_request
+        end
       end
 
       # @method get_utm_gif
@@ -202,6 +214,8 @@ module Meda
         end
       end
 
+
+
       def respond_with_ok
         json({"status" => "ok"})
       end
@@ -228,8 +242,15 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
+
+      def valid_request?(request_params)
+        [:dataset, :profile_id].all? {|p| request_params[p].present? }
+      end
+
+
       def valid_hit_request?(request_params)
-        [:dataset, :profile_id, :client_id, :path].all? {|p| request_params[p].present? }
+        #[:dataset, :profile_id, :client_id, :path].all? {|p| request_params[p].present? }
+        valid_request?(request_params) && ([:client_id, :path].all? {|p| request_params[p].present? })
       end
 
       def get_saved_client_id(data)
