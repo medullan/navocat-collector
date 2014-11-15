@@ -15,7 +15,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token
+    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit
@@ -50,6 +50,7 @@ module Meda
 
     def add_hit(hit)
       hit.id = UUIDTools::UUID.timestamp_create.hexdigest
+      hit.default_profile_id = default_profile_id
       hit.dataset = self
       if hit.profile_id
         profile = store.get_profile_by_id(hit.profile_id)
@@ -64,7 +65,7 @@ module Meda
 
       #The need to lines calls a custom filter for every client to transform the
       #hit data specific to their needs
-
+      hit_filter.whitelisted_urls = whitelisted_urls
       hit_filter.google_analytics = google_analytics
       hit = hit_filter.filter_hit(hit)
       @last_hit = hit
@@ -119,7 +120,8 @@ module Meda
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
-        if(hit.profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+        #if(hit.profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+        if(hit.profile_id != default_profile_id)
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
             #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA

@@ -4,7 +4,7 @@ module Meda
 
   class HitFilter
 
-    attr_accessor :hit, :google_analytics
+    attr_accessor :hit, :whitelisted_urls, :google_analytics
 
     def initialize(google_analytics={})
       @google_analytics = google_analytics
@@ -41,12 +41,12 @@ module Meda
 
     def filter_query_strings(hit)
       begin
-        if hit && hit.props && hit.props[:path]
+        if hit && hit.props && hit.props[:path] && whitelisted_urls
           current_path = hit.props[:path]
           if current_path.include? "?"
 
-            whitelisted_paths = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
-            regex_of_paths = Regexp.union(whitelisted_paths)
+            #whitelisted_paths = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
+            regex_of_paths = Regexp.union(whitelisted_urls['url'])
 
             if (!regex_of_paths.match(current_path))
               hit.props[:path] = current_path[0..(current_path.index("?")-1)]

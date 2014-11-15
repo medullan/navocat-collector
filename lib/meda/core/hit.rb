@@ -5,7 +5,7 @@ module Meda
 
   class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
-    attr_accessor :profile_props, :id, :dataset
+    attr_accessor :profile_props, :id, :dataset, :default_profile_id
 
     def initialize(props)
       time = props.delete(:time)
@@ -56,7 +56,8 @@ module Meda
 
     def as_ga
 
-      if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+      #if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+      if(profile_id != default_profile_id)
         props[:user_id] = profile_id
       end
         
