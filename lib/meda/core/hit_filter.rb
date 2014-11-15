@@ -1,4 +1,5 @@
 require 'logger'
+require 'uri'
 
 module Meda
 
@@ -12,14 +13,14 @@ module Meda
 
     def filter_hit(hit)
       hit = filter_age(hit)
+      hit = filter_vendor_sites(hit)
+      hit = filter_path(hit)
       hit = filter_query_strings(hit)
       hit = filter_profile_data(hit)
     end
 
     def  filter_age(hit)
-
       begin
-
         if hit && hit.profile_props and hit.profile_props[:age]
           case hit.profile_props[:age].to_i
           when 1..17
@@ -39,15 +40,47 @@ module Meda
       hit
     end
 
+    def filter_path(hit)  
+      begin
+        myUri = URI.parse(hit.props[:path])
+        idx = hit.props[:path].index(myUri.path)
+        hit.props[:path] = hit.props[:path][idx..hit.props[:path].length-1]
+      rescue StandardError => e
+        logger.error("Failure cleaning path: ")
+        logger.error(e)
+      end
+      hit
+    end
+
+
+    def filter_vendor_sites(hit)
+      begin
+        url = hit.props[:path].downcase
+        if url.include? 'myblue'
+          hit.props[:title] = "MyBlue Portal - ".concat(hit.props[:title] )
+        elsif url.include? 'custservpt'
+          hit.props[:title] = "EService - ".concat(hit.props[:title] )
+        elsif url.include? 'mychiprewards'
+          hit.props[:title] = "Chip Rewards - ".concat(hit.props[:title] )
+        elsif url.include? 'webmd'
+          hit.props[:title] = "WebMD - ".concat(hit.props[:title] )
+        elsif url.include? 'fepblue.org'
+          hit.props[:title] = "Public Site - ".concat(hit.props[:title] )
+        end
+      rescue StandardError => e
+          logger.error("Can't determine what partner vendor sites this request comes from")
+          logger.error(e)
+      end
+      hit
+    end 
+
+
     def filter_query_strings(hit)
       begin
         if hit && hit.props && hit.props[:path] && whitelisted_urls
           current_path = hit.props[:path]
           if current_path.include? "?"
-
-            #whitelisted_paths = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
-            regex_of_paths = Regexp.union(whitelisted_urls['url'])
-
+            regex_of_paths = Regexp.union(whitelisted_urls)
             if (!regex_of_paths.match(current_path))
               hit.props[:path] = current_path[0..(current_path.index("?")-1)]
             end

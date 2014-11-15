@@ -55,15 +55,11 @@ module Meda
     end
 
     def as_ga
-
-      #if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
       if(profile_id != default_profile_id)
         props[:user_id] = profile_id
-      end
-        
+      end      
       props[:cache_buster] = id
       props[:anonymize_ip] = 1
-
       props
     end
 

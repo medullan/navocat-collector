@@ -63,14 +63,19 @@ module Meda
         # Leave it anonymous-ish for now. Figure out what to do later.
       end
 
+      hit = custom_hit_filter(hit)
+      @last_hit = hit
+      hit.validate! # blows up if missing attrs
+      hit
+    end
+
+    def custom_hit_filter(hit)
       #The need to lines calls a custom filter for every client to transform the
       #hit data specific to their needs
       hit_filter.whitelisted_urls = whitelisted_urls
       hit_filter.google_analytics = google_analytics
       hit = hit_filter.filter_hit(hit)
-      @last_hit = hit
-      hit.validate! # blows up if missing attrs
-      hit
+      hit = update_client_id(hit)
     end
 
     def set_profile(profile_id, profile_info)
@@ -112,7 +117,6 @@ module Meda
     def stream_hit_to_ga(hit)
       @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
       return unless stream_to_ga?
-      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id)
       tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
       begin
         if hit.hit_type == 'pageview'
@@ -120,12 +124,11 @@ module Meda
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
-        #if(hit.profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
         if(hit.profile_id != default_profile_id)
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
             #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA
-            puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
+            #puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
             ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
           end
         end
@@ -140,6 +143,36 @@ module Meda
       end
       true
     end
+
+
+    def update_client_id(hit)
+      begin
+        profile_id = hit.profile_id
+        if profile_id != default_profile_id
+          temp = ActiveSupport::HashWithIndifferentAccess.new({
+            :client_id => hit.client_id
+          })
+          current_path = hit.props[:path]
+          regex_of_paths = Regexp.union(landing_pages)
+          if (regex_of_paths.match(current_path))
+            set_profile(profile_id, temp)
+          else
+            profile = get_profile(profile_id)
+            if profile
+              profile_client_id = profile[:client_id]
+              if profile_client_id
+                hit.client_id = profile_client_id
+              end
+            end
+          end
+        end
+      rescue StandardError => e
+        logger.error("Failure getting client_id from profile")
+        logger.error(e)
+      end
+      hit
+    end
+
 
     def after_identify(&block)
       @after_identify = block
