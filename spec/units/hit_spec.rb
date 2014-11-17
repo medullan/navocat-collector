@@ -50,9 +50,11 @@ describe Meda::Hit do
         Meda::Hit.new(params)
       end
 
+      
+
       it 'user_id not included when profile_id is default' do
 
-        #puts subject.as_ga
+        subject.default_profile_id = profile_id
 
         expect(subject.as_ga[:user_id]).to be_nil
         #expect(subject.as_ga).to be_true

@@ -10,6 +10,10 @@ describe Meda::HitFilter do
   before(:all) do
     dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.token = token
+    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
+    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
+    dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
+    dataset.enable_data_retrivals = true
     dataset.google_analytics = {
       'record' => true,
       'tracking_id' => 'UA-666-1',
@@ -72,11 +76,14 @@ describe Meda::HitFilter do
       })
     }
 
+
+
     before(:each) do
       hit = nil
       #stub(subject.store).get_profile_by_id(profile_id) { profile_info }
       hit = Meda::Hit.new(page_info)
       hit.profile_props = profile
+      subject.whitelisted_urls = dataset.whitelisted_urls
     end
 
     describe '#filter_age' do
@@ -147,16 +154,7 @@ describe Meda::HitFilter do
       end
     end
 
-    describe '#filter_gender' do
-      it 'should filter gender field' do
-        hit = subject.filter_gender(hit)
-        expect(hit.profile_props[:gender]).to eq('female')
 
-        hit.profile_props[:gender] = 'M'
-        hit = subject.filter_gender(hit)
-        expect(hit.profile_props[:gender]).to eq('male')
-      end
-    end
 
     describe '#filter_profile_data' do
       it 'should filter profile fields' do

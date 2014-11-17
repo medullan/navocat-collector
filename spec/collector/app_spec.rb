@@ -13,6 +13,10 @@ describe "Collector Application" do
   before(:all) do
     dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.token = token
+    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
+    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
+    dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
+    dataset.enable_data_retrivals = true
     dataset.google_analytics = {
       'record' => true,
       'tracking_id' => 'UA-666-1',
