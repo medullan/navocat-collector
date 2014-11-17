@@ -104,6 +104,9 @@ module Meda
         else
             respond_with_bad_request
         end
+        if last_hit
+          last_hit.to_json
+        end
       end
 
 
