@@ -15,7 +15,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls
+    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit
@@ -83,7 +83,9 @@ module Meda
     end
 
     def get_profile(profile_id)
-      store.get_profile_by_id(profile_id)
+      if(enable_data_retrivals)
+        store.get_profile_by_id(profile_id)
+      end
     end
 
     def stream_to_ga?

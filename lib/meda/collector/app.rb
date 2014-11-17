@@ -79,10 +79,7 @@ module Meda
 
 
       # @method post_getprofile_json
-      # @overload post "/meda/getprofile.json"
       # Displays a profile for given profile_id
-      # NOTE: This needs to be modified in keeping with the RESTful interface
-      # Did not get the time to
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
         if valid_request?(profile_data)
@@ -92,6 +89,18 @@ module Meda
           else
             respond_with_bad_request
           end
+        else
+            respond_with_bad_request
+        end
+      end
+
+      # @method post_getlasthit_json
+      # Displays the last hit send to a dataset
+      # Requires a dataset
+      post '/meda/getlasthit.json', :provides => :json do
+        request_data = raw_json_from_request
+        if request_data[:dataset] 
+          last_hit = settings.connection.get_last_hit(request_data)
         else
             respond_with_bad_request
         end
@@ -190,6 +199,15 @@ module Meda
         else
           respond_with_bad_request
         end
+      end
+
+
+
+      # @method get_endsession_gif
+      # Say
+      get '/meda/endsession.gif' do
+        cookies.delete("_meda_profile_id")
+        respond_with_pixel
       end
 
       # Config
