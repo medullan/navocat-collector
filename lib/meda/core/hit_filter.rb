@@ -56,17 +56,20 @@ module Meda
     def filter_vendor_sites(hit)
       begin
         url = hit.props[:path].downcase
-        if url.include? 'myblue'
-          hit.props[:title] = "MyBlue Portal - ".concat(hit.props[:title] )
+        if url.include? '/pilot'
+          vendor = "MyBlue Pilot - "
+        elsif url.include? 'myblue'
+          vendor = "MyBlue Classic - "
         elsif url.include? 'custservpt'
-          hit.props[:title] = "EService - ".concat(hit.props[:title] )
+          vendor = "EService - "
         elsif url.include? 'mychiprewards'
-          hit.props[:title] = "Chip Rewards - ".concat(hit.props[:title] )
+          vendor = "Chip Rewards - "
         elsif url.include? 'webmd'
-          hit.props[:title] = "WebMD - ".concat(hit.props[:title] )
+          vendor = "WebMD - "
         elsif url.include? 'fepblue.org'
-          hit.props[:title] = "Public Site - ".concat(hit.props[:title] )
+          vendor = "Public Site - "
         end
+        hit.props[:title] = vendor.concat(hit.props[:title])
       rescue StandardError => e
           logger.error("Can't determine what partner vendor sites this request comes from")
           logger.error(e)

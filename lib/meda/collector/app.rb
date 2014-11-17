@@ -20,6 +20,10 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
+      set(:cookie_options) do
+        { :expires => Time.now + 1800 } #30 mins
+      end
+
       # @method get_index
       # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
@@ -204,10 +208,8 @@ module Meda
         end
       end
 
-
-
       # @method get_endsession_gif
-      # Say
+      # remove an active identified session with the collector
       get '/meda/endsession.gif' do
         cookies.delete("_meda_profile_id")
         respond_with_pixel
