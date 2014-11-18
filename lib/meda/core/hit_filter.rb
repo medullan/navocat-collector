@@ -55,6 +55,7 @@ module Meda
 
     def filter_vendor_sites(hit)
       begin
+        vendor = ""
         url = hit.props[:path].downcase
         if url.include? '/pilot'
           vendor = "MyBlue Pilot - "
