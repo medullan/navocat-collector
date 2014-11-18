@@ -20,10 +20,6 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
-      set(:cookie_options) do
-        { :expires => Time.now + 1800 } #30 mins
-      end
-
       # @method get_index
       # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
