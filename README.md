@@ -86,7 +86,8 @@ development:
 
 ### config.ru
 
-Add a `config.ru` file to your project to configure the rack environment to run the collector. A sample file may look like this:
+Add a `config.ru` file to your project to configure the rack environment to run the collector. 
+A sample file which includes a custom filter may look like this:
 
 ```ruby
 # config.ru
@@ -98,10 +99,24 @@ require 'meda/collector'
 require 'path/to/yourfilter.rb'
 
 Meda.datasets.each_pair do |token, dataset|
-	dataset.hit_filter = YouFilter.new()
+	dataset.hit_filter = YourFilter.new()
 end
 
 run Meda::Collector::App
+```
+
+## Sample filter
+```ruby
+class YourFilter 
+	def filter(hit) 
+	   puts "-----\nin your filter!\n------"
+	   hit
+	end
+
+end
+
+
+
 ```
 
 ## Run the collector
