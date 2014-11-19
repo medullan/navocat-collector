@@ -15,10 +15,10 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config
-    attr_accessor :google_analytics, :token
+    attr_accessor :google_analytics, :token, :hit_filter
 
     # Readers primarily used for tests, not especially thread-safe :p
-    attr_reader :last_hit, :last_disk_hit, :last_ga_hit
+    attr_reader :last_hit, :last_disk_hit, :last_ga_hit, :hit_filter
 
     def initialize(name, meda_config={})
       @name = name
@@ -60,9 +60,23 @@ module Meda
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
       end
+
+      hit = custom_hit_filter(hit)
+
       @last_hit = hit
       hit.validate! # blows up if missing attrs
       hit
+    end
+
+
+    def custom_hit_filter(hit)
+      #The need to lines calls a custom filter for every client to transform the
+      #hit data specific to their needs
+        puts "before filter"
+        if(hit_filter)
+          hit = hit_filter.filter(hit)
+        end
+        hit
     end
 
     def set_profile(profile_id, profile_info)
