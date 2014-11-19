@@ -96,7 +96,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
-require 'path/to/yourfilter.rb'
+require_relative 'path/to/yourfilter.rb'
 
 Meda.datasets.each_pair do |token, dataset|
 	dataset.hit_filter = YourFilter.new()
