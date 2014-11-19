@@ -112,7 +112,6 @@ class YourFilter
 	   puts "-----\nin your filter!\n------"
 	   hit
 	end
-
 end
 
 
