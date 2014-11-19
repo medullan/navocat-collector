@@ -1,4 +1,4 @@
-# Medullan Analytics Toolkit
+# Navovcat Collector
 
 The meda gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
 
