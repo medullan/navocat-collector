@@ -82,7 +82,7 @@ describe Meda::HitFilter do
     before(:each) do
       hit = nil
       #stub(subject.store).get_profile_by_id(profile_id) { profile_info }
-      hit = Meda::Hit.new(page_info)
+      hit = Meda::Hit.new(page_info, dataset.default_profile_id, dataset)
       hit.profile_props = profile
       subject.whitelisted_urls = dataset.whitelisted_urls
     end

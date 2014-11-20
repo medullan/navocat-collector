@@ -38,20 +38,17 @@ module Meda
     def add_event(event_props)
       event_props[:time] ||= DateTime.now.to_s
       event_props[:category] ||= 'none'
-      event = Meda::Event.new(event_props)
+      event = Meda::Event.new(event_props, default_profile_id, self)
       add_hit(event)
     end
 
     def add_pageview(page_props)
       page_props[:time] ||= DateTime.now.to_s
-      pageview = Meda::Pageview.new(page_props)
+      pageview = Meda::Pageview.new(page_props, default_profile_id, self)
       add_hit(pageview)
     end
 
     def add_hit(hit)
-      hit.id = UUIDTools::UUID.timestamp_create.hexdigest
-      hit.default_profile_id = default_profile_id
-      hit.dataset = self
       if hit.profile_id
         profile = store.get_profile_by_id(hit.profile_id)
         if profile

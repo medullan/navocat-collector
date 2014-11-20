@@ -40,7 +40,7 @@ describe Meda::Dataset do
         expect(hit.hit_type).to eq('event')
         expect(hit.time).to be_present
         expect(hit.profile_id).to eq(profile_id)
-        expect(hit.props).to eq({:category => 'shop', :action => 'purchase'})
+        expect(hit.props).to eq({:category => 'shop', :action => 'purchase', :user_id=>profile_id, :cache_buster=>hit.id, :anonymize_ip=>1})
         expect(hit.profile_props).to eq(profile_info)
       end
     end
@@ -59,7 +59,7 @@ describe Meda::Dataset do
         expect(hit.time).to be_present
         expect(hit.profile_id).to eq(profile_id)
         expect(hit.props).to eq({:hostname => 'example.com',
-          :path => '/shopping/index.html', :title => 'Buy Stuff'})
+          :path => '/shopping/index.html', :title => 'Buy Stuff', :user_id=>profile_id, :cache_buster=>hit.id, :anonymize_ip=>1})
         expect(hit.profile_props).to eq(profile_info)
       end
     end

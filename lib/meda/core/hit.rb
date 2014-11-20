@@ -1,3 +1,8 @@
+
+require 'uuidtools'
+
+
+
 module Meda
 
   # Each hit represents a single user activity, a pageview, event, etc.
@@ -7,12 +12,16 @@ module Meda
 
     attr_accessor :profile_props, :id, :dataset, :default_profile_id
 
-    def initialize(props)
+    def initialize(props, default_profile_id, datset)
+      @id = UUIDTools::UUID.timestamp_create.hexdigest
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
       client_id = props.delete(:client_id)
+      @default_profile_id = default_profile_id
+      @dataset = dataset
       profile_props = {}
       super(time, profile_id, client_id, props)
+      add_extra_props
     end
 
     def hit_type
@@ -54,12 +63,15 @@ module Meda
       }
     end
 
-    def as_ga
+    def add_extra_props
       if(profile_id != default_profile_id)
         props[:user_id] = profile_id
       end      
       props[:cache_buster] = id
       props[:anonymize_ip] = 1
+    end
+
+    def as_ga
       props
     end
 
