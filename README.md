@@ -21,7 +21,7 @@ Add a Gemfile to the repo, and `bundle install`. Note that your git user must ha
 ```ruby
 # Gemfile
 source 'https://rubygems.org'
-gem 'meda', :git => 'github.com/medullan/meda.git'
+gem 'meda', :git => 'github.com/medullan/navocat-collector.git'
 gem 'puma'
 ```
 
