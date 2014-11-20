@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "sinatra", "~> 1.4.4"
   spec.add_runtime_dependency "sinatra-contrib", " ~> 1.4.2"
   spec.add_runtime_dependency "staccato", "~> 0.1.0"
+  spec.add_runtime_dependency "addressable"
 
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
@@ -35,6 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard"
   spec.add_development_dependency "ruby-jmeter"
   spec.add_development_dependency "descriptive-statistics"
-  spec.add_development_dependency "addressable"
 end
 
