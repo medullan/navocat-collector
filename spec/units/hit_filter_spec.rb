@@ -1,6 +1,7 @@
 require_relative 'spec_helper'
 require 'meda'
 
+
 describe Meda::HitFilter do
 
   token = '3423432423423423423423'
@@ -168,6 +169,15 @@ describe Meda::HitFilter do
         #subject.filter_hit(hit)
         #subject.should_receive(:filter_query_strings).with(hit)
         #subject.should_receive(:filter_profile_data).with(hit)
+      end
+    end
+
+
+    describe '#filter_path' do
+      it 'should return the path ' do
+        hit.props[:path] = 'https://fepblue.org:8443/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account'
+        result_hit = subject.filter_path(hit)
+        expect(result_hit.props[:path]).to eq('/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account')
       end
     end
 

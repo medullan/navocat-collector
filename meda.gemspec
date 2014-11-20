@@ -35,5 +35,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "yard"
   spec.add_development_dependency "ruby-jmeter"
   spec.add_development_dependency "descriptive-statistics"
+  spec.add_development_dependency "addressable"
 end
 

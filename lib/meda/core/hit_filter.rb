@@ -1,5 +1,5 @@
 require 'logger'
-require 'uri'
+require "addressable/uri"
 
 module Meda
 
@@ -42,11 +42,21 @@ module Meda
 
     def filter_path(hit)  
       begin
-        myUri = URI.parse(hit.props[:path])
-        idx = hit.props[:path].index(myUri.path)
-        hit.props[:path] = hit.props[:path][idx..hit.props[:path].length-1]
+        original_path = hit.props[:path]
+        myUri = Addressable::URI.parse(original_path)
+        idx = original_path.index(myUri.path)
+        hit.props[:path] = original_path[idx..original_path.length-1]
+      rescue Addressable::URI::InvalidURIError => e
+        logger.error("InvalidURIError cleaning path: #{original_path}")
+        logger.error(e)
+      rescue TypeError => e
+        logger.error("Weird TypeError cleaning path: #{original_path} ")
+        logger.error(e)
+      rescue ArgumentError => e
+        logger.error("Weird ArgumentError cleaning path: #{original_path} ")
+        logger.error(e)
       rescue StandardError => e
-        logger.error("Failure cleaning path: ")
+        logger.error("StandardError cleaning path: #{original_path} ")
         logger.error(e)
       end
       hit
