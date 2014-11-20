@@ -71,7 +71,7 @@ module Meda
       #hit data specific to their needs
 
       if(hit_filter)
-        hit = hit_filter.filter_hit(hit)
+        hit = hit_filter.filter_hit(hit,dataset)
       end
 
       hit_filter.whitelisted_urls = whitelisted_urls
