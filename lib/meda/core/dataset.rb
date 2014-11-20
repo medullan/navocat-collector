@@ -74,9 +74,6 @@ module Meda
         hit = hit_filter.filter_hit(hit,dataset)
       end
 
-      hit_filter.whitelisted_urls = whitelisted_urls
-      hit_filter.google_analytics = google_analytics
-      hit = hit_filter.filter_hit(hit)
       hit = update_client_id(hit)
     end
 
