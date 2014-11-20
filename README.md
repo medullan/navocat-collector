@@ -1,6 +1,6 @@
-# Medullan Analytics Toolkit
+# Navocat Collector
 
-The meda gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
+The collector gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
 
 The collector is written in Sinatra and deployed with the puma webserver.
 
@@ -8,11 +8,11 @@ The collector is written in Sinatra and deployed with the puma webserver.
 
 The collector application requires jRuby 1.7+ and Java 1.6+.
 
-To store profile data, the collector uses MapDB, a pure-java embedded key-value store database. The jar files for MapDB are included in the meda gem, and are plaform independent.
+To store profile data, the collector uses MapDB, a pure-java embedded key-value store database. The jar files for MapDB are included in the collector gem, and are plaform independent.
 
 ## Basic Application Setup
 
-To create your own collector application, create a new git repo that will use the meda gem.
+To create your own collector application, create a new git repo that will use the collector gem.
 
 ### Gemfile
 
