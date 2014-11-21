@@ -2,6 +2,7 @@ require File.dirname(File.absolute_path(__FILE__)) + '/meda/version.rb'
 Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
 require "active_support/all"
 require 'psych'
+require 'pathname'
 
 module Meda
 
@@ -36,16 +37,40 @@ module Meda
       begin
         config = Psych.load(File.open(Meda::DATASETS_CONFIG_FILE))
         config.each do |d_name, d_config|
-          d = Meda::Dataset.new(d_name, Meda.configuration)
-          d_config.each_pair { |key, val| d.send("#{key}=", val) }
-          @datasets[d.token] = d
+          begin
+            puts "#{d_name} dataset configuration started"
+            d = Meda::Dataset.new(d_name, Meda.configuration)
+            d_config.each_pair { |key, val| d.send("#{key}=", val) } 
+     
+            configure_custom_filter(d)
+         
+            @datasets[d.token] = d
+            puts "#{d_name} dataset configuration completed"
+          rescue Exception => e
+            puts "Error: datasets.yml is incorrectly setup, please review - #{e.message}"
+          end
         end
-      rescue Errno::ENOENT
-        puts "Warning: datasets.yml missing, please create datasets manually"
+      rescue Errno::ENOENT => error
+        puts "Error: datasets.yml is incorrect, please review - #{error.message}"
       end
     end
     @datasets
   end
+
+  def self.configure_custom_filter(dataset)
+    if(dataset.filter_file_name.nil? || dataset.filter_class_name.nil?)
+      puts "no custom filters to configure"
+      puts dataset.hit_filter
+      return
+    end
+
+
+    
+    custom_filter_file_path = Pathname.new dataset.filter_file_name
+    require(custom_filter_file_path.realpath)
+    filter = dataset.filter_class_name.constantize.new
+    dataset.hit_filter = filter
+  end  
 
   class Configuration
 

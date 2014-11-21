@@ -1,0 +1,33 @@
+# datasets.yml (sample)
+production:
+  token: afc0a6c8c73211e3aaf844fb42fffe8c
+  filter_file_name: yourfilter.rb
+  filter_class_name: YourFilter
+  google_analytics:
+    record: true
+    tracking_id: UA-47758842
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+
+staging:
+  token: b6822676c73211e3aaf844fb42fffe8c
+  google_analytics:
+    record: false
+
+development:
+  token: c2e02c92c73211e3aaf844fb42fffe8c
+  google_analytics:
+    record: true
+    tracking_id: UA-56812429-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index : 3

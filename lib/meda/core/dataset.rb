@@ -15,7 +15,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter
+    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit
@@ -26,7 +26,7 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
-      @hit_filter = Meda::HitFilter.new({})
+     # @hit_filter = Meda::HitFilter.new({})
     end
 
     def identify_profile(info)
@@ -70,8 +70,9 @@ module Meda
       #The need to lines calls a custom filter for every client to transform the
       #hit data specific to their needs
 
-      if(hit_filter)
-        hit = hit_filter.filter_hit(hit,dataset)
+      if(!hit_filter.nil?)
+        puts hit_filter
+        hit = hit_filter.filter_hit(hit,self)
       end
 
       hit = update_client_id(hit)
