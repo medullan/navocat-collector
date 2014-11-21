@@ -12,6 +12,7 @@ module Meda
     end
 
     def filter_hit(hit)
+      hit = filter_campaign(hit)
       hit = filter_robot_user(hit)
       hit = filter_age(hit)
       hit = filter_vendor_sites(hit)
@@ -19,6 +20,37 @@ module Meda
       hit = filter_query_strings(hit)
       hit = filter_profile_data(hit)
     end
+
+
+    def filter_campaign(hit)
+       begin
+        if(hit.props && hit.props[:path])
+          original_path = hit.props[:path]
+          myUri = Addressable::URI.parse(original_path)
+          query_strings = myUri.query_values
+
+          hit.props[:campaign_name] = query_strings["utm_campaign"] if query_strings.has_key?("utm_campaign")
+          hit.props[:campaign_source] = query_strings["utm_source"] if query_strings.has_key?("utm_source")
+          hit.props[:campaign_medium] = query_strings["utm_medium"] if query_strings.has_key?("utm_medium")
+          hit.props[:campaign_keyword] = query_strings["utm_keyword"] if query_strings.has_key?("utm_keyword")
+          hit.props[:campaign_content] = query_strings["utm_content"] if query_strings.has_key?("utm_content")
+        end
+      rescue Addressable::URI::InvalidURIError => e
+        logger.error("InvalidURIError cleaning path: #{original_path}")
+        logger.error(e)
+      rescue TypeError => e
+        logger.error("Weird TypeError cleaning path: #{original_path} ")
+        logger.error(e)
+      rescue ArgumentError => e
+        logger.error("Weird ArgumentError cleaning path: #{original_path} ")
+        logger.error(e)
+      rescue StandardError => e
+        logger.error("StandardError cleaning path: #{original_path} ")
+        logger.error(e)
+      end
+      hit
+    end
+
 
     def filter_robot_user(hit)
       begin

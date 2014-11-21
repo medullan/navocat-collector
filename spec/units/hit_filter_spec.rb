@@ -211,6 +211,32 @@ describe Meda::HitFilter do
       end
     end
 
+    context 'with a custom campaign running' do
+      describe '#filter_campaign' do
+        it 'should add additional properties for the custim campaign fields' do
+          hit.props[:path] = no_qa_params.concat('?utm_source=medaemail&utm_medium=email&utm_campaign=TestCampaign')
+          result_hit = subject.filter_campaign(hit)
+          expect(result_hit.props).to have_key(:campaign_source)
+          expect(result_hit.props[:campaign_source]).to eq('medaemail')
+
+          expect(result_hit.props).to have_key(:campaign_name)
+          expect(result_hit.props[:campaign_name]).to eq('TestCampaign')
+
+          expect(result_hit.props).to have_key(:campaign_medium)
+          expect(result_hit.props[:campaign_medium]).to eq('email')
+        end
+
+        it 'should not add additional properties non existing campaign fields' do
+          hit.props[:path] = "/web/guest/myblue"
+          result_hit = subject.filter_campaign(hit)
+          expect(result_hit.props).not_to have_key(:campaign_source)
+          expect(result_hit.props).not_to have_key(:campaign_name)
+          expect(result_hit.props).not_to have_key(:campaign_medium)
+        end
+      end
+
+    end
+
 
   end
 end
