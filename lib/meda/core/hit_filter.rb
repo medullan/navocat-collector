@@ -12,11 +12,58 @@ module Meda
     end
 
     def filter_hit(hit)
+      hit = filter_campaign(hit)
+      hit = filter_robot_user(hit)
       hit = filter_age(hit)
       hit = filter_vendor_sites(hit)
       hit = filter_path(hit)
       hit = filter_query_strings(hit)
       hit = filter_profile_data(hit)
+    end
+
+
+    def filter_campaign(hit)
+       begin
+        if(hit.props && hit.props[:path])
+          original_path = hit.props[:path]
+          myUri = Addressable::URI.parse(original_path)
+          query_strings = myUri.query_values
+
+          hit.props[:campaign_name] = query_strings["utm_campaign"] if query_strings.has_key?("utm_campaign")
+          hit.props[:campaign_source] = query_strings["utm_source"] if query_strings.has_key?("utm_source")
+          hit.props[:campaign_medium] = query_strings["utm_medium"] if query_strings.has_key?("utm_medium")
+          hit.props[:campaign_keyword] = query_strings["utm_keyword"] if query_strings.has_key?("utm_keyword")
+          hit.props[:campaign_content] = query_strings["utm_content"] if query_strings.has_key?("utm_content")
+        end
+      rescue Addressable::URI::InvalidURIError => e
+        logger.error("InvalidURIError cleaning path: #{original_path}")
+        logger.error(e)
+      rescue TypeError => e
+        logger.error("Weird TypeError cleaning path: #{original_path} ")
+        logger.error(e)
+      rescue ArgumentError => e
+        logger.error("Weird ArgumentError cleaning path: #{original_path} ")
+        logger.error(e)
+      rescue StandardError => e
+        logger.error("StandardError cleaning path: #{original_path} ")
+        logger.error(e)
+      end
+      hit
+    end
+
+
+    def filter_robot_user(hit)
+      begin
+        robot_user = hit.props[:robot_user]
+        if(robot_user && robot_user=='true')
+            hit.tracking_id = 'UA-50799020-3' #Digital Experience Program Stage 
+            #hit.props = hit.props.except!(:robot_user)
+        end
+      rescue StandardError => e
+        logger.error("Failure filter robot users: ")
+        logger.error(e)
+      end
+      hit
     end
 
     def  filter_age(hit)
@@ -111,13 +158,13 @@ module Meda
 
     def filter_profile_data(hit)
       begin
-        if !!google_analytics && !!google_analytics['record'] && hit.profile_props
+        if !!google_analytics && !!google_analytics['record'] && hit.profile_props && google_analytics['custom_dimensions']
           google_analytics['custom_dimensions'].each_pair do |dimensionName, dimensionConfiguration| 
             filter_profile_data_property(hit.profile_props, dimensionName, dimensionConfiguration['mapping']) 
           end
         end
       rescue StandardError => e
-        logger.error("Failure cleaning path: ")
+        logger.error("Failure mapping profile data ")
         logger.error(e)
       end
 
@@ -131,7 +178,7 @@ module Meda
           profile_props[key] = mappings[value_to_map]
         end
       rescue StandardError => e
-        logger.error("Failure filtering #{name} ")
+        logger.error("Failure filtering: #{name} ")
         logger.error(e)
       end
     end

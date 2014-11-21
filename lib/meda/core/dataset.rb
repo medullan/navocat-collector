@@ -119,7 +119,8 @@ module Meda
     def stream_hit_to_ga(hit)
       @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
       return unless stream_to_ga?
-      tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
+      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
+      tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
       begin
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
