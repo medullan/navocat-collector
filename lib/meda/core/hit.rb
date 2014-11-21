@@ -10,10 +10,11 @@ module Meda
 
   class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
-    attr_accessor :profile_props, :id, :dataset, :default_profile_id
+    attr_accessor :profile_props, :id, :dataset, :default_profile_id, :tracking_id
 
-    def initialize(props, default_profile_id, datset)
+    def initialize(props, default_profile_id, dataset)
       @id = UUIDTools::UUID.timestamp_create.hexdigest
+      @tracking_id = dataset.google_analytics['tracking_id'] if (dataset && dataset.google_analytics)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
       client_id = props.delete(:client_id)

@@ -12,11 +12,26 @@ module Meda
     end
 
     def filter_hit(hit)
+      hit = filter_robot_user(hit)
       hit = filter_age(hit)
       hit = filter_vendor_sites(hit)
       hit = filter_path(hit)
       hit = filter_query_strings(hit)
       hit = filter_profile_data(hit)
+    end
+
+    def filter_robot_user(hit)
+      begin
+        robot_user = hit.props[:robot_user]
+        if(robot_user && robot_user=='true')
+            hit.tracking_id = 'UA-50799020-3' #Digital Experience Program Stage 
+            #hit.props = hit.props.except!(:robot_user)
+        end
+      rescue StandardError => e
+        logger.error("Failure filter robot users: ")
+        logger.error(e)
+      end
+      hit
     end
 
     def  filter_age(hit)

@@ -9,6 +9,11 @@ describe Meda::Hit do
 	before(:all) do
     dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
+    # dataset.google_analytics = {
+    #   'record' => true,
+    #   'tracking_id' => 'UA-666-1',
+    #   'custom_dimensions' => {}
+    # }
     Meda.datasets[token] = dataset
   end
 

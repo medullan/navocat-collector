@@ -13,7 +13,7 @@ describe Meda::HitFilter do
     dataset.token = token
     dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
     dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
-    dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/]
+    dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/,/\/web\/guest\/myblue\?.*Fcreate_account&_58_resume=$/,/utm_campaign=[^&]+/]
     dataset.enable_data_retrivals = true
     dataset.google_analytics = {
       'record' => true,
@@ -42,6 +42,7 @@ describe Meda::HitFilter do
   request_path = "/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account"
   unknown_path = "/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account_random_ext"
   no_qa_params = "/web/guest/myblue"
+  campaign_url = "https://dev.fepblue.org:8443/members/myblue/dashboard?utm_source=November%20newsletter&utm_medium=email&utm_campaign=registration"
 
   context 'with a hit' do
     let(:page_info) { {
@@ -57,7 +58,8 @@ describe Meda::HitFilter do
               'cb'=>'d380a42a60a5df4ab6fafcc3f353cb853bc7',
               'hostname'=>'localhost',
               'path'=>'/sample.html',
-              'title'=>'Awesome Page'
+              'title'=>'Awesome Page',
+              'robot_user' => 'true'
             } )
 
     }  }
@@ -151,9 +153,16 @@ describe Meda::HitFilter do
         hit.props[:path] = no_qa_params
         result_hit = subject.filter_query_strings(hit)
         expect(result_hit.props[:path]).to eq('/web/guest/myblue')
+      end
 
+      it 'should allow campaign urls' do
+        hit.props[:path] = campaign_url
+        hit = subject.filter_path(hit)
+        result_hit = subject.filter_query_strings(hit)
+        expect(result_hit.props[:path]).to eq('/members/myblue/dashboard?utm_source=November%20newsletter&utm_medium=email&utm_campaign=registration')
       end
     end
+
 
 
 
@@ -178,6 +187,27 @@ describe Meda::HitFilter do
         hit.props[:path] = 'https://fepblue.org:8443/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account'
         result_hit = subject.filter_path(hit)
         expect(result_hit.props[:path]).to eq('/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account')
+      end
+    end
+
+    context 'with the flag set' do
+      describe '#filter_robot_user' do
+        it 'should direct to stage and remove the flag' do
+
+          hit.props[:robot_user] = 'true'
+          hit = subject.filter_robot_user(hit)
+
+          expect(hit.tracking_id).to eq('UA-50799020-3')
+          #expect(hit.props).to have_key(:robot_user) 
+        end
+
+        it 'should not direct to stage if robot_user is negative' do
+
+          hit.props[:robot_user] = 'false'
+          hit = subject.filter_robot_user(hit)
+          expect(hit.tracking_id).to eq('UA-666-1')
+          #expect(hit.props).to have_key(:robot_user) 
+        end
       end
     end
 
