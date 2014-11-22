@@ -36,6 +36,7 @@ module Meda
       @datasets = {}
       begin
         config = Psych.load(File.open(Meda::DATASETS_CONFIG_FILE))
+        puts config
         config.each do |d_name, d_config|
           begin
             puts "#{d_name} dataset configuration started"

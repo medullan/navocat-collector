@@ -22,6 +22,8 @@ describe "Collector Application" do
       'tracking_id' => 'UA-666-1',
       'custom_dimensions' => {}
     }
+    dataset.filter_file_name = "HitFilter.rb"
+    dataset.filter_class_name = "HitFilter"
     Meda.datasets[token] = dataset
   end
 

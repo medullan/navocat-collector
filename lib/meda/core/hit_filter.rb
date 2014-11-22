@@ -11,7 +11,9 @@ module Meda
       @google_analytics = google_analytics
     end
 
-    def filter_hit(hit)
+    def filter_hit(hit,dataset)
+      self.whitelisted_urls = dataset.whitelisted_urls
+      self.google_analytics = dataset.google_analytics
       hit = filter_campaign(hit)
       hit = filter_robot_user(hit)
       hit = filter_age(hit)

@@ -23,9 +23,5 @@ dataset.whitelisted_urls = []
 dataset.google_analytics = {'record' => false}
 Meda.datasets[dataset.token] = dataset
 
-Meda.datasets.each_pair do |token, dataset|
-	#dataset.hit_filter = YourFilter.new()
-end
-
 run Meda::Collector::App
 

@@ -26,7 +26,7 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
-     # @hit_filter = Meda::HitFilter.new({})
+      #@hit_filter = Meda::HitFilter.new({})
     end
 
     def identify_profile(info)
@@ -69,9 +69,8 @@ module Meda
     def custom_hit_filter(hit)
       #The need to lines calls a custom filter for every client to transform the
       #hit data specific to their needs
-
+#      @hit_filter = Meda::HitFilter.new({})
       if(!hit_filter.nil?)
-        puts hit_filter
         hit = hit_filter.filter_hit(hit,self)
       end
 
