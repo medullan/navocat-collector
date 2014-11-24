@@ -13,11 +13,16 @@ describe "Collector Application" do
   before(:all) do
     dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.token = token
+    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
+    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
+    dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
+    dataset.enable_data_retrivals = true
     dataset.google_analytics = {
       'record' => true,
       'tracking_id' => 'UA-666-1',
       'custom_dimensions' => {}
     }
+    dataset.hit_filter = Meda::HitFilter.new({})
     Meda.datasets[token] = dataset
   end
 
@@ -165,7 +170,7 @@ describe "Collector Application" do
       it 'responds with bad request' do
         post_data = {
           'dataset' => token, 'client_id' => client_id,
-          'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1'
+          'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1', 'path' => '/'
         }
         post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
         app.settings.connection.join_threads

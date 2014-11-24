@@ -1,3 +1,8 @@
+
+require 'uuidtools'
+
+
+
 module Meda
 
   # Each hit represents a single user activity, a pageview, event, etc.
@@ -5,14 +10,19 @@ module Meda
 
   class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
-    attr_accessor :profile_props, :id, :dataset
+    attr_accessor :profile_props, :id, :dataset, :default_profile_id, :tracking_id
 
-    def initialize(props)
+    def initialize(props, default_profile_id, dataset)
+      @id = UUIDTools::UUID.timestamp_create.hexdigest
+      @tracking_id = dataset.google_analytics['tracking_id'] if (dataset && dataset.google_analytics)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
       client_id = props.delete(:client_id)
+      @default_profile_id = default_profile_id
+      @dataset = dataset
       profile_props = {}
       super(time, profile_id, client_id, props)
+      add_extra_props
     end
 
     def hit_type
@@ -54,15 +64,15 @@ module Meda
       }
     end
 
-    def as_ga
-
-      if(profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+    def add_extra_props
+      if(profile_id != default_profile_id)
         props[:user_id] = profile_id
-      end
-        
+      end      
       props[:cache_buster] = id
       props[:anonymize_ip] = 1
+    end
 
+    def as_ga
       props
     end
 
