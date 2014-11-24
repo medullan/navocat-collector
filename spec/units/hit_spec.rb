@@ -3,7 +3,19 @@ require 'meda'
 
 describe Meda::Hit do
 
-	
+  token = '3423432423423423423423'
+  dataset = nil
+
+	before(:all) do
+    dataset = Meda::Dataset.new('test', Meda.configuration)
+    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
+    # dataset.google_analytics = {
+    #   'record' => true,
+    #   'tracking_id' => 'UA-666-1',
+    #   'custom_dimensions' => {}
+    # }
+    Meda.datasets[token] = dataset
+  end
 
 
   describe '#as_ga' do
@@ -21,7 +33,7 @@ describe Meda::Hit do
           } }
 
       subject do
-        Meda::Hit.new(params)
+        Meda::Hit.new(params, dataset.default_profile_id, dataset)
       end
 
       it 'appends user_id when profile_id is not default' do
@@ -47,12 +59,14 @@ describe Meda::Hit do
           } }
 
       subject do
-        Meda::Hit.new(params)
+        Meda::Hit.new(params, dataset.default_profile_id, dataset)
       end
+
+      
 
       it 'user_id not included when profile_id is default' do
 
-        #puts subject.as_ga
+        subject.default_profile_id = profile_id
 
         expect(subject.as_ga[:user_id]).to be_nil
         #expect(subject.as_ga).to be_true

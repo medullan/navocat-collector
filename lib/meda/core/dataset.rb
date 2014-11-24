@@ -14,11 +14,12 @@ module Meda
   # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
-    attr_reader :data_uuid, :name, :meda_config
-    attr_accessor :google_analytics, :token
+    attr_accessor :google_analytics, :token, :hit_filter
+    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name
+
 
     # Readers primarily used for tests, not especially thread-safe :p
-    attr_reader :last_hit, :last_disk_hit, :last_ga_hit
+    attr_reader :last_hit, :last_disk_hit, :last_ga_hit, :hit_filter
 
     def initialize(name, meda_config={})
       @name = name
@@ -26,6 +27,7 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
+      #@hit_filter = Meda::HitFilter.new({})
     end
 
     def identify_profile(info)
@@ -37,19 +39,17 @@ module Meda
     def add_event(event_props)
       event_props[:time] ||= DateTime.now.to_s
       event_props[:category] ||= 'none'
-      event = Meda::Event.new(event_props)
+      event = Meda::Event.new(event_props, default_profile_id, self)
       add_hit(event)
     end
 
     def add_pageview(page_props)
       page_props[:time] ||= DateTime.now.to_s
-      pageview = Meda::Pageview.new(page_props)
+      pageview = Meda::Pageview.new(page_props, default_profile_id, self)
       add_hit(pageview)
     end
 
     def add_hit(hit)
-      hit.id = UUIDTools::UUID.timestamp_create.hexdigest
-      hit.dataset = self
       if hit.profile_id
         profile = store.get_profile_by_id(hit.profile_id)
         if profile
@@ -60,9 +60,18 @@ module Meda
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
       end
+
+      hit = custom_hit_filter(hit)
       @last_hit = hit
       hit.validate! # blows up if missing attrs
       hit
+    end
+
+    def custom_hit_filter(hit)
+      if(!hit_filter.nil?)
+        hit = hit_filter.filter_hit(hit,self)
+      end
+      hit = update_client_id(hit)
     end
 
     def set_profile(profile_id, profile_info)
@@ -70,7 +79,9 @@ module Meda
     end
 
     def get_profile(profile_id)
-      store.get_profile_by_id(profile_id)
+      if(enable_data_retrivals)
+        store.get_profile_by_id(profile_id)
+      end
     end
 
     def stream_to_ga?
@@ -104,20 +115,22 @@ module Meda
     def stream_hit_to_ga(hit)
       @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
       return unless stream_to_ga?
-      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.profile_id) 
-      tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id) 
+      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
+      tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
       begin
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
-        if(hit.profile_id != '471bb8f0593711e48c1e44fb42fffeaa')
+        if(hit.profile_id != default_profile_id)
           google_analytics['custom_dimensions'].each_pair do |dim, val|
-            #The naming of profile fields in the json request to fields in the dataset.yml must be identical 
-            #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA 
+            #The naming of profile fields in the json request to fields in the dataset.yml must be identical
+            #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA
             #puts("Dimension: #{dim} - Index #{val['index']} - Mapped Value: #{hit.profile_props[dim]}")
-            ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
+            if(val && hit.profile_props)
+              ga_hit.add_custom_dimension(val['index'], hit.profile_props[dim])
+            end
           end
         end
         @last_ga_hit[:staccato_hit] = ga_hit
@@ -131,6 +144,36 @@ module Meda
       end
       true
     end
+
+
+    def update_client_id(hit)
+      begin
+        profile_id = hit.profile_id
+        if profile_id != default_profile_id
+          temp = ActiveSupport::HashWithIndifferentAccess.new({
+            :client_id => hit.client_id
+          })
+          current_path = hit.props[:path]
+          regex_of_paths = Regexp.union(landing_pages)
+          if (regex_of_paths.match(current_path))
+            set_profile(profile_id, temp)
+          else
+            profile = get_profile(profile_id)
+            if profile
+              profile_client_id = profile[:client_id]
+              if profile_client_id
+                hit.client_id = profile_client_id
+              end
+            end
+          end
+        end
+      rescue StandardError => e
+        logger.error("Failure getting client_id from profile")
+        logger.error(e)
+      end
+      hit
+    end
+
 
     def after_identify(&block)
       @after_identify = block
@@ -157,4 +200,3 @@ module Meda
 
   end
 end
-

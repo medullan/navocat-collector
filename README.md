@@ -1,4 +1,5 @@
-# Navocat Collector
+# Navovcat Collector
+=======
 
 [ ![Codeship Status for medullan/navocat-collector](https://codeship.com/projects/257cb380-5615-0132-3f01-16afe4cead14/status)](https://codeship.com/projects/49450)
 
@@ -88,7 +89,8 @@ development:
 
 ### config.ru
 
-Add a `config.ru` file to your project to configure the rack environment to run the collector. A sample file may look like this:
+Add a `config.ru` file to your project to configure the rack environment to run the collector. 
+A sample file which includes a custom filter may look like this:
 
 ```ruby
 # config.ru
@@ -97,8 +99,26 @@ require 'rubygems'
 require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
+require_relative 'path/to/yourfilter.rb'
+
+Meda.datasets.each_pair do |token, dataset|
+	dataset.hit_filter = YourFilter.new()
+end
 
 run Meda::Collector::App
+```
+
+## Sample filter
+```ruby
+class YourFilter 
+	def filter(hit) 
+	   puts "-----\nin your filter!\n------"
+	   hit
+	end
+end
+
+
+
 ```
 
 ## Run the collector

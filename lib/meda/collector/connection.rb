@@ -50,8 +50,15 @@ module Meda
         end
       end
 
+      def get_last_hit(params)
+        process_request(params) do |dataset, extra_params|
+          if dataset.enable_data_retrivals
+            last_hit = dataset.last_hit
+          end
+        end
+      end
+
       def track(params)
-        #params = get_user_id_for_logged_in_user(params)
 
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
@@ -68,7 +75,6 @@ module Meda
       end
 
       def page(params)
-        #params = get_user_id_for_logged_in_user(params)
 
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
@@ -82,13 +88,6 @@ module Meda
           end
         end
         true
-      end
-
-      def get_user_id_for_logged_in_user(params)
-        if(params[:profile_id] !=  '351bb960ecd711e3a0a822000ab93e79')
-          params[:user_id] = params[:profile_id]
-        end
-        params
       end
 
       def join_threads(&block)
