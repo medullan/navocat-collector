@@ -14,7 +14,7 @@ module Meda
   # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
-    attr_accessor :google_analytics, :token, :hit_filter
+    attr_reader :data_uuid, :name, :meda_config, :hit_filter
     attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name
 
 

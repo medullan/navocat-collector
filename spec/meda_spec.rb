@@ -31,7 +31,7 @@ module Meda
         expect( dataset.hit_filter).to be_nil 
     end
 
-    it 'it loads filters if filter name and filter class name is in config' do
+    xit 'it loads filters if filter name and filter class name is in config' do
       dataset = Meda::Dataset.new("test_#{rand(100000)}", Meda.configuration)
       dataset.filter_file_name = "yourfilter.rb"
       dataset.filter_class_name = "YourFilter"
