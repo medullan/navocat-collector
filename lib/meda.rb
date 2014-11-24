@@ -102,8 +102,8 @@ Meda.configure do |config|
   begin
     app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
     app_config.each_pair { |key, val| config[key] = val }
-  rescue Errno::ENOENT
-    puts "Warning: Missing meda.yml, please configure manually"
+  rescue Errno::ENOENT => error
+    puts "Warning: Missing meda.yml, please configure manually #{error.message}"
   end
 end
 
