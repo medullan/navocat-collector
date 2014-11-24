@@ -122,7 +122,7 @@ describe "Collector Application" do
         expect(dataset.last_hit).to be_present
         expect(dataset.last_disk_hit).to be_present
         path = dataset.last_disk_hit[:path]
-        expect(File.read(path)).to match(dataset.last_disk_hit[:data])
+        expect(File.read(path).strip).to eq(dataset.last_disk_hit[:data].strip)
         expect(dataset.last_ga_hit).to be_present
       end
     end
