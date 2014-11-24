@@ -313,7 +313,7 @@ html,body {
 height:100%;
 }
 
-section {
+div.section {
 width:100%;
 position:relative;
 z-index:1;
@@ -324,7 +324,7 @@ h2 ~ h2 {
 margin-top:2.3em;
 }
 
-section>p {
+div.section >p {
 line-height:1.48;
 font-size:1.45em;
 max-width:90%;
@@ -334,7 +334,7 @@ margin-left:auto;
 margin-right:auto;
 }
 
-section>p a {
+div.section >p a {
 text-align:center;
 }
 
@@ -376,7 +376,7 @@ cursor:default;
 -moz-transition:all .15s ease-in-out;
 transition:all .15s ease-in-out;
 
-max-width: 510px;
+max-width: 520px;
 margin-bottom: 1.5em;
 }
 
@@ -410,7 +410,7 @@ left:0;
 opacity:0;
 line-height:1;
 text-align:center;
-display:block;
+display:none;
 background:#fff;
 box-shadow:0 1px 4px rgba(0,0,0,0.03),0 1px 0 rgba(0,0,0,0.06);
 -webkit-transition:all .1s ease-in-out;
@@ -673,7 +673,7 @@ margin-right:0;
 }
 
 @media screen and max-width 725em{
-section {
+div.section {
 padding:6em 30px;
 }
 
@@ -684,7 +684,7 @@ border: solid red 2px;
 }
 
 @media screen and max-width 50em{
-section>p {
+div.section>p {
 max-width:100%;
 font-size:1.25em;
 }
@@ -706,6 +706,7 @@ p.ctabuttoncontainer a{
 #top p.hero-cta{
 	margin-top:2.5em;
 	font-size: 2em;
+	width: 100%;
 }
 
 @media (min-width:768px){

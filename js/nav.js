@@ -11,7 +11,7 @@ $(document).ready(function() {
 	}, { offset: 100 });
 
 	// Activate breadcrumb
-	$('section').waypoint(function(direction) {
+	$('div.section').waypoint(function(direction) {
 		var section = direction == 'down' ? $(this).attr('id') : $(this).prev().attr('id');
 		$('ul.fixie li a.active').removeClass('active');
 		$('ul.fixie li a[href="#'+section+'"]').addClass('active');
