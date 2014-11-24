@@ -1,6 +1,5 @@
 # Navocat Collector
 =======
-
 [ ![Codeship Status for medullan/navocat-collector](https://codeship.com/projects/257cb380-5615-0132-3f01-16afe4cead14/status)](https://codeship.com/projects/49450)
 
 The collector gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
@@ -65,6 +64,8 @@ Here is a sample file:
 # datasets.yml (sample)
 production:
   token: afc0a6c8c73211e3aaf844fb42fffe8c
+  filter_file_name: yourfilter.rb (path to filter.rb)
+  filter_class_name: YourFilter (filter class name)
   google_analytics:
     record: true
     tracking_id: UA-47758842
@@ -99,16 +100,11 @@ require 'rubygems'
 require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
-require_relative 'path/to/yourfilter.rb'
-
-Meda.datasets.each_pair do |token, dataset|
-	dataset.hit_filter = YourFilter.new()
-end
 
 run Meda::Collector::App
 ```
 
-## Sample filter
+## Sample filter for dataset.yml config
 ```ruby
 class YourFilter 
 	def filter(hit) 
