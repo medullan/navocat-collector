@@ -1,5 +1,7 @@
 # Navocat Collector
 
+[ ![Codeship Status for medullan/navocat-collector](https://codeship.com/projects/257cb380-5615-0132-3f01-16afe4cead14/status)](https://codeship.com/projects/49450)
+
 The collector gem currently provides a collector application that is used to gather analytics events from web browsers, mobile apps or back-end servers, and send page views and events to Google Analytics.
 
 The collector is written in Sinatra and deployed with the puma webserver.
