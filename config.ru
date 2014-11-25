@@ -2,7 +2,6 @@ require 'rubygems'
 require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
-require_relative 'yourfilter.rb'
 
 use Rack::Deflater
 
