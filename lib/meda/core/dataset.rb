@@ -15,7 +15,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name
+    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
 
     # Readers primarily used for tests, not especially thread-safe :p
@@ -85,7 +85,10 @@ module Meda
     end
 
     def delete_profile(profile_id)
-        store.delete_profile(profile_id)
+      if(enable_profile_delete)
+        return store.delete_profile(profile_id)
+      end
+      return false
     end
 
     def stream_to_ga?
