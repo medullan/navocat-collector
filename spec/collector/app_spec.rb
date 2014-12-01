@@ -20,6 +20,7 @@ describe "Collector Application" do
     dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
     dataset.enable_data_retrivals = true
+    dataset.enable_profile_delete = true
     dataset.google_analytics = {
       'record' => true,
       'tracking_id' => 'UA-666-1',
@@ -121,6 +122,17 @@ describe "Collector Application" do
       delete_member_id = Time.now.getutc.to_i + test_increment
       delete_data = {'dataset' => token, 'profile_id' => 1}
       delete 'meda/profile.json', delete_data.to_json, :content_type => 'application/json'
+      expect(last_response).to be_bad_request
+    end
+
+     it 'delete profile with toggle off' do
+      dataset.enable_profile_delete = false
+      test_increment += 100
+      delete_member_id = Time.now.getutc.to_i + test_increment
+      delete_profile_id = setup_delete_profile_id(token, delete_member_id)
+      delete_data = {'dataset' => token, 'profile_id' => delete_profile_id}
+      delete 'meda/profile.json', delete_data.to_json, :content_type => 'application/json'
+      dataset.enable_profile_delete = true
       expect(last_response).to be_bad_request
     end
   end
