@@ -50,7 +50,14 @@ module Meda
         end
       end
 
-      def get_last_hit(params)
+      def delete_profile(params)
+        process_request(params) do |dataset, profile_params|
+          profile_id = profile_params.delete(:profile_id)
+          dataset.delete_profile(profile_id)
+        end
+      end
+
+      def get_last_hit(params)  
         process_request(params) do |dataset, extra_params|
           if dataset.enable_data_retrivals
             last_hit = dataset.last_hit
@@ -113,6 +120,7 @@ module Meda
         if params[:dataset].blank?
           raise 'Cannot find dataset. Token param blank.'
         end
+
         extra_params = params.symbolize_keys
         extra_params[:user_ip] = mask_ip(extra_params[:user_ip]) if extra_params[:user_ip]
         token = extra_params.delete(:dataset)

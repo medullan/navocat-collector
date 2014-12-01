@@ -38,6 +38,11 @@ module MapDB
       re = Regexp.new "#{pattern}", Regexp::EXTENDED | Regexp::IGNORECASE
       @tree.select{ |k,v| "#{k}" =~ re }.map(&:first)
     end
+    
+    def delete(key)
+      @tree.delete(key)
+      @mapdb.commit()
+    end
 
     def_delegator :@tree, :clear,    :clear
     def_delegator :@tree, :has_key?, :key?
