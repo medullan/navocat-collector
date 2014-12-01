@@ -77,6 +77,39 @@ module Meda
         end
       end
 
+      # @method delete_profile_json
+      # Deletes a given profile by profileid and dataset
+      delete '/meda/profile.json', :provides => :json do
+
+        profile_data = raw_json_from_request
+        if valid_request?(profile_data)
+          result = settings.connection.delete_profile(profile_data)
+          if result
+            respond_with_ok
+          else
+            respond_with_bad_request
+          end
+        else
+          respond_with_bad_request
+        end
+      end
+
+      # @method delete_profile_json
+      # Deletes a given profile by profileid and dataset
+      get '/meda/profile_delete.gif' do
+
+        get_profile_id_from_cookie
+        if valid_request?(params)
+          result = settings.connection.delete_profile(params)
+          if result
+            respond_with_pixel
+          else
+            respond_with_bad_request
+          end
+        else
+          respond_with_bad_request
+        end
+      end
 
       # @method post_getprofile_json
       # Displays a profile for given profile_id

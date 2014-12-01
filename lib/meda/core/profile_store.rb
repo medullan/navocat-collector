@@ -18,6 +18,7 @@ module Meda
     # Create a new profile with the identifying info in the given hash
     def create_profile(info)
       profile_id = UUIDTools::UUID.timestamp_create.hexdigest
+
       # Create the main record, ie "profile:12341234123412341234124"
       @tree.encode(profile_key(profile_id), {'id' => profile_id})
 
@@ -65,6 +66,16 @@ module Meda
       if @tree.key?(profile_key(profile_id))
         existing_profile = @tree.decode(profile_key(profile_id))
         @tree.encode(profile_key(profile_id), existing_profile.merge(profile_info))
+        true
+      else
+        false # no profile
+      end
+    end
+
+    # delete profile given profile if
+    def delete_profile(profile_id)
+      if @tree.key?(profile_key(profile_id))
+        @tree.delete(profile_key(profile_id))
         true
       else
         false # no profile

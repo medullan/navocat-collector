@@ -4,10 +4,13 @@ require File.expand_path '../spec_helper.rb', __FILE__
 
 describe "Collector Application" do
 
+  test_increment = 1
   token = '3423432423423423423423'
   member_id = '384739284793284293'
+  delete_member_id = 'AA84739284793284293'
   dataset = nil
   profile_id = nil
+  delete_profile_id = nil
   client_id = 'abcd1234abcd1234'
 
   before(:all) do
@@ -28,6 +31,15 @@ describe "Collector Application" do
 
   after(:all) do
     Meda.datasets[token] = nil
+  end
+
+  def setup_delete_profile_id(token,delete_member_id)
+    post_data = {'dataset' => token, 'member_id' => delete_member_id}
+    post 'meda/identify.json', post_data.to_json, :content_type => 'application/json'
+    expect(last_response).to be_ok
+    body = JSON.parse(last_response.body)
+    expect(body['profile_id']).to be_present
+    body['profile_id']
   end
 
   describe 'index' do
@@ -58,16 +70,11 @@ describe "Collector Application" do
       expect(last_response).to be_ok
     end
 
-  end
-
-  describe 'profile.json' do
-
     it 'posts profile with bad profile_id' do
       post_data = {'dataset' => token, 'profile_id' => 'some-bad-profile-id', 'state' => 'Maine', 'weight' => '200'}
       post 'meda/profile.json', post_data.to_json, :content_type => 'application/json'
       expect(last_response).to be_bad_request
     end
-
   end
 
   describe 'getprofile.json' do
@@ -83,7 +90,6 @@ describe "Collector Application" do
 
   end
 
-
   describe 'getprofile.json' do
 
     it 'get profile info with bad profile_id' do
@@ -93,6 +99,49 @@ describe "Collector Application" do
     end
 
   end
+
+
+  describe 'delete_profile.json' do
+    it 'delete profile' do
+      test_increment += 1
+      delete_member_id = Time.now.getutc.to_i + test_increment
+      delete_profile_id = setup_delete_profile_id(token, delete_member_id)
+      delete_data = {'dataset' => token, 'profile_id' => delete_profile_id}
+      delete 'meda/profile.json', delete_data.to_json, :content_type => 'application/json'
+      expect(last_response).to be_ok
+
+      post_data = {'dataset' => token, 'profile_id' => delete_profile_id}
+      post 'meda/getprofile.json', post_data.to_json, :content_type => 'application/json' 
+      expect(last_response).to be_bad_request
+
+    end
+
+    it 'delete profile with bad id' do
+      test_increment += 1
+      delete_member_id = Time.now.getutc.to_i + test_increment
+      delete_data = {'dataset' => token, 'profile_id' => 1}
+      delete 'meda/profile.json', delete_data.to_json, :content_type => 'application/json'
+      expect(last_response).to be_bad_request
+    end
+  end
+
+
+  describe 'profile_delete.gif' do
+    it 'delete profile' do
+      test_increment += 1
+      delete_member_id = Time.now.getutc.to_i + test_increment
+      delete_profile_id = setup_delete_profile_id(token, delete_member_id)
+      get "meda/profile_delete.gif?dataset=#{token}&profile_id=#{delete_profile_id}"
+      expect(last_response).to be_ok
+    end
+
+    it 'delete profile with bad id' do
+      delete_profile_id = 1 
+      get "meda/profile_delete.gif?dataset=#{token}&profile_id=#{delete_profile_id}"
+      expect(last_response).to be_bad_request
+    end
+  end
+
 
   describe 'page.json' do
 
@@ -229,6 +278,8 @@ describe "Collector Application" do
       end
     end
   end
+
+
 
 end
 

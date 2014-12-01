@@ -84,6 +84,10 @@ module Meda
       end
     end
 
+    def delete_profile(profile_id)
+        store.delete_profile(profile_id)
+    end
+
     def stream_to_ga?
       !!google_analytics && !!google_analytics['record']
     end
