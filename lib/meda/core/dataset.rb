@@ -27,7 +27,6 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
-      #@hit_filter = Meda::HitFilter.new({})
     end
 
     def identify_profile(info)
@@ -63,7 +62,8 @@ module Meda
 
       hit = custom_hit_filter(hit)
       @last_hit = hit
-      hit.validate! # blows up if missing attrs
+      hit.validate!
+
       hit
     end
 
