@@ -71,7 +71,6 @@ module Meda
           hit = dataset.add_event(track_params)
 
           if(hit.is_invalid)
-            Meda.logger.info "hit #{hit} is invalid, not sending to analytics"
             return false
           end
 
@@ -93,7 +92,6 @@ module Meda
           hit = dataset.add_pageview(page_params)
 
           if(hit.is_invalid)
-            Meda.logger.info "hit #{hit} is invalid, not sending to analytics"
             return false
           end
 
