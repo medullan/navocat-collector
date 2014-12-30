@@ -4,6 +4,9 @@ The collector gem currently provides a collector application that is used to gat
 
 The collector is written in Sinatra and deployed with the puma webserver.
 
+## Licensing
+The collector is licensed under the open source [Eclipse Public License, Version 1.0 (EPL-1.0)](http://opensource.org/licenses/eclipse-1.0.txt)
+
 ## Dependencies
 
 The collector application requires jRuby 1.7+ and Java 1.6+.
