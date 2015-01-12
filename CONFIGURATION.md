@@ -73,7 +73,7 @@ production:
 
 ### Meda configuration in config.ru
 
-If you prefer to configure the collector in Ruby, you can also do this is `config.ru`. For example:
+If you prefer to configure the collector in Ruby, you can also use `config.ru`. For example:
 
 ```ruby
 # config.ru
