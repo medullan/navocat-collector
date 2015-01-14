@@ -153,6 +153,8 @@ module Meda
         end
         if last_hit
           last_hit.to_json
+        else
+          logger.info("post /meda/getlasthit.json ==> Failed to get last hit")
         end
       end
 
