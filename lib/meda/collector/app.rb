@@ -75,9 +75,11 @@ module Meda
           if result
             respond_with_ok
           else
+            logger.info("post /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
+          logger.info("post /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -92,9 +94,11 @@ module Meda
           if result
             respond_with_ok
           else
+            logger.info("delete /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
+          logger.info("delete /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -109,11 +113,11 @@ module Meda
           if result
             respond_with_pixel
           else
-            logger.info("Unable to delete profile")
+            logger.info("get_profile_id_from_cookie ==> Unable to delete profile")
             respond_with_bad_request
           end
         else
-          logger.info("Invalid request")
+          logger.info("get_profile_id_from_cookie ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -160,6 +164,7 @@ module Meda
           settings.connection.profile(params)
           respond_with_pixel
         else
+          logger.info("get_profile_id_from_cookie ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -240,7 +245,7 @@ module Meda
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.info("Invalid hit request")
+          logger.info("get_profile_id_from_cookie ==> Invalid hit request")
           respond_with_bad_request
         end
       end
