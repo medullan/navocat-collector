@@ -1,6 +1,7 @@
 require_relative 'mapdb'
 require 'uuidtools'
 require 'digest'
+require 'logger'
 
 module Meda
 
@@ -105,6 +106,10 @@ module Meda
     # TreeMap key for profile data
     def profile_key(id)
       "profile:#{id}"
+    end
+
+    def logger
+      @logger ||= Meda.logger || Logger.new(STDOUT)
     end
 
   end
