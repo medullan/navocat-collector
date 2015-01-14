@@ -1,3 +1,5 @@
+require 'logger'
+
 module Meda
   module Collector
 
@@ -154,6 +156,10 @@ module Meda
       def mask_ip(ip)
         subnet, match, hostname = ip.rpartition('.')
         return subnet + '.0'
+      end
+
+      def logger
+        @logger ||= Meda.logger || Logger.new(STDOUT)
       end
 
     end
