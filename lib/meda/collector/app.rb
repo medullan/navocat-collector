@@ -55,9 +55,13 @@ module Meda
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
         profile = settings.connection.identify(params)
-        #print_out_params(params)
-        set_profile_id_in_cookie(profile['id'])
-        respond_with_pixel
+        if profile
+          set_profile_id_in_cookie(profile['id'])
+          respond_with_pixel
+        else
+          logger.info("Unable to find profile")
+          respond_with_bad_request
+        end
       end
 
       # @method post_profile_json
