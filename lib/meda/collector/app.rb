@@ -45,6 +45,7 @@ module Meda
         if profile
           json({'profile_id' => profile[:id]})
         else
+          logger.info("Unable to find profile id")
           respond_with_bad_request
         end
       end
@@ -132,7 +133,7 @@ module Meda
       # Requires a dataset
       post '/meda/getlasthit.json', :provides => :json do
         request_data = raw_json_from_request
-        if request_data[:dataset] 
+        if request_data[:dataset]
           last_hit = settings.connection.get_last_hit(request_data)
         else
             respond_with_bad_request
@@ -233,6 +234,7 @@ module Meda
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
+          logger.info("Invalid hit request")
           respond_with_bad_request
         end
       end
