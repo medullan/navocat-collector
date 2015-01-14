@@ -54,10 +54,13 @@ module Meda
         if profile
           profile.delete('id')
           hit.profile_props = profile
+        else
+          logger.info("add_hit ==> Unable to find profile id")
         end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
+        logger.info("add_hit ==> Hit has no profile id")
       end
 
       hit = custom_hit_filter(hit)
@@ -71,6 +74,7 @@ module Meda
       if(!hit_filter.nil?)
         hit = hit_filter.filter_hit(hit,self)
       end
+      logger.info("custom_hit_filter ==> hit_filter is nil")
       hit = update_client_id(hit)
     end
 
@@ -88,6 +92,7 @@ module Meda
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
+      logger.info("delete_profile ==> Unable to delete profile")
       return false
     end
 
