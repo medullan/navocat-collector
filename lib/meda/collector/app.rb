@@ -131,10 +131,12 @@ module Meda
           if profile
             profile.to_json
           else
+            logger.info("post /meda/getprofile.json ==> Unable to find profile id")
             respond_with_bad_request
           end
         else
-            respond_with_bad_request
+          logger.info("post /meda/getprofile.json ==> Invalid request")
+          respond_with_bad_request
         end
       end
 
@@ -146,7 +148,8 @@ module Meda
         if request_data[:dataset]
           last_hit = settings.connection.get_last_hit(request_data)
         else
-            respond_with_bad_request
+          logger.info("post /meda/getlasthit.json ==> Invalid request")
+          respond_with_bad_request
         end
         if last_hit
           last_hit.to_json
@@ -181,6 +184,7 @@ module Meda
             settings.connection.track(utm_data)
             respond_with_pixel
           else
+            logger.info("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         else
@@ -189,6 +193,7 @@ module Meda
             settings.connection.page(utm_data)
             respond_with_pixel
           else
+            logger.info("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         end
@@ -204,6 +209,7 @@ module Meda
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else
+          logger.info("post /meda/page.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -218,6 +224,7 @@ module Meda
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
+          logger.info("get /meda/page.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -232,6 +239,7 @@ module Meda
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok
         else
+          logger.info("post /meda/track.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
