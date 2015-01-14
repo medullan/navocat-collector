@@ -105,9 +105,11 @@ module Meda
           if result
             respond_with_pixel
           else
+            logger.info("Unable to delete profile")
             respond_with_bad_request
           end
         else
+          logger.info("Invalid request")
           respond_with_bad_request
         end
       end
