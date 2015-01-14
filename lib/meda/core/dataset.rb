@@ -55,7 +55,7 @@ module Meda
           profile.delete('id')
           hit.profile_props = profile
         else
-          logger.info("add_hit ==> Unable to find profile id")
+          logger.info("add_hit ==> Unable to find profile")
         end
       else
         # Hit has no profile
@@ -74,7 +74,6 @@ module Meda
       if(!hit_filter.nil?)
         hit = hit_filter.filter_hit(hit,self)
       end
-      logger.info("custom_hit_filter ==> hit_filter is nil")
       hit = update_client_id(hit)
     end
 
