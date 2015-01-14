@@ -57,10 +57,12 @@ module Meda
         end
       end
 
-      def get_last_hit(params)  
+      def get_last_hit(params)
         process_request(params) do |dataset, extra_params|
           if dataset.enable_data_retrivals
             last_hit = dataset.last_hit
+          else
+            logger.info("get_last_hit ==> Data retrieval was not enabled")
           end
         end
       end
@@ -71,6 +73,7 @@ module Meda
           hit = dataset.add_event(track_params)
 
           if(hit.is_invalid)
+            logger.info("track ==> Invalid hit")
             return false
           end
 
@@ -81,6 +84,8 @@ module Meda
             ga_pool.submit do
               dataset.stream_hit_to_ga(hit)
             end
+          else
+            logger.info("track ==> Data did not stream to GA")
           end
         end
         true
@@ -92,6 +97,7 @@ module Meda
           hit = dataset.add_pageview(page_params)
 
           if(hit.is_invalid)
+            logger.info("page ==> Invalid hit")
             return false
           end
 
@@ -102,6 +108,8 @@ module Meda
             ga_pool.submit do
               dataset.stream_hit_to_ga(hit)
             end
+          else
+            logger.info("page ==> Data did not stream to GA")
           end
         end
         true
@@ -151,4 +159,3 @@ module Meda
     end
   end
 end
-
