@@ -1,0 +1,59 @@
+# datasets.yml (sample)
+production:
+  token: afc0a6c8c73211e3aaf844fb42fffe8c
+  landing_pages:
+    - !ruby/regexp '/\/pilot\/landingpage/'
+    - !ruby/regexp '/\/members\/myblue\/dashboard/'
+  enable_data_retrivals: true
+  google_analytics:
+    record: true
+    tracking_id: UA-58408341-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+
+staging:
+  token: b6822676c73211e3aaf844fb42fffe8c
+  landing_pages:
+    - !ruby/regexp '/\/pilot\/landingpage/'
+    - !ruby/regexp '/\/members\/myblue\/dashboard/'
+  enable_data_retrivals: true
+  google_analytics:
+    record: false
+
+development:
+  token: c2e02c92c73211e3aaf844fb42fffe8c
+  landing_pages:
+    - !ruby/regexp '/\/pilot\/landingpage/'
+    - !ruby/regexp '/\/members\/myblue\/dashboard/'
+  enable_data_retrivals: true
+  google_analytics:
+    record: true
+    tracking_id: UA-58408341-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+test:
+  token: c2e02c92c73211e3aaf844fb42fffe8c
+  landing_pages:
+    - !ruby/regexp '/\/pilot\/landingpage/'
+    - !ruby/regexp '/\/members\/myblue\/dashboard/'
+  enable_data_retrivals: true
+  google_analytics:
+    record: true
+    tracking_id: UA-58408341-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3

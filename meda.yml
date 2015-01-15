@@ -1,0 +1,23 @@
+development:
+  disk_pool: 2
+  google_analytics_pool: 2
+  mapdb_path: db
+  data_path: meda_data
+  log_path: log/development.log
+  log_level: 0
+
+production:
+  disk_pool: 4
+  google_analytics_pool: 16
+  mapdb_path: db
+  data_path: meda_data
+  log_path: log/production.log
+  log_level: 1
+
+performance:
+  disk_pool: 4
+  google_analytics_pool: 16
+  mapdb_path: db
+  data_path: meda_data
+  log_path: log/performance.log
+  log_level: 1
