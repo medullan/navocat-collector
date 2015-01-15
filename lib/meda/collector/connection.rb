@@ -64,7 +64,8 @@ module Meda
           if dataset.enable_data_retrivals
             last_hit = dataset.last_hit
           else
-            logger.info("get_last_hit ==> Data retrieval was not enabled")
+          #  the default config is not have this enabled. do not log.
+          #  logger.info("get_last_hit ==> Data retrieval was not enabled")
           end
         end
       end
@@ -82,6 +83,7 @@ module Meda
           disk_pool.submit do
             dataset.stream_hit_to_disk(hit)
           end
+
           if dataset.stream_to_ga?
             ga_pool.submit do
               dataset.stream_hit_to_ga(hit)
@@ -97,6 +99,7 @@ module Meda
 
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
+          hit.request_id = Thread.current[:request_uuid]
 
           if(hit.is_invalid)
             logger.info("page ==> Invalid hit")
@@ -104,10 +107,13 @@ module Meda
           end
 
           disk_pool.submit do
+            Thread.current[:request_uuid] = hit.request_id
             dataset.stream_hit_to_disk(hit)
           end
+
           if dataset.stream_to_ga?
             ga_pool.submit do
+              Thread.current[:request_uuid] = hit.request_id
               dataset.stream_hit_to_ga(hit)
             end
           else
@@ -130,6 +136,7 @@ module Meda
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
         rescue StandardError => e
+          puts Meda.logger
           Meda.logger.error(e) if Meda.logger
           puts e
           raise e

@@ -10,7 +10,7 @@ module Meda
 
   class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
-    attr_accessor :profile_props, :id, :dataset, :default_profile_id, :tracking_id, :is_invalid
+    attr_accessor :profile_props, :id, :dataset, :default_profile_id, :tracking_id, :is_invalid, :request_id
 
     def initialize(props, default_profile_id, dataset)
       @id = UUIDTools::UUID.timestamp_create.hexdigest

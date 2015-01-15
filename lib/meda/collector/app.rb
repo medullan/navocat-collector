@@ -4,6 +4,7 @@ require 'sinatra/json'
 require 'meda'
 require 'meda/collector/connection'
 require 'logger'
+require 'uuidtools'
 
 module Meda
   module Collector
@@ -19,6 +20,16 @@ module Meda
 
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
+
+      before do
+          Thread.current[:request_uuid] = UUIDTools::UUID.random_create
+          logger.info("Starting request... #{request.url}")
+      end
+
+      after do
+          logger.info("ending request... status code #{response.status}")
+      end
+
 
       # @method get_index
       # @overload get "/meda"
