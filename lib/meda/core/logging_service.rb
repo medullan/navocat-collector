@@ -1,4 +1,4 @@
-require 'logglier' 
+#require 'logglier' 
 require 'logger'
 
 module Meda
@@ -16,20 +16,20 @@ module Meda
     end
 
   	def info(message)	
-  		message = add_meta_data(message)
+  	#	message = add_meta_data(message)
 	#	@log.info(message)  		
 		@nativeLogger.info(message)
   	end
 
 
   	def error(message)
-  		message = add_meta_data(message)
+  	#	message = add_meta_data(message)
 	#	@log.error(message)  
 		@nativeLogger.error(message)
   	end
 
   	def debug(message)
-  		message = add_meta_data(message)
+  #		message = add_meta_data(message)
 	#	@log.debug(message)  
 		@nativeLogger.debug(message)
   	end
