@@ -47,8 +47,10 @@ module Meda
 
       def get_profile_by_id(params)
         process_request(params) do |dataset, profile_params|
-          profile_id = profile_params.delete(:profile_id)
-          profile = dataset.get_profile(profile_id)
+        if dataset.enable_data_retrivals
+            profile_id = profile_params.delete(:profile_id)
+            profile = dataset.get_profile(profile_id)
+          end
         end
       end
 

@@ -82,9 +82,7 @@ module Meda
     end
 
     def get_profile(profile_id)
-      if(enable_data_retrivals)
-        store.get_profile_by_id(profile_id)
-      end
+      store.get_profile_by_id(profile_id)
     end
 
     def delete_profile(profile_id)
