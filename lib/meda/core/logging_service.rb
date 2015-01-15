@@ -9,7 +9,7 @@ module Meda
 	attr_accessor :level, :log, :nativelogger
 	
    	def initialize(log_path)
-      	@log = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json) 
+   #   	@log = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json) 
       	
       	@nativeLogger = Logger.new(Meda.configuration.log_path)
       #	@nativelogger.level = Meda.configuration.log_level || Logger::INFO
@@ -17,20 +17,20 @@ module Meda
 
   	def info(message)	
   		message = add_meta_data(message)
-		@log.info(message)  		
+	#	@log.info(message)  		
 		@nativeLogger.info(message)
   	end
 
 
   	def error(message)
   		message = add_meta_data(message)
-		@log.error(message)  
+	#	@log.error(message)  
 		@nativeLogger.error(message)
   	end
 
   	def debug(message)
   		message = add_meta_data(message)
-		@log.debug(message)  
+	#	@log.debug(message)  
 		@nativeLogger.debug(message)
   	end
 
