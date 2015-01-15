@@ -37,9 +37,9 @@ module Meda
 
   		caller_infos = caller.second.split(":")
 
-  		@nativeLogger.inf("called_infos")
+  		@nativeLogger.info("called_infos")
   		@nativeLogger.info("#{caller_infos}")  	
-  		
+
 		message_with_meta_data =  "#{caller_infos[0]} : #{caller_infos[1]} - Thread ID :  #{Thread.current.object_id.to_s}  Request ID : #{Thread.current[:request_uuid]} " + message.to_s
 		
   		if message.is_a? StandardError
