@@ -1,3 +1,5 @@
+require 'logger'
+
 module Meda
   module Collector
 
@@ -57,10 +59,13 @@ module Meda
         end
       end
 
-      def get_last_hit(params)  
+      def get_last_hit(params)
         process_request(params) do |dataset, extra_params|
           if dataset.enable_data_retrivals
             last_hit = dataset.last_hit
+          else
+          #  the default config is not have this enabled. do not log.
+          #  logger.info("get_last_hit ==> Data retrieval was not enabled")
           end
         end
       end
@@ -71,16 +76,20 @@ module Meda
           hit = dataset.add_event(track_params)
 
           if(hit.is_invalid)
+            logger.info("track ==> Invalid hit")
             return false
           end
 
           disk_pool.submit do
             dataset.stream_hit_to_disk(hit)
           end
+
           if dataset.stream_to_ga?
             ga_pool.submit do
               dataset.stream_hit_to_ga(hit)
             end
+          else
+            logger.info("track ==> Data did not stream to GA")
           end
         end
         true
@@ -90,18 +99,25 @@ module Meda
 
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
+          hit.request_id = Thread.current[:request_uuid]
 
           if(hit.is_invalid)
+            logger.info("page ==> Invalid hit")
             return false
           end
 
           disk_pool.submit do
+            Thread.current[:request_uuid] = hit.request_id
             dataset.stream_hit_to_disk(hit)
           end
+
           if dataset.stream_to_ga?
             ga_pool.submit do
+              Thread.current[:request_uuid] = hit.request_id
               dataset.stream_hit_to_ga(hit)
             end
+          else
+            logger.info("page ==> Data did not stream to GA")
           end
         end
         true
@@ -120,6 +136,7 @@ module Meda
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
         rescue StandardError => e
+          puts Meda.logger
           Meda.logger.error(e) if Meda.logger
           puts e
           raise e
@@ -148,7 +165,10 @@ module Meda
         return subnet + '.0'
       end
 
+      def logger
+        @logger ||= Meda.logger || Logger.new(STDOUT)
+      end
+
     end
   end
 end
-
