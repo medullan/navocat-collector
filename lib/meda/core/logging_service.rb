@@ -10,6 +10,7 @@ module Meda
 	
    	def initialize(log_path)
       	@log = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json) 
+      	
       	@nativeLogger = Logger.new(Meda.configuration.log_path)
       #	@nativelogger.level = Meda.configuration.log_level || Logger::INFO
     end
