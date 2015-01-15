@@ -36,12 +36,9 @@ module Meda
 
   	def add_meta_data(message)
 
-  		caller_infos = caller.second.split(":")
+  		caller_infos = caller.second.split(":in")
 
-  		@nativeLogger.info("called_infos")
-  		@nativeLogger.info("#{caller_infos}")  	
-
-		message_with_meta_data =  "#{caller_infos[0]} : #{caller_infos[1]} - Thread ID :  #{Thread.current.object_id.to_s}  Request ID : #{Thread.current[:request_uuid]} " + message.to_s
+		message_with_meta_data =  "#{caller_infos[0]} - Thread ID :  #{Thread.current.object_id.to_s}  Request ID : #{Thread.current[:request_uuid]} " + message.to_s
 		
   		if message.is_a? StandardError
   			message_with_meta_data = add_stacktrace(message,message_with_meta_data)
