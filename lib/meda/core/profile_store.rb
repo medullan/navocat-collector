@@ -57,7 +57,6 @@ module Meda
     # Return a hash with the profile info for the given profile_id
     def get_profile_by_id(profile_id)
       if @tree.key?(profile_key(profile_id))
-        logger.info("get_profile_by_id ==> Profile found with key #{profile_key(profile_id)}")
         ActiveSupport::HashWithIndifferentAccess.new(@tree.decode(profile_key(profile_id)))
       else
         logger.info("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
