@@ -64,6 +64,7 @@ module Meda
       end
 
       hit = custom_hit_filter(hit)
+      Thread.current[:request_uuid] = hit.request_id
       @last_hit = hit
       hit.validate!
 

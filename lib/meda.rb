@@ -16,17 +16,26 @@ module Meda
   def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)
+    features
     datasets
     logger
     true
+  end
+
+  def self.features
+    require('meda/services/feature_toggle_service.rb')
+    if @features.nil? && Meda.configuration.log_path.present?
+      @features = Meda::FeatureToggleService.new(Meda.configuration.features)
+    end
+    @features    
   end
 
   def self.logger
     if @logger.nil? && Meda.configuration.log_path.present?
       FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
       FileUtils.touch(Meda.configuration.log_path)
-      @logger = Meda::LoggingService.new(Meda.configuration.log_path)
-      @logger.level = Meda.configuration.log_level || Logger::INFO
+      loggingLevel = Meda.configuration.log_level || Logger::INFO
+      @logger = Meda::LoggingService.new(Meda.configuration.log_path,loggingLevel)
     end
     @logger
   end
@@ -80,10 +89,11 @@ module Meda
       :log_path => File.join(Dir.pwd, 'log/server.log'),
       :log_level => 1,
       :disk_pool => 2,
-      :google_analytics_pool => 2
+      :google_analytics_pool => 2,
+      :features => []
     }
 
-    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool
+    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features
 
     def initialize
       DEFAULTS.each do |key,val|

@@ -18,16 +18,23 @@ module Meda
 
       set :public_folder, 'static'
 
+      @@count = 0
+
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
       before do
+        if Meda.features.is_enabled("pre_request_log")
+          @@count = @@count + 1
           Thread.current[:request_uuid] = UUIDTools::UUID.random_create
-          logger.info("Starting request... #{request.url}")
+          logger.info("Starting request #{@@count} ... #{request.url}")
+        end
       end
 
       after do
-          logger.info("ending request... status code #{response.status}")
+        if Meda.features.is_enabled("post_request_log")
+          logger.info("Ending request... status code #{response.status}")
+        end  
       end
 
 
