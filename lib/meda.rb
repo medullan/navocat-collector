@@ -25,8 +25,9 @@ module Meda
     if @logger.nil? && Meda.configuration.log_path.present?
       FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
       FileUtils.touch(Meda.configuration.log_path)
-      @logger = Meda::LoggingService.new(Meda.configuration.log_path)
-      @logger.level = Meda.configuration.log_level || Logger::INFO
+      loggingLevel = Meda.configuration.log_level || Logger::INFO
+      @logger = Meda::LoggingService.new(Meda.configuration.log_path,loggingLevel)
+   #   @logger.level = Meda.configuration.log_level || Logger::INFO
     end
     @logger
   end

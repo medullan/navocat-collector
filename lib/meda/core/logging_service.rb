@@ -1,4 +1,4 @@
-#require 'logglier' 
+require 'logglier' 
 require 'logger'
 
 module Meda
@@ -8,30 +8,54 @@ module Meda
 
 	attr_accessor :level, :log, :nativelogger
 	
-   	def initialize(log_path)
-   #   	@log = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json) 
+   	def initialize(log_path,level)
+
+      	@logglyLogger = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json) 
+		@consoleLogger = Logger.new(STDOUT)
+      	@fileLogger = Logger.new(log_path)
+      
+      	@consoleLogger.level = level
+      	@fileLogger.level = level
+      	@level = level
+
+      	puts "logging level is #{@level}"
+      	puts "logging file location is #{log_path}"
       	
-      	@nativeLogger = Logger.new(Meda.configuration.log_path)
-      #	@nativelogger.level = Meda.configuration.log_level || Logger::INFO
     end
 
-  	def info(message)	
-  	#	message = add_meta_data(message)
-	#	@log.info(message)  		
-		@nativeLogger.info(message)
-  	end
-
-
   	def error(message)
-  	#	message = add_meta_data(message)
-	#	@log.error(message)  
-		@nativeLogger.error(message)
+  		message = add_meta_data(message)
+		@logglyLogger.error(message)  
+		@consoleLogger.error(message)
+		@fileLogger.error(message)
   	end
+
+  	def warn(message)
+  		if @level >= 2
+	  		message = add_meta_data(message)
+			@logglyLogger.warn(message)  
+			@consoleLogger.warn(message)
+			@fileLogger.warn(message)
+  		end
+  	end
+
+  	def info(message)	
+  		if @level >= 1
+	  		message = add_meta_data(message)
+			@logglyLogger.info(message)  		
+			@consoleLogger.info(message)
+			@fileLogger.info(message)
+  		end
+  	end
+
 
   	def debug(message)
-  #		message = add_meta_data(message)
-	#	@log.debug(message)  
-		@nativeLogger.debug(message)
+		if @level >= 0
+	  		message = add_meta_data(message)
+			@logglyLogger.debug(message)  
+			@consoleLogger.debug(message)
+			@fileLogger.debug(message)
+		end
   	end
 
   	def add_meta_data(message)

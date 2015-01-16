@@ -23,11 +23,13 @@ module Meda
 
       before do
           Thread.current[:request_uuid] = UUIDTools::UUID.random_create
+          logger.debug(" ddd Starting request... #{request.url}")
+        
           logger.info("Starting request... #{request.url}")
       end
 
       after do
-          logger.info("ending request... status code #{response.status}")
+          logger.info("Ending request... status code #{response.status}")
       end
 
 
