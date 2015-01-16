@@ -82,17 +82,23 @@ module Meda
             return false
           end
 
-          disk_pool.submit do
-            dataset.stream_hit_to_disk(hit)
+          if Meda.features.is_enabled("file_store")
+            disk_pool.submit do
+              dataset.stream_hit_to_disk(hit)
+            end
           end
 
-          if dataset.stream_to_ga?
-            ga_pool.submit do
-              dataset.stream_hit_to_ga(hit)
+          if Meda.features.is_enabled("google_analytics_store")
+            if dataset.stream_to_ga?
+              ga_pool.submit do
+                dataset.stream_hit_to_ga(hit)
+              end
+            else
+              logger.info("track ==> Data did not stream to GA")
             end
-          else
-            logger.info("track ==> Data did not stream to GA")
           end
+
+          
         end
         true
       end
@@ -108,18 +114,20 @@ module Meda
             return false
           end
 
-          disk_pool.submit do
-            Thread.current[:request_uuid] = hit.request_id
-            dataset.stream_hit_to_disk(hit)
+          if Meda.features.is_enabled("file_store")
+            disk_pool.submit do
+              dataset.stream_hit_to_disk(hit)
+            end
           end
 
-          if dataset.stream_to_ga?
-            ga_pool.submit do
-              Thread.current[:request_uuid] = hit.request_id
-              dataset.stream_hit_to_ga(hit)
+          if Meda.features.is_enabled("google_analytics_store")
+            if dataset.stream_to_ga?
+              ga_pool.submit do
+                dataset.stream_hit_to_ga(hit)
+              end
+            else
+              logger.info("track ==> Data did not stream to GA")
             end
-          else
-            logger.info("page ==> Data did not stream to GA")
           end
         end
         true
