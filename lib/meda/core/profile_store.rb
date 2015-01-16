@@ -47,6 +47,7 @@ module Meda
     # Find or create a profile for the identifying info in the given hash
     def find_or_create_profile(info)
       profile_id = lookup_profile(info)
+      logger.info("find_or_create_profile ==> Profile ID: #{profile_id}")
       if profile_id
         get_profile_by_id(profile_id)
       else
@@ -90,8 +91,10 @@ module Meda
     # Uses one criteria at a time from the given hash, in order, until a match is found
     def lookup_profile(info)
       lookup_keys = info.map{|k,v| key_hashed_profile_lookup(k,v)}
+      logger.info("lookup_profile ==> Lookup keys: #{lookup_keys}")
       while (lookup_keys.length > 0) do
         test_key = lookup_keys.shift
+        logger.info("lookup_profile ==> test keys: #{test_key}")
         return @tree.decode(test_key) if @tree.key?(test_key)
       end
       logger.info("lookup_profile ==> Nothing found in info: #{info}")
