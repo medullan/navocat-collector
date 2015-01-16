@@ -22,7 +22,7 @@ module Meda
 
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
-
+=begin
       before do
         if Meda.features.is_enabled("pre_request_log")
           @@count = @@count + 1
@@ -34,9 +34,9 @@ module Meda
       after do
         if Meda.features.is_enabled("post_request_log")
           logger.info("Ending request... status code #{response.status}")
-        end  
+        end
       end
-
+=end
 
       # @method get_index
       # @overload get "/meda"
