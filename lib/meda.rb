@@ -109,6 +109,7 @@ end
 
 Meda.configure do |config|
   begin
+    puts ENV['RACK_ENV']
     app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
     app_config.each_pair { |key, val| config[key] = val }
   rescue Errno::ENOENT => error
