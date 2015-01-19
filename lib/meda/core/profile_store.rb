@@ -48,11 +48,12 @@ module Meda
     def find_or_create_profile(info)
       profile_id = lookup_profile(info)
 
-      logger.error("find_or_create_profile ==> Profile ID: #{profile_id}")
+      logger.info("find_or_create_profile ==> Profile ID: #{profile_id}")
       if profile_id
-        logger.warn("profile id found")
+        
         get_profile_by_id(profile_id)
       else
+        logger.warn("profile id found")
         create_profile(info)
       end
     end
