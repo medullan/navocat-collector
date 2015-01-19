@@ -5,6 +5,7 @@ module Meda
 	attr_accessor :features
 	
    	def initialize(featuresToggles)
+      puts "featuresToggles #{featuresToggles}"
       @features = featuresToggles
     end
 
