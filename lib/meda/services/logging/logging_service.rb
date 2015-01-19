@@ -22,7 +22,7 @@ module Meda
         puts @logger
       end
 
-      puts "#{@loggers.length.to_s} have been setup"
+      puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
     #TODO - move to seaprate file/service
