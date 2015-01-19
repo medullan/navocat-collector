@@ -47,8 +47,10 @@ module Meda
     # Find or create a profile for the identifying info in the given hash
     def find_or_create_profile(info)
       profile_id = lookup_profile(info)
-      logger.info("find_or_create_profile ==> Profile ID: #{profile_id}")
+
+      logger.error("find_or_create_profile ==> Profile ID: #{profile_id}")
       if profile_id
+        logger.warn("profile id found")
         get_profile_by_id(profile_id)
       else
         create_profile(info)
@@ -57,9 +59,12 @@ module Meda
 
     # Return a hash with the profile info for the given profile_id
     def get_profile_by_id(profile_id)
+
       if @tree.key?(profile_key(profile_id))
+
         ActiveSupport::HashWithIndifferentAccess.new(@tree.decode(profile_key(profile_id)))
       else
+        puts "!!! profile is missing z1"
         logger.error("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
         false # no profile
       end

@@ -28,6 +28,7 @@ module Meda
           @@count = @@count + 1
           Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
           logger.info("Starting request #{@@count} ... #{request.url} ")
+          puts "Starting request #{@@count} ... #{request.url} "
         end
       end
 
@@ -70,6 +71,8 @@ module Meda
         if profile
           json({'profile_id' => profile[:id]})
         else
+            puts "going to send an error"
+          puts logger
           logger.error("post /meda/identify.json ==> Unable to find profile")
           respond_with_bad_request
         end

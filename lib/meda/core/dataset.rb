@@ -31,7 +31,9 @@ module Meda
 
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
+      puts "profile is #{profile} 34"
       @after_identify.call(self, profile)
+      puts "profile is #{profile} 36"
       return profile
     end
 
