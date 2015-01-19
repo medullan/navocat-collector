@@ -5,22 +5,16 @@ module Meda
 	attr_accessor :features
 	
    	def initialize(featuresToggles)
-      @@features = featuresToggles
+      @features = featuresToggles
     end
 
-
-  	def is_enabled(feature)
-  		if @@features.nil? || @@features.empty?
-        return true
+    def is_enabled(feature,default)
+      if @features.nil? || @features.empty?
+        return default
       end
 
-      if @@features[feature] == false
-        return false
-      end
-
-      #default to features on.
-      return true  
-  	end
+      return @features[feature] == true  
+    end
 
   end
 end

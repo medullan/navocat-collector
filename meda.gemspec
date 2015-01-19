@@ -27,7 +27,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "addressable"
   spec.add_runtime_dependency "logglier"
   spec.add_runtime_dependency "newrelic_rpm"
-  spec.add_runtime_dependency "eventmachine"
   spec.add_runtime_dependency "jdbc-postgres", "~> 9.3.1102"
   spec.add_runtime_dependency "json"
 

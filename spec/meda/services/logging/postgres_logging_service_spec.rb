@@ -7,17 +7,11 @@ describe Meda::PostgresLoggingService do
   describe 'postgres logging service' do
     it 'logs using info calls' do
 
-      json_message = %Q('{"message2":"love #{Time.new().inspect}"}')
+      	json_message = '{"message2":"love"}'
 
- 
+      	postgresLoggingService = Meda::PostgresLoggingService.new(Meda.configuration)	
 
-      postgresLoggingService = Meda::PostgresLoggingService.new(Meda.configuration)
-
-      
-		#t1=Thread.new{
-			postgresLoggingService.info(json_message)
-		#}
-
+		postgresLoggingService.info(json_message)
     end
   end
 

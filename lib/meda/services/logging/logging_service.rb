@@ -14,13 +14,15 @@ module Meda
       @loggers = []
       @level = config.log_level || Logger::INFO
 
-      @loggers.push(setup_file_logger(config))
-      @loggers.push(setup_console_logger(config))
-      @loggers.push(setup_loggly_logger(config))
-      @loggers.push(setup_postgres_logger(config))   
+      @loggers.push(setup_file_logger(config)) if setup_file_logger(config)
+      @loggers.push(setup_console_logger(config)) if setup_console_logger(config)
+      @loggers.push(setup_loggly_logger(config)) if setup_loggly_logger(config)
+      @loggers.push(setup_postgres_logger(config))   if setup_postgres_logger(config)
     end
 
+    #TODO - move to seaprate file/service
     def setup_file_logger(config)
+
       FileUtils.mkdir_p(File.dirname(config.log_path))
       FileUtils.touch(config.log_path)
       loggingLevel = config.log_level || Logger::INFO
@@ -43,16 +45,20 @@ module Meda
     end
 
     def setup_loggly_logger(config)
-      require 'logglier' 
-      @logglyLogger = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json,:threaded => true) 
-      @logglyLogger
+      if features.is_enabled("logs_loggly",false)
+        require 'logglier' 
+        @logglyLogger = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json,:threaded => true) 
+        @logglyLogger
+      end
     end
 
     def setup_postgres_logger(config)
-      require_relative 'postgres_logging_service.rb' 
-      @postgres_logger = Meda::PostgresLoggingService.new(config)
-      puts "postgres logger setup"
-      @postgres_logger
+      if features.is_enabled("logs_postgres",false)
+          require_relative 'postgres_logging_service.rb' 
+          @postgres_logger = Meda::PostgresLoggingService.new(config)
+          puts "postgres logger setup"
+          @postgres_logger
+        end
     end
 
   	def error(message)
@@ -96,9 +102,9 @@ module Meda
   	def add_meta_data(message,severity)
 
       hash = Hash.new();
-      hash["message"] = JSON.generate(message, quirks_mode: true)
+      hash["message"] = message
       hash["file"] = caller.second.split(":in")
-      hash["request id"] = Thread.current[:request_uuid]
+      hash["request_id"] = Thread.current[:request_uuid]
       hash["severity"] = severity
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s

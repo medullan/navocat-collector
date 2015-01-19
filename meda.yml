@@ -9,6 +9,8 @@ development:
   features:
     pre_request_log:true
     post_request_log:true
+    logs_postgres:true
+    logs_postgres_multithreaded:false
 
 production:
   disk_pool: 4

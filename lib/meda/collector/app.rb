@@ -24,7 +24,7 @@ module Meda
       helpers Sinatra::JSON
 
       before do
-        if Meda.features.is_enabled("pre_request_log")
+        if Meda.features.is_enabled("pre_request_log",false)
           @@count = @@count + 1
           Thread.current[:request_uuid] = UUIDTools::UUID.random_create
           logger.info("Starting request #{@@count} ... #{request.url}")
@@ -32,7 +32,7 @@ module Meda
       end
 
       after do
-        if Meda.features.is_enabled("post_request_log")
+        if Meda.features.is_enabled("post_request_log",false)
           logger.info("Ending request... status code #{response.status}")
         end
       end

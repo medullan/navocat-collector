@@ -1,6 +1,6 @@
 require 'java'
 require 'jdbc/postgres'
-require 'eventmachine'
+
 require_relative "../../../postgresql-9.3-1102.jdbc41.jar"
 
 java_import java.sql.DriverManager
@@ -36,7 +36,14 @@ module Meda
   	end
 
   	def writeToDb(message)
+  		if Meda.features.is_enabled("logs_postgres_multithreaded",false)
+  			Thread.new{write(message)}
+  		else
+  			write(message)
+  		end	
+  	end
 
+  	def write(message)
 		begin
 
 			connection = DriverManager.get_connection(@@dburl)
@@ -52,10 +59,9 @@ module Meda
 			connection.close()
   			
   			rescue StandardError => error
-   			puts "!! LOGGING ERROR !! -- #{error.message}"
+   			puts "!! POSTGRES LOGGING ERROR !! -- #{error.message}"
 		
-		end
-
+		end  		
   	end
   end
 end
