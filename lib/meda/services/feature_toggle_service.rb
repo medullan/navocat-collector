@@ -10,9 +10,7 @@ module Meda
     end
 
     def is_enabled(feature,default)
-      puts "test feature #{feature}, default #{default}"
       if @features.nil? || @features.empty?
-        puts "no features, return default"
         return default
       end
 
