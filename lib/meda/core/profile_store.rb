@@ -39,7 +39,7 @@ module Meda
         end
         true
       else
-        logger.info("alias_profile ==> No profile found with key: #{profile_id}")
+        logger.error("alias_profile ==> No profile found with key: #{profile_id}")
         false # no profile
       end
     end
@@ -60,7 +60,7 @@ module Meda
       if @tree.key?(profile_key(profile_id))
         ActiveSupport::HashWithIndifferentAccess.new(@tree.decode(profile_key(profile_id)))
       else
-        logger.info("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
+        logger.error("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
         false # no profile
       end
     end
@@ -72,7 +72,7 @@ module Meda
         @tree.encode(profile_key(profile_id), existing_profile.merge(profile_info))
         true
       else
-        logger.info("set_profile ==> No profile found with key #{profile_id}")
+        logger.error("set_profile ==> No profile found with key #{profile_id}")
         false # no profile
       end
     end
@@ -83,7 +83,7 @@ module Meda
         @tree.delete(profile_key(profile_id))
         true
       else
-        logger.info("delete_profile ==> No profile found with key #{profile_id}")
+        logger.error("delete_profile ==> No profile found with key #{profile_id}")
         false # no profile
       end
     end
