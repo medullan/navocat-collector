@@ -72,10 +72,12 @@ module Meda
     end
 
   	def error(message)
+      puts "sendind an error with message #{message}"
   		message = add_meta_data(message,"error")
   		 @loggers.each do |logger|
         logger.error(message)  
        end
+       puts "done sending an error with message #{message}"
   	end
 
   	def warn(message)
