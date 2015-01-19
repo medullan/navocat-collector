@@ -31,9 +31,9 @@ module Meda
 
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
-      puts "profile is #{profile} 34"
+    
       @after_identify.call(self, profile)
-      puts "profile is #{profile} 36"
+    
       return profile
     end
 
@@ -197,7 +197,7 @@ module Meda
 
     def store
       if @profile_store.nil?
-        puts " profile store on -- #{Meda.features.is_enabled("profile_store_hash", false)} "
+       
         if Meda.features.is_enabled("profile_store_hash", false)
           require_relative("../services/profile/profile_service.rb")
           @profile_store = Meda::ProfileService.new()
