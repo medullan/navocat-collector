@@ -52,7 +52,7 @@ module Meda
             configure_custom_filter(d)
          
             @datasets[d.token] = d
-            puts "#{d_name} dataset configuration completed"
+            puts "#{d_name}  #{d.token} dataset configuration completed"
           rescue Exception => e
             puts "Error: datasets.yml is incorrectly setup, please review - #{e.message}"
           end
