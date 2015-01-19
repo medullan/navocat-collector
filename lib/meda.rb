@@ -1,11 +1,12 @@
 require File.dirname(File.absolute_path(__FILE__)) + '/meda/version.rb'
 Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
+require File.dirname(File.absolute_path(__FILE__)) + '/meda/services/logging/logging_service.rb'
 require "active_support/all"
 require 'psych'
 require 'pathname'
+ 
 
 module Meda
-
   MEDA_CONFIG_FILE = 'meda.yml'
   DATASETS_CONFIG_FILE = 'datasets.yml'
 
@@ -24,18 +25,15 @@ module Meda
 
   def self.features
     require('meda/services/feature_toggle_service.rb')
-    if @features.nil? && Meda.configuration.log_path.present?
+    if @features.nil?
       @features = Meda::FeatureToggleService.new(Meda.configuration.features)
     end
     @features    
   end
 
   def self.logger
-    if @logger.nil? && Meda.configuration.log_path.present?
-      FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
-      FileUtils.touch(Meda.configuration.log_path)
-      loggingLevel = Meda.configuration.log_level || Logger::INFO
-      @logger = Meda::LoggingService.new(Meda.configuration.log_path,loggingLevel)
+    if @logger.nil?
+      @logger = Meda::LoggingService.new(Meda.configuration)
     end
     @logger
   end
@@ -93,7 +91,7 @@ module Meda
       :features => []
     }
 
-    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features
+    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url
 
     def initialize
       DEFAULTS.each do |key,val|
@@ -109,7 +107,6 @@ end
 
 Meda.configure do |config|
   begin
-    puts ENV['RACK_ENV']
     app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
     app_config.each_pair { |key, val| config[key] = val }
   rescue Errno::ENOENT => error
@@ -117,5 +114,4 @@ Meda.configure do |config|
   end
 end
 
-Meda
 

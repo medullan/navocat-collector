@@ -5,6 +5,10 @@ development:
   data_path: meda_data
   log_path: log/development.log
   log_level: 0
+  db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
+  features:
+    pre_request_log:true
+    post_request_log:true
 
 production:
   disk_pool: 4
@@ -29,3 +33,4 @@ test:
   data_path: meda_data
   log_path: log/test.log
   log_level: 0
+  db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
