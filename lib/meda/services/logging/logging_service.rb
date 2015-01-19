@@ -124,9 +124,10 @@ module Meda
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s
 		
-  #		if message.is_a? StandardError
-  #			hash["stacktrace"] = message.backtrace
- # 		end
+  		if message.is_a? StandardError
+        puts "backtrace #{message.backtrace}"
+  			hash["stacktrace"] = message.backtrace
+  		end
 
       hash.to_json
   	end	
