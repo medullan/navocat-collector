@@ -62,11 +62,9 @@ module Meda
     def get_profile_by_id(profile_id)
 
       if @tree.key?(profile_key(profile_id))
-
         ActiveSupport::HashWithIndifferentAccess.new(@tree.decode(profile_key(profile_id)))
       else
-        puts "!!! profile is missing z1"
-        logger.error("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
+        logger.info("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
         false # no profile
       end
     end
@@ -103,10 +101,6 @@ module Meda
         logger.info("lookup_profile ==> test keys: #{test_key}")
         return @tree.decode(test_key) if @tree.key?(test_key)
       end
-
-          puts "going to send an error"
-          puts logger
-
       logger.error("lookup_profile ==> Nothing found in info: #{info}")
       false
     end
