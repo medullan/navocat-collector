@@ -76,7 +76,7 @@ module Meda
 
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
-
+        hit.request_id = Thread.current["request_uuid"]
           if(hit.is_invalid)
             logger.info("track ==> Invalid hit")
             return false
@@ -107,7 +107,7 @@ module Meda
 
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
-          hit.request_id = Thread.current[:request_uuid]
+          hit.request_id = Thread.current["request_uuid"]
 
           if(hit.is_invalid)
             logger.info("page ==> Invalid hit")

@@ -112,7 +112,7 @@ module Meda
       hash = Hash.new();
       hash["message"] = message
       hash["file"] = caller.second.split(":in")
-      hash["request_id"] = Thread.current[:request_uuid]
+      hash["request_uuid"] = Thread.current["request_uuid"]
       hash["severity"] = severity
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s

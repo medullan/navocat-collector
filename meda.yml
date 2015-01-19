@@ -7,10 +7,10 @@ development:
   log_level: 0
   db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
   features:
-    pre_request_log:true
-    post_request_log:true
-    logs_postgres:true
-    logs_postgres_multithreaded:false
+    pre_request_log: true
+    post_request_log: true
+    logs_postgres: true
+    logs_postgres_multithreaded: false
 
 production:
   disk_pool: 4

@@ -24,10 +24,11 @@ module Meda
       helpers Sinatra::JSON
 
       before do
+        puts "test uui --- #{UUIDTools::UUID.random_create}"
         if Meda.features.is_enabled("pre_request_log",false)
           @@count = @@count + 1
-          Thread.current[:request_uuid] = UUIDTools::UUID.random_create
-          logger.info("Starting request #{@@count} ... #{request.url}")
+          Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
+          logger.info("Starting request #{@@count} ... #{request.url} ")
         end
       end
 
