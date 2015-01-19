@@ -18,6 +18,11 @@ module Meda
       @loggers.push(setup_console_logger(config)) if setup_console_logger(config)
       @loggers.push(setup_loggly_logger(config)) if setup_loggly_logger(config)
       @loggers.push(setup_postgres_logger(config))   if setup_postgres_logger(config)
+      @loggers.each do |logger|
+        puts @logger
+      end
+
+      puts "#{@loggers.length.to_s} have been setup"
     end
 
     #TODO - move to seaprate file/service
@@ -41,6 +46,7 @@ module Meda
       @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n\n"
       end
+       puts "console logger setup"
       @consoleLogger
     end
 
@@ -48,6 +54,7 @@ module Meda
       if features.is_enabled("logs_loggly",false)
         require 'logglier' 
         @logglyLogger = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json,:threaded => true) 
+        puts "loggly logger setup"
         @logglyLogger
       end
     end
