@@ -97,7 +97,11 @@ module Meda
         logger.info("lookup_profile ==> test keys: #{test_key}")
         return @tree.decode(test_key) if @tree.key?(test_key)
       end
-      logger.info("lookup_profile ==> Nothing found in info: #{info}")
+
+          puts "going to send an error"
+          puts logger
+
+      logger.error("lookup_profile ==> Nothing found in info: #{info}")
       false
     end
 

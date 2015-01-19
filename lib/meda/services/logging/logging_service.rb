@@ -31,12 +31,13 @@ module Meda
       FileUtils.mkdir_p(File.dirname(config.log_path))
       FileUtils.touch(config.log_path)
       loggingLevel = config.log_level || Logger::INFO
+      puts " loggingLevel  is #{loggingLevel} "
       @fileLogger = Logger.new(config.log_path)
-      @fileLogger.level = loggingLevel
+      
       @fileLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n"
       end
-
+      @fileLogger.level = loggingLevel
       puts "file logger setup at #{config.log_path}"
       @fileLogger
     end
@@ -44,10 +45,12 @@ module Meda
     def setup_console_logger(config)
       loggingLevel = config.log_level || Logger::INFO
       @consoleLogger = Logger.new(STDOUT)
-      @consoleLogger.level = loggingLevel
+      
       @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n\n"
       end
+      @consoleLogger.level = loggingLevel
+      puts " loggingLevel  is #{loggingLevel} "
        puts "console logger setup"
       @consoleLogger
     end
