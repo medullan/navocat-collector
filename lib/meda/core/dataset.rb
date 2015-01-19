@@ -195,9 +195,16 @@ module Meda
 
     def store
       if @profile_store.nil?
-        FileUtils.mkdir_p(meda_config.mapdb_path)
-        mapdb_path = File.join(meda_config.mapdb_path, path_name)
-        @profile_store = Meda::ProfileStore.new(mapdb_path)
+        puts " profile store on -- #{Meda.features.is_enabled("profile_store_hash", false)} "
+        if Meda.features.is_enabled("profile_store_hash", false)
+          require_relative("../services/profile/profile_service.rb")
+          @profile_store = Meda::ProfileService.new()
+        else
+          FileUtils.mkdir_p(meda_config.mapdb_path)
+          mapdb_path = File.join(meda_config.mapdb_path, path_name)
+          @profile_store = Meda::ProfileStore.new(mapdb_path)
+        end
+
       end
       @profile_store
     end

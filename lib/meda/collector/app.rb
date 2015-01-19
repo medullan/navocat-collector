@@ -28,7 +28,6 @@ module Meda
           @@count = @@count + 1
           Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
           logger.info("Starting request #{@@count} ... #{request.url} ")
-          logger.info("-- test -- ")
         end
       end
 
@@ -43,7 +42,14 @@ module Meda
       # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
       get '/meda' do
+
+                logger.debug("debug")
+        logger.info("info")
+        logger.warn("warn")
+        logger.error("error")
+        
         "Meda version #{Meda::VERSION}"
+
       end
 
       # @method get_static
@@ -224,9 +230,11 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
+        logger.info("in page")
         page_data = json_from_request
         #print_out_params(page_data)
         if valid_hit_request?(page_data)
+          logger.info("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else

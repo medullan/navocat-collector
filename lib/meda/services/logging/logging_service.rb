@@ -32,6 +32,7 @@ module Meda
       FileUtils.touch(config.log_path)
       loggingLevel = config.log_level || Logger::INFO
       @fileLogger = Logger.new(config.log_path)
+      @fileLogger.level = loggingLevel
       @fileLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n"
       end
@@ -43,6 +44,7 @@ module Meda
     def setup_console_logger(config)
       loggingLevel = config.log_level || Logger::INFO
       @consoleLogger = Logger.new(STDOUT)
+      @consoleLogger.level = loggingLevel
       @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n\n"
       end
@@ -70,10 +72,12 @@ module Meda
     end
 
   	def error(message)
+      puts "sendind an error with message #{message}"
   		message = add_meta_data(message,"error")
   		 @loggers.each do |logger|
         logger.error(message)  
        end
+       puts "done sending an error with message #{message}"
   	end
 
   	def warn(message)
