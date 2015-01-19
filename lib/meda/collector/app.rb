@@ -28,7 +28,7 @@ module Meda
           @@count = @@count + 1
           Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
           logger.info("Starting request #{@@count} ... #{request.url} ")
-          puts "Starting request #{@@count} ... #{request.url} ")
+          puts "Starting request #{@@count} ... #{request.url} "
         end
       end
 
