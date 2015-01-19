@@ -64,7 +64,7 @@ module Meda
         if profile
           json({'profile_id' => profile[:id]})
         else
-          logger.info("post /meda/identify.json ==> Unable to find profile")
+          logger.error("post /meda/identify.json ==> Unable to find profile")
           respond_with_bad_request
         end
       end
@@ -78,7 +78,7 @@ module Meda
           set_profile_id_in_cookie(profile['id'])
           respond_with_pixel
         else
-          logger.info("get /meda/identify.gif ==> Unable to find profile")
+          logger.error("get /meda/identify.gif ==> Unable to find profile")
           respond_with_bad_request
         end
       end
