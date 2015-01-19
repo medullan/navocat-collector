@@ -61,6 +61,7 @@ module Meda
 
     def setup_postgres_logger(config)
       if features.is_enabled("logs_postgres",false)
+          puts "setting up postgres logger"
           require_relative 'postgres_logging_service.rb' 
           @postgres_logger = Meda::PostgresLoggingService.new(config)
           puts "postgres logger setup"
