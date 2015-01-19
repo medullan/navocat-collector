@@ -73,9 +73,9 @@ module MapDB
         @mapdb = Java::OrgMapdb::DBMaker.
           newFileDB(Java::JavaIo::File.new("#{path}")).
           closeOnJvmShutdown().
-          transactionDisable(). #was throwing an error on windows
+       #   transactionDisable(). #was throwing an error on windows
           mmapFileEnable().
-          asyncWriteEnable(). #commented out because it was throughing an error
+       #   asyncWriteEnable(). #commented out because it was throughing an error
           make()
       end
     end
