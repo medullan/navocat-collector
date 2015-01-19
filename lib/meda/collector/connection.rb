@@ -104,7 +104,7 @@ module Meda
       end
 
       def page(params)
-
+        logger.debug("in page")
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
           hit.request_id = Thread.current["request_uuid"]
@@ -129,7 +129,9 @@ module Meda
               logger.info("track ==> Data did not stream to GA")
             end
           end
+
         end
+         logger.debug("returning true")
         true
       end
 
