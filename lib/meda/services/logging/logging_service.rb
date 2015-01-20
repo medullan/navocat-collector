@@ -2,8 +2,7 @@ require 'logger'
 require 'json'
 
 module Meda
-
-#TODO use fowardable?
+  
   class LoggingService
 	
 	def features
@@ -51,7 +50,7 @@ module Meda
       end
       @consoleLogger.level = loggingLevel
       puts " loggingLevel  is #{loggingLevel} "
-       puts "console logger setup"
+      puts "console logger setup"
       @consoleLogger
     end
 
@@ -66,21 +65,17 @@ module Meda
 
     def setup_postgres_logger(config)
       if features.is_enabled("logs_postgres",false)
-          puts "setting up postgres logger"
           require_relative 'postgres_logging_service.rb' 
           @postgres_logger = Meda::PostgresLoggingService.new(config)
-          puts "postgres logger setup"
           @postgres_logger
         end
     end
 
   	def error(message)
-      puts "sendind an error with message #{message}"
   		message = add_meta_data(message,"error")
   		 @loggers.each do |logger|
         logger.error(message)  
        end
-       puts "done sending an error with message #{message}"
   	end
 
   	def warn(message)
@@ -125,7 +120,6 @@ module Meda
       hash["thread"] = Thread.current.object_id.to_s
 		
   		if message.is_a? StandardError
-        puts "backtrace #{message.backtrace}"
   			hash["stacktrace"] = message.backtrace
   		end
 

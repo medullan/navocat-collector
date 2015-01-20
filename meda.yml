@@ -1,15 +1,15 @@
 development:
-  disk_pool: 2
-  google_analytics_pool: 2
+  disk_pool: 1
+  google_analytics_pool: 1
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 2
+  log_level: 3
   db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
   features:
     pre_request_log: true
     post_request_log: true
-    logs_postgres: true
+    logs_postgres: false
     logs_postgres_multithreaded: false
     profile_store_hash : true
 production:

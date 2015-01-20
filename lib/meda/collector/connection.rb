@@ -76,7 +76,6 @@ module Meda
 
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
-        hit.request_id = Thread.current["request_uuid"]
           if(hit.is_invalid)
             logger.info("track ==> Invalid hit")
             return false
@@ -84,6 +83,7 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
+              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -91,6 +91,7 @@ module Meda
           if Meda.features.is_enabled("google_analytics_store",true)
             if dataset.stream_to_ga?
               ga_pool.submit do
+                Thread.current["request_uuid"] = hit.request_uuid
                 dataset.stream_hit_to_ga(hit)
               end
             else
@@ -105,9 +106,9 @@ module Meda
 
       def page(params)
         logger.debug("in page")
+    
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
-          hit.request_id = Thread.current["request_uuid"]
 
           if(hit.is_invalid)
             logger.info("page ==> Invalid hit")
@@ -116,20 +117,24 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
+              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
 
+ 
           if Meda.features.is_enabled("google_analytics_store",true)
+          
             if dataset.stream_to_ga?
               ga_pool.submit do
+                Thread.current["request_uuid"] = hit.request_uuid
                 dataset.stream_hit_to_ga(hit)
               end
             else
               logger.info("track ==> Data did not stream to GA")
             end
           end
-
+           true   
         end
          logger.debug("returning true")
         true
@@ -148,10 +153,7 @@ module Meda
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
         rescue StandardError => e
-          puts Meda.logger
-          Meda.logger.error(e) if Meda.logger
-          puts e
-          raise e
+          Meda.logger.error(e)
         end
       end
 

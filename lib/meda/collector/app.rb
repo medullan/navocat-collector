@@ -233,15 +233,15 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
-        logger.info("in page")
+        logger.error("in page")
         page_data = json_from_request
         #print_out_params(page_data)
         if valid_hit_request?(page_data)
-          logger.info("in page, hit validated")
+          logger.error("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else
-          logger.info("post /meda/page.json ==> Invalid hit request")
+          logger.error("post /meda/page.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -256,7 +256,7 @@ module Meda
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.info("get /meda/page.gif ==> Invalid hit request")
+          logger.warn("get /meda/page.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
