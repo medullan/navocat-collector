@@ -10,7 +10,7 @@ module Meda
     end
 
     def is_enabled(feature,default)
-      if @features.nil? || @features.empty?
+      if @features.nil? || @features.empty? || @features[feature].nil?
         return default
       end
 
