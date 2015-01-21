@@ -9,7 +9,7 @@ describe Meda::PostgresLoggingService do
 
       	json_message = '{"message2":"love"}'
       	postgres_logger
-      	postgresLoggingService = Meda::PostgresLoggingService.new(Meda.configuration)	
+   #   	postgresLoggingService = Meda::PostgresLoggingService.new(Meda.configuration)	
 
 		postgresLoggingService.info(json_message)
     end
