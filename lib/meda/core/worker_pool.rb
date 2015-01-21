@@ -1,4 +1,5 @@
 require 'java'
+require 'uuidtools'
 
 java_import 'java.util.concurrent.Executors'
 java_import 'java.util.concurrent.TimeUnit'
@@ -12,8 +13,9 @@ module Meda
   # Implements a simple jRuby interface to a FixedThreadPool from java.util.concurrent
   class WorkerPool
     def initialize(options={})
-      pool_size = options[:size] || self.class.default_size
-      @pool = java.util.concurrent.Executors.new_fixed_thread_pool(pool_size)
+      @pool_size = options[:size] || self.class.default_size
+      @pool = java.util.concurrent.Executors.new_fixed_thread_pool(@pool_size)
+      @name = options[:name] || UUIDTools::UUID.random_create.to_s
     end
 
     def self.default_size
@@ -25,6 +27,10 @@ module Meda
     end
 
     def active?
+      if @pool.getActiveCount >= @pool_size
+        Meda.logger.error("For thread pool #{@name} active workers is #{@pool.getActiveCount} and pool size is #{@pool_size}")
+      end
+
       @pool.getActiveCount > 0
     end
 
@@ -33,6 +39,7 @@ module Meda
     end
 
     def await_termination(options={})
+      logger.error("await_termination")
       if options[:poll]
         until @pool.await_termination(options[:timeout] || 1, java.util.concurrent.TimeUnit::SECONDS)
           yield if block_given?
@@ -41,7 +48,14 @@ module Meda
         @pool.await_termination(options[:timeout] || 300, java.util.concurrent.TimeUnit::SECONDS)
       end
     end
-  end
 
+    def to_hash
+      hash = {}
+      hash["name"] = @name
+      hash["getActiveCount"] = @pool.getActiveCount
+      hash["poolsize"] = @pool_size
+      hash
+    end
+  end
 end
 

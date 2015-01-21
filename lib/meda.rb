@@ -91,7 +91,7 @@ module Meda
       :features => []
     }
 
-    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url
+    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger
 
     def initialize
       DEFAULTS.each do |key,val|

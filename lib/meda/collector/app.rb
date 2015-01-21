@@ -18,17 +18,16 @@ module Meda
 
       set :public_folder, 'static'
 
-      @@count = 0
 
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
+      
+
       before do
+        Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
         if Meda.features.is_enabled("pre_request_log",false)
-          @@count = @@count + 1
-          Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
-          logger.info("Starting request #{@@count} ... #{request.url} ")
-          puts "Starting request #{@@count} ... #{request.url} "
+          logger.info("Starting request... #{request.url} ")
         end
       end
 
@@ -42,15 +41,27 @@ module Meda
       # @method get_index
       # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
-      get '/meda' do
+      get '/meda' do        
+        "Meda version #{Meda::VERSION}"
+      end
 
+      # @method get debug info
+      # @overload get "/meda/debug"
+      # Thread pool data.
+      get '/meda/log' do
+        puts "puts"
         logger.debug("debug")
         logger.info("info")
         logger.warn("warn")
         logger.error("error")
-        
-        "Meda version #{Meda::VERSION}"
+        "see logs"
+      end
 
+      # @method get debug info
+      # @overload get "/meda/debug"
+      # Thread pool data.
+      get '/meda/debug' do
+        settings.connection.to_hash
       end
 
       # @method get_static
@@ -68,6 +79,7 @@ module Meda
         identify_data = raw_json_from_request
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
+        puts "1"
         if profile
           json({'profile_id' => profile[:id]})
         else
@@ -233,15 +245,15 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
-        logger.error("in page")
+        logger.debug("in page")
         page_data = json_from_request
         #print_out_params(page_data)
         if valid_hit_request?(page_data)
-          logger.error("in page, hit validated")
+          logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else
-          logger.error("post /meda/page.json ==> Invalid hit request")
+          logger.warn("post /meda/page.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end

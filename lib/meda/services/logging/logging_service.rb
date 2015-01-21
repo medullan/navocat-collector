@@ -2,7 +2,7 @@ require 'logger'
 require 'json'
 
 module Meda
-  
+
   class LoggingService
 	
 	def features
@@ -13,13 +13,10 @@ module Meda
       @loggers = []
       @level = config.log_level || Logger::INFO
 
-      @loggers.push(setup_file_logger(config)) if setup_file_logger(config)
-      @loggers.push(setup_console_logger(config)) if setup_console_logger(config)
-      @loggers.push(setup_loggly_logger(config)) if setup_loggly_logger(config)
-      @loggers.push(setup_postgres_logger(config))   if setup_postgres_logger(config)
-      @loggers.each do |logger|
-        puts @logger
-      end
+      setup_file_logger(config)
+      setup_console_logger(config)
+      setup_loggly_logger(config)
+      setup_postgres_logger(config)
 
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
@@ -30,15 +27,14 @@ module Meda
       FileUtils.mkdir_p(File.dirname(config.log_path))
       FileUtils.touch(config.log_path)
       loggingLevel = config.log_level || Logger::INFO
-      puts " loggingLevel  is #{loggingLevel} "
       @fileLogger = Logger.new(config.log_path)
       
       @fileLogger.formatter = proc do |severity, datetime, progname, msg|
          "#{msg}\n"
       end
-      @fileLogger.level = loggingLevel
+      @fileLogger.level = loggingLevel  
+      @loggers.push(@fileLogger)
       puts "file logger setup at #{config.log_path}"
-      @fileLogger
     end
 
     def setup_console_logger(config)
@@ -49,17 +45,16 @@ module Meda
          "#{msg}\n\n"
       end
       @consoleLogger.level = loggingLevel
-      puts " loggingLevel  is #{loggingLevel} "
+      @loggers.push(@consoleLogger)
       puts "console logger setup"
-      @consoleLogger
     end
 
     def setup_loggly_logger(config)
       if features.is_enabled("logs_loggly",false)
-        require 'logglier' 
-        @logglyLogger = Logglier.new("https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/", :format => :json,:threaded => true) 
-        puts "loggly logger setup"
-        @logglyLogger
+        require_relative 'loggly_logging_service.rb' 
+        @logglyLogger = Meda::LogglyLoggingService.new(config)
+        @loggers.push(@logglyLogger)
+        puts "loggly logger setup at #{config.loggly_url}"
       end
     end
 
@@ -67,7 +62,8 @@ module Meda
       if features.is_enabled("logs_postgres",false)
           require_relative 'postgres_logging_service.rb' 
           @postgres_logger = Meda::PostgresLoggingService.new(config)
-          @postgres_logger
+          @loggers.push(@postgres_logger)
+          puts "postgres logger setup"
         end
     end
 
@@ -111,11 +107,11 @@ module Meda
 
   	def add_meta_data(message,severity)
 
-      hash = Hash.new();
+      hash = Hash.new()
       hash["message"] = message
-      hash["file"] = caller.second.split(":in")
       hash["request_uuid"] = Thread.current["request_uuid"]
       hash["severity"] = severity
+      hash["file"] = caller.second.split(":in")
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s
 		

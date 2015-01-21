@@ -1,14 +1,24 @@
 development:
-  disk_pool: 1
-  google_analytics_pool: 1
+  disk_pool: 10
+  google_analytics_pool: 10
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 3
-  db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
+  log_level: 0
+  loggly_url: https://logs-01.loggly.com/inputs/d3edcdea-6c63-446a-a60b-4cb7db999d55/tag/ruby/
+  loggly_pool: 20
+  postgres_thread_pool: 10
+  postgres_logger:
+    username: wesleyboland
+    password: p@ssw0rd
+    database: collector-logs
+    server: localhost
+    port: 5433
+    db_pool: 20
   features:
     pre_request_log: true
     post_request_log: true
+    logs_loggly: true
     logs_postgres: false
     logs_postgres_multithreaded: false
     profile_store_hash : true
