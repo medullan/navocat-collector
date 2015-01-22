@@ -39,7 +39,7 @@ module Meda
         end
         true
       else
-        logger.error("alias_profile ==> No profile found with key: #{profile_id}")
+        logger.warn("alias_profile ==> No profile found with key: #{profile_id}")
         false # no profile
       end
     end
@@ -103,7 +103,7 @@ module Meda
         return @tree.decode(test_key) if @tree.key?(test_key)
       end
 
-      logger.error("lookup_profile ==> Nothing found in info: #{info}")
+      logger.warn("lookup_profile ==> Nothing found in info: #{info}")
       false
     end
 

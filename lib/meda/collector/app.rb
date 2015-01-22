@@ -61,7 +61,7 @@ module Meda
       # @overload get "/meda/debug"
       # Thread pool data.
       get '/meda/debug' do
-        settings.connection.to_hash
+        log.info("pool status => #{settings.connection.to_hash}")
       end
 
       # @method get_static
@@ -79,12 +79,10 @@ module Meda
         identify_data = raw_json_from_request
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
-        puts "1"
+
         if profile
           json({'profile_id' => profile[:id]})
         else
-            puts "going to send an error"
-          puts logger
           logger.error("post /meda/identify.json ==> Unable to find profile")
           respond_with_bad_request
         end

@@ -21,11 +21,8 @@ module MapDB
     end
 
     def decode(key)
-      puts "in map db"
       stored = @tree.get(key)
-       puts "got stored"
       return nil if stored.nil?
-      puts "not nil"
       Marshal.load String.from_java_bytes(stored)
     end
 
@@ -34,7 +31,6 @@ module MapDB
     end
 
     def keys
-      puts "list keys as array"
       @tree.key_set.to_a
     end
 

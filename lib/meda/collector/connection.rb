@@ -69,7 +69,7 @@ module Meda
             last_hit = dataset.last_hit
           else
           #  the default config is not have this enabled. do not log.
-          #  logger.info("get_last_hit ==> Data retrieval was not enabled")
+            logger.debug("get_last_hit ==> Data retrieval was not enabled")
           end
         end
       end

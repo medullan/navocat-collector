@@ -30,11 +30,8 @@ module Meda
     end
 
     def identify_profile(info)
-        puts "2"
       profile = store.find_or_create_profile(info)
-     puts "3"
       @after_identify.call(self, profile)
-    
       return profile
     end
 
@@ -112,7 +109,6 @@ module Meda
 
         filename = "#{hit.hour}-#{self.data_uuid}.json".gsub(':', '-')  #Replace : with - because can't save files with : on windows
         path = File.join(directory, filename)
-
 
         File.open(path, 'a') do |f|
           f.puts(hit.to_json)
