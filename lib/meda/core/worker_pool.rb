@@ -24,7 +24,7 @@ module Meda
 
     def submit(&block)
       if @pool.getActiveCount >= @pool_size
-        Meda.logger.error("For thread pool #{@name} active workers is #{@pool.getActiveCount} and pool size is #{@pool_size}")
+        Meda.logger.warn("For thread pool #{@name} active workers is #{@pool.getActiveCount} and pool size is #{@pool_size}")
       end
       @pool.submit(block)
     end

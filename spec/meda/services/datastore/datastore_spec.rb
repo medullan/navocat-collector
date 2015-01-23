@@ -33,7 +33,7 @@ describe "datastore" do
 	describe 'map db store' do
 
 		Meda.configure do |config|
-	  	config.data_path = 'meda_data'
+	  	  config.data_path = 'meda_data'
 		  config.log_path = 'log/test.log'
 		  config.log_level = 0
 		end

@@ -150,7 +150,7 @@ module Meda
         end
         @last_ga_hit[:staccato_hit] = ga_hit
         @last_ga_hit[:response] = ga_hit.track!
-        logger.info("Writing hit #{hit.id} to Google Analytics")
+        logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to GA")

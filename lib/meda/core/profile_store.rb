@@ -51,7 +51,7 @@ module Meda
         
         get_profile_by_id(profile_id)
       else
-        logger.warn("profile id found")
+        logger.warn("profile id not found, calling create")
         create_profile(info)
       end
     end
