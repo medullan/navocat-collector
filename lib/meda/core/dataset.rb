@@ -118,7 +118,7 @@ module Meda
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.info("Writing hit #{hit.id} to #{path}")
+        logger.info("Writing hit #{hit.id} to disk #{path}")
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)

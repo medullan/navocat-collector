@@ -75,7 +75,7 @@ module Meda
         @profile_db.encode(profile_key(profile_id), existing_profile.merge(profile_info))
         true
       else
-        logger.error("set_profile ==> No profile found with key #{profile_id}")
+        logger.error("INVALID POINT -- set_profile ==> No profile found with key #{profile_id}")
         false # no profile
       end
     end
@@ -86,7 +86,7 @@ module Meda
         @profile_db.delete(profile_key(profile_id))
         true
       else
-        logger.error("delete_profile ==> No profile found with key #{profile_id}")
+        logger.error("INVALID POINT -- delete_profile ==> No profile found with key #{profile_id}")
         false # no profile
       end
     end
