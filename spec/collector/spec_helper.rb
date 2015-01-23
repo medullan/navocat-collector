@@ -19,6 +19,7 @@ RSpec.configure { |c| c.include RSpecMixin }
 
 WebMock.disable_net_connect!
 
+
 Meda.configure do |config|
   config.data_path = 'meda_data'
   config.log_path = 'log/test.log'

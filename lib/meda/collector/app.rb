@@ -49,7 +49,7 @@ module Meda
       # @overload get "/meda/debug"
       # Thread pool data.
       get '/meda/log' do
-        puts "puts"
+
         logger.debug("debug")
         logger.info("info")
         logger.warn("warn")
@@ -80,7 +80,6 @@ module Meda
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
 
-        puts profile
         if profile
           json({'profile_id' => profile[:id]})
         else

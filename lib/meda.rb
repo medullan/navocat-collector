@@ -31,6 +31,12 @@ module Meda
     @features    
   end
 
+  def self.featuresNoCache
+    require('meda/services/feature_toggle_service.rb')
+    @features = Meda::FeatureToggleService.new(Meda.configuration.features)
+    @features    
+  end
+
   def self.logger
     if @logger.nil?
       @logger = Meda::LoggingService.new(Meda.configuration)

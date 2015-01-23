@@ -9,19 +9,20 @@ module Meda
   class ProfileDataStore
 	
    	def initialize(config)
-#      feature = Meda.features.get_feature_service("profile_store")
+      feature = Meda.features.get_feature_service("profile_store")
 
-#      case feature
-#      when "mapdb"
+      case feature
+      when "mapdb"
         @store = Meda::MapDbStore.new(config)
-#      when "hashdb"
-#        @store = Meda::HashDbStore.new(config)
-#      when "redisdb"
-#        @store = Meda::RedisDbStore.new(config)
-#      else
-#        raise "feature #{feature} is not implemented"
-#      end 
+      when "hashdb"
+        @store = Meda::HashDbStore.new(config)
+      when "redisdb"
+        @store = Meda::RedisDbStore.new(config)
+      else
+        raise "feature #{feature} is not implemented"
+      end 
     end
+
 
     def encode(key,value)
       Meda.logger.info("starting encode")
@@ -50,6 +51,7 @@ module Meda
       return result
     end
 
+    #better ruby benchmark
     def delete(key)
       Meda.logger.info("starting delete")
       startBenchmark = Time.now.to_f

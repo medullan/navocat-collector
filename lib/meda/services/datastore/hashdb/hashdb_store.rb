@@ -3,7 +3,7 @@ module Meda
   #ruby hash implementation profile database
   class HashDbStore
 	
-   	def initialize()
+   	def initialize(config)
       @hash = {}
     end
 
