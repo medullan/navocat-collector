@@ -22,12 +22,11 @@ module Meda
         hk_config.setMaximumPoolSize(20)
    
         hk_config.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource")
-   #     hk_config.setJdbcUrl(config.db_url)
         hk_config.addDataSourceProperty("user",config.postgres_logger["username"])
         hk_config.addDataSourceProperty("password",config.postgres_logger["password"])
         hk_config.addDataSourceProperty("serverName",config.postgres_logger["server"])
-		hk_config.addDataSourceProperty("portNumber",config.postgres_logger["port"])
-		hk_config.addDataSourceProperty("databaseName",config.postgres_logger["database"])
+		    hk_config.addDataSourceProperty("portNumber",config.postgres_logger["port"])
+		    hk_config.addDataSourceProperty("databaseName",config.postgres_logger["database"])
         @ds = HikariDataSource.new(hk_config)
   	end
 

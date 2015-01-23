@@ -44,11 +44,12 @@ module Meda
       begin
         config = Psych.load(File.open(Meda::DATASETS_CONFIG_FILE))
         config.each do |d_name, d_config|
+
           begin
             puts "#{d_name} dataset configuration started"
             d = Meda::Dataset.new(d_name, Meda.configuration)
             d_config.each_pair { |key, val| d.send("#{key}=", val) } 
-     
+            d.name = d_name
             configure_custom_filter(d)
          
             @datasets[d.token] = d
@@ -88,10 +89,12 @@ module Meda
       :log_level => 1,
       :disk_pool => 2,
       :google_analytics_pool => 2,
-      :features => []
+      :features => [],
+      :redis => [],
+      :name => "dataset_name"
     }
 
-    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger
+    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis
 
     def initialize
       DEFAULTS.each do |key,val|

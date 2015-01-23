@@ -17,6 +17,14 @@ module Meda
       return @features[feature] == true  
     end
 
+    def get_feature_service(feature)
+      if @features.nil? || @features.empty? || @features[feature].nil?
+        raise "missing features, cannot do #{feature} with #{@features}"
+      end
+ 
+      return @features[feature]  
+    end
+
   end
 end
 

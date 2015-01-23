@@ -15,8 +15,6 @@ module Meda
 
       setup_file_logger(config)
       setup_console_logger(config)
-      setup_loggly_logger(config)
-      setup_postgres_logger(config)
 
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
@@ -47,15 +45,6 @@ module Meda
       @consoleLogger.level = loggingLevel
       @loggers.push(@consoleLogger)
       puts "console logger setup"
-    end
-
-    def setup_loggly_logger(config)
-      if features.is_enabled("logs_loggly",false)
-        require_relative 'loggly_logging_service.rb' 
-        @logglyLogger = Meda::LogglyLoggingService.new(config)
-        @loggers.push(@logglyLogger)
-        puts "loggly logger setup at #{config.loggly_url}"
-      end
     end
 
     def setup_postgres_logger(config)
@@ -114,10 +103,9 @@ module Meda
       hash["file"] = caller.second.split(":in")
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s
-		
-  		if message.is_a? StandardError
-  			hash["stacktrace"] = message.backtrace
-  		end
+		  hash["stacktrace"] = message.backtrace if message.respond_to?(:backtrace)
+      hash["message"] = message.getMessage() if message.respond_to?(:getMessage)
+   
 
       hash.to_json
   	end	

@@ -14,8 +14,8 @@ module Meda
   # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
-    attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
+    attr_reader :data_uuid, :meda_config, :hit_filter
+    attr_accessor :name,:google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
 
     # Readers primarily used for tests, not especially thread-safe :p
@@ -32,6 +32,7 @@ module Meda
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
       @after_identify.call(self, profile)
+      Meda.logger.info("profile #{profile}")
       return profile
     end
 
@@ -198,16 +199,10 @@ module Meda
 
     def store
       if @profile_store.nil?
-       
-        if Meda.features.is_enabled("profile_store_hash", false)
-          require_relative("../services/profile/profile_service.rb")
-          @profile_store = Meda::ProfileService.new()
-        else
-          FileUtils.mkdir_p(meda_config.mapdb_path)
-          mapdb_path = File.join(meda_config.mapdb_path, path_name)
-          @profile_store = Meda::ProfileStore.new(mapdb_path)
-        end
-
+          store_config ={}
+          store_config["name"] = path_name
+          store_config["config"] = @meda_config
+          @profile_store = Meda::ProfileStore.new(store_config)
       end
       @profile_store
     end

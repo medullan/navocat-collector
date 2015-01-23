@@ -2,19 +2,24 @@ require_relative 'spec_helper'
 require_relative '../../lib/meda/core/profile_store'
 require 'tempfile'
 
+
 describe Meda::ProfileStore do
   subject do
-    tmpfile = Tempfile.new("testdb_#{rand(10000000)}")
-    Meda::ProfileStore.new(tmpfile.path)
+   
+#    tmpfile = Tempfile.new("testdb_#{rand(10000000)}")
+    config = {}
+    config["config"] = Meda.configuration
+    config["name"] = "testdb_#{rand(10000000)}"
+    Meda::ProfileStore.new(config)
   end
 
   describe '#create_profile' do
     it 'creates a profile record with lookups' do
       info = {'member_id' => '1234567890', 'contract_id' => '0987654321'}
       profile_id = subject.create_profile(info)['id']
-      expect(subject.tree.key?(subject.profile_key(profile_id))).to be_true
-      expect(subject.tree.key?(subject.key_hashed_profile_lookup('member_id', '1234567890'))).to be_true
-      expect(subject.tree.key?(subject.key_hashed_profile_lookup('contract_id', '0987654321'))).to be_true
+      expect(subject.profile_db.key?(subject.profile_key(profile_id))).to be_true
+      expect(subject.profile_db.key?(subject.key_hashed_profile_lookup('member_id', '1234567890'))).to be_true
+      expect(subject.profile_db.key?(subject.key_hashed_profile_lookup('contract_id', '0987654321'))).to be_true
     end
   end
 
@@ -23,7 +28,7 @@ describe Meda::ProfileStore do
       info = {'member_id' => '1234567890', 'contract_id' => '0987654321'}
       profile_id = subject.create_profile(info)['id']
       subject.alias_profile(profile_id, {'employee_id' => '1234'})
-      expect(subject.tree.key?(subject.key_hashed_profile_lookup('employee_id', '1234'))).to be_true
+      expect(subject.profile_db.key?(subject.key_hashed_profile_lookup('employee_id', '1234'))).to be_true
     end
   end
 
@@ -32,7 +37,7 @@ describe Meda::ProfileStore do
       it 'creates a new profile' do
         info = {'member_id' => '1234567890', 'contract_id' => '0987654321'}
         profile_id = subject.find_or_create_profile(info)['id']
-        expect(subject.tree.key?(subject.profile_key(profile_id))).to be_true
+        expect(subject.profile_db.key?(subject.profile_key(profile_id))).to be_true
       end
     end
 

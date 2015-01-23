@@ -41,6 +41,28 @@ describe Meda::FeatureToggleService do
 		expect(result).to be_false
     end
 
+    it 'raises exception when features do not exist' do
+    	featuresHash = {}
+    	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
+    	expect { feature_toggle_service.get_feature_service("feature") }.to raise_error
+    end
+
+    it 'raises exception when features does not include requested feature' do
+    	featuresHash = {}
+    	featuresHash["falseFeature"] = false  
+    	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
+    	expect { feature_toggle_service.get_feature_service("feature") }.to raise_error
+    end
+
+    it 'returns feature to use when it exists' do
+    	featuresHash = {}
+    	feature = "profile_store"
+    	feature_service = "mapdb"
+    	featuresHash[feature] = feature_service  
+    	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
+    	result = feature_toggle_service.get_feature_service(feature)
+    	expect(result).to eq(feature_service) 
+    end
 
   end
 
