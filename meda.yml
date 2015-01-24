@@ -16,7 +16,7 @@ development:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "h2"
+    profile_store: mapdb
 
 production:
   disk_pool: 4
@@ -31,12 +31,12 @@ production:
     password: nil
     pool: 10
   h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/test;USER=sa;PASSWORD=
+    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "mapdb"
+    profile_store: mapdb
 
 performance:
   disk_pool: 4
@@ -51,12 +51,12 @@ performance:
     password: nil
     pool: 10
   h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/test;USER=sa;PASSWORD=
+    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "mapdb"
+    profile_store: mapdb
 
 test:
   disk_pool: 2

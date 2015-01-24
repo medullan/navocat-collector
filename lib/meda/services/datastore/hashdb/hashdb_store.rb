@@ -22,6 +22,11 @@ module Meda
     def delete(key)
       @hash.delete(key)
     end
+
+    def size()
+      @hash.length
+    end
   end
+
 end
 
