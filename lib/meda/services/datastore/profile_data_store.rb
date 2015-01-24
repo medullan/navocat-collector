@@ -1,6 +1,7 @@
 require_relative "mapdb/mapdb_store"
 require_relative "hashdb/hashdb_store"
 require_relative "redisdb/redisdb_store"
+require_relative "h2db/h2db_store"
 require "benchmark"
 
 module Meda
@@ -18,6 +19,8 @@ module Meda
         @store = Meda::HashDbStore.new(config)
       when "redisdb"
         @store = Meda::RedisDbStore.new(config)
+      when "h2"
+        @store = Meda::H2DbStore.new(config)
       else
         raise "feature #{feature} is not implemented"
       end 

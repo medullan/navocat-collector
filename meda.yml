@@ -10,11 +10,14 @@ development:
     port: 6379
     password: nil
     pool: 10
+  h2:
+    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "hashdb"
+    profile_store: "h2"
+
 production:
   disk_pool: 4
   google_analytics_pool: 16
@@ -27,11 +30,14 @@ production:
     port: 6379
     password: nil
     pool: 10
+  h2:
+    db_conn_url: jdbc:h2:tcp://localhost/~/test;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
     profile_store: "mapdb"
+
 performance:
   disk_pool: 4
   google_analytics_pool: 16
@@ -39,6 +45,18 @@ performance:
   data_path: meda_data
   log_path: log/performance.log
   log_level: 1
+  redis:
+    host: localhost
+    port: 6379
+    password: nil
+    pool: 10
+  h2:
+    db_conn_url: jdbc:h2:tcp://localhost/~/test;USER=sa;PASSWORD=
+  features:
+    pre_request_log: true
+    post_request_log: true
+    logs_postgres: false
+    profile_store: "mapdb"
 
 test:
   disk_pool: 2
