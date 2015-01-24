@@ -35,7 +35,7 @@ module Meda
 
     def decode(key)
       redis do |r|
-        return r.get(ley)
+        return r.get(key)
       end
      
     end

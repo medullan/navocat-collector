@@ -14,7 +14,7 @@ development:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "mapdb"
+    profile_store: mapdb
 
 production:
   disk_pool: 4
@@ -32,7 +32,8 @@ production:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: "mapdb"
+    profile_store: mapdb
+    
 performance:
   disk_pool: 4
   google_analytics_pool: 16

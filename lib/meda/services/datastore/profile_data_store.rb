@@ -13,11 +13,11 @@ module Meda
 
 #      case feature
 #      when "mapdb"
-        @store = Meda::MapDbStore.new(config)
+#       @store = Meda::MapDbStore.new(config)
 #      when "hashdb"
 #        @store = Meda::HashDbStore.new(config)
 #      when "redisdb"
-#        @store = Meda::RedisDbStore.new(config)
+        @store = Meda::RedisDbStore.new(config)
 #      else
 #        raise "feature #{feature} is not implemented"
 #      end 
