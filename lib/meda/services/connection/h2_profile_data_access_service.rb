@@ -1,6 +1,5 @@
 require 'java'
 require 'logger'
-#require 'jdbc/h2'
 require 'meda'
 
 
@@ -9,57 +8,23 @@ require_relative "../../../javassist-3.19.0-GA.jar"
 require_relative "../../../slf4j-api-1.7.10.jar"
 require_relative "../../../slf4j-simple-1.7.10.jar"
 require_relative "../../../HikariCP-2.3.0.jar"
-#require_relative "h2_connection_pool_service.rb"
-
+require_relative "h2_connection_pool.rb"
 
 java_import java.sql.DriverManager
 java_import java.sql.PreparedStatement
 java_import java.sql.Connection
 
-
-#Jdbc::H2.load_driver(:require) if Jdbc::H2.respond_to?(:load_driver)
-
 module Meda
 
   class H2ProfileDataAccessService
 
-    attr_reader :db_conn_url
-
   	def initialize(db_conn_url)
-    		DriverManager.register_driver(org.h2.Driver.new)
-        @db_conn_url = db_conn_url
-
-    		#@db_conn_pool = Meda::H2ConnectionPoolService.new
-
-        # @h2_thread_pool = Meda::WorkerPool.new({
-        #   :size => 200,
-        #   :name => "h2_thread_pool"
-        # })
-
-        # at_exit do
-        #   @h2_thread_pool.shutdown
-        # end
+    		@db_conn_pool = Meda::H2ConnectionPoolService.new(db_conn_url)
   	end
-
-    def createOrUpdateProfile(profile_id, profile_params)
-      begin
-          profile = getProfile(profile_id)
-          if(!profile)
-            addProfile(profile_id)
-          else
-            updateProfile(profile_id, profile_params)
-          end
-      rescue Exception => error
-        puts "!! ERROR UPDATING PROFILE !! -- #{error.message} -- #{error.backtrace}"
-        return false 
-      end    
-    end
-
 
     def updateProfile(profile_id, profile_params)
       begin
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
+          connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("UPDATE Profiles SET age=?, gender=?, memberType=?, Option=?, heathAndConsumerSegmentation=?, healthSegmentation=?, consumerSegmentation=? WHERE profile_id=?")
           preparedStatement.setString(1, profile_params[:age] || "") 
           preparedStatement.setString(2, profile_params[:gender] || "")
@@ -82,8 +47,7 @@ module Meda
 
   	def addProfile(profile_id)
   		begin
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-    			connection = DriverManager.get_connection(@db_conn_url)
+    			connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("INSERT INTO Profiles(profile_id) VALUES (?)")
     			preparedStatement.setString(1, profile_id)
     	    preparedStatement.executeUpdate()
@@ -96,11 +60,9 @@ module Meda
   		end  
   	end
 
-
     def getProfile(profile_id)
       begin 
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
+          connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("SELECT * FROM Profiles WHERE profile_id=?")  
           preparedStatement.setString(1, profile_id)   
           resultSet = preparedStatement.executeQuery()
@@ -141,8 +103,7 @@ module Meda
 
     def removeProfile(profile_id)
       begin
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
+          connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("DELETE FROM Profiles WHERE profile_id (?)")
           preparedStatement.setString(1, profile_id)
           preparedStatement.executeUpdate()
@@ -150,32 +111,29 @@ module Meda
           connection.close()  
           return true 
       rescue Exception => error
-        puts "!! ERROR ADDING PROFILE !! -- #{error.message} -- #{error.backtrace}"
+        puts "!! ERROR REMOVING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       end  
     end
 
-
-    def addProfile(profile_id)
+    def removeProfileLookUp(profile_id)
       begin
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
-          preparedStatement = connection.prepareStatement("INSERT INTO Profiles(profile_id) VALUES (?)")
+          connection = @db_conn_pool.get_connection()
+          preparedStatement = connection.prepareStatement("DELETE FROM ProfileLookups WHERE profile_id (?)")
           preparedStatement.setString(1, profile_id)
           preparedStatement.executeUpdate()
           preparedStatement.close()
           connection.close()  
           return true 
       rescue Exception => error
-        puts "!! ERROR ADDING PROFILE !! -- #{error.message} -- #{error.backtrace}"
+        puts "!! ERROR REMOVING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       end  
     end
 
     def addProfileLookup(lookup_key, lookup_value)
       begin
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
+          connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("INSERT INTO ProfileLookups(lookup_key, profile_id) VALUES (?, ?)")
           preparedStatement.setString(1, lookup_key)
           preparedStatement.setString(2, lookup_value)
@@ -184,7 +142,7 @@ module Meda
           connection.close()  
           return true 
       rescue Exception => error
-        puts "!! ERROR ADDING PROFILE !! -- #{error.message} -- #{error.backtrace}"
+        puts "!! ERROR ADDING PROFILE LOOKUP!! -- #{error.message} -- #{error.backtrace}"
         return false 
       end  
     end
@@ -192,8 +150,7 @@ module Meda
 
     def lookupProfile(lookup_key)
       begin 
-          #connection = DriverManager.get_connection("jdbc:h2:~/test;USER=sa;PASSWORD=")
-          connection = DriverManager.get_connection(@db_conn_url)
+          connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("SELECT * FROM ProfileLookups WHERE lookup_key=?")  
           preparedStatement.setString(1, lookup_key)   
           resultSet = preparedStatement.executeQuery()
@@ -216,14 +173,9 @@ module Meda
           })  
 
       rescue Exception => error
-        puts "!! ERROR READING PROFILE !! -- #{error.message} -- #{error.backtrace}"
+        puts "!! ERROR LOOKING UP PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       end  
     end
-
-
-
-
-
   end
 end

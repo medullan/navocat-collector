@@ -4,7 +4,7 @@ require_relative '../../connection/h2_profile_data_access_service.rb'
 
 module Meda
 
-  #ruby hash implementation profile database
+  #Implementation of H2 datastore
   class H2DbStore
 	
   	attr_reader :db_conn_url
@@ -57,36 +57,10 @@ module Meda
       decode(key)
     end
 
-   #  def delete(key)
-   #    @h2db.removeProfile(key)
-   #	@h2db.removeProfileLookup(key)
-   #  end
+    def delete(key)
+      @h2db.removeProfile(key)
+   	@h2db.removeProfileLookup(key)
+    end
 
-   #  def encode(key,value)
-   #   k = "cb"
-   #   cb_hash = "#{Digest::SHA1.hexdigest(k.to_s)}"
-
-   #    sections = key.split(':')
-   #    if !sections.include?(cb_hash)
-	  #     if sections.include?("lookup") 
-	  #     	profile_id = sections[3]
-	  #     else
-	  #     	if !value.has_key?("id")
-	  #     		profile_id = sections[1]
-	  #     	else
-	  #     		return
-	  #     	end
-	  # 	  end
-	  # 	  @h2db.createOrUpdateProfile(profile_id, value)
-	  # end
-   #  end
-
-  
-
-
-
-   #  def delete(key)
-   #    @h2db.removeProfile(key)
-   #  end
   end
 end
