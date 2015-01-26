@@ -7,7 +7,7 @@ require_relative '../../../h2-1.3.176.jar'
 require_relative "../../../javassist-3.19.0-GA.jar"
 require_relative "../../../slf4j-api-1.7.10.jar"
 require_relative "../../../slf4j-simple-1.7.10.jar"
-require_relative "../../../HikariCP-2.3.0.jar"
+require_relative "../../../HikariCP-2.3.1.jar"
 require_relative "h2_connection_pool.rb"
 
 java_import java.sql.DriverManager
@@ -19,20 +19,21 @@ module Meda
   class H2ProfileDataAccessService
 
   	def initialize(db_conn_url)
-    		@db_conn_pool = Meda::H2ConnectionPoolService.new(db_conn_url)
-  	end
+      @db_conn_pool = Meda::H2ConnectionPoolService.new(db_conn_url)
+
+    end
 
     def updateProfile(profile_id, profile_params)
       begin
           connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("UPDATE Profiles SET age=?, gender=?, memberType=?, Option=?, heathAndConsumerSegmentation=?, healthSegmentation=?, consumerSegmentation=? WHERE profile_id=?")
-          preparedStatement.setString(1, profile_params[:age] || "") 
-          preparedStatement.setString(2, profile_params[:gender] || "")
-          preparedStatement.setString(3, profile_params[:memberType] || "")
-          preparedStatement.setString(4, profile_params[:Option] || "")
-          preparedStatement.setString(5, profile_params[:heathAndConsumerSegmentation] || "")
-          preparedStatement.setString(6, profile_params[:healthSegmentation] || "")
-          preparedStatement.setString(7, profile_params[:consumerSegmentation] || "")
+          preparedStatement.setString(1, profile_params[:age].to_s || "") 
+          preparedStatement.setString(2, profile_params[:gender].to_s || "")
+          preparedStatement.setString(3, profile_params[:memberType].to_s || "")
+          preparedStatement.setString(4, profile_params[:Option].to_s || "")
+          preparedStatement.setString(5, profile_params[:heathAndConsumerSegmentation].to_s || "")
+          preparedStatement.setString(6, profile_params[:healthSegmentation].to_s || "")
+          preparedStatement.setString(7, profile_params[:consumerSegmentation].to_s || "")
           preparedStatement.setString(8, profile_id)
           preparedStatement.executeUpdate()
           preparedStatement.close()

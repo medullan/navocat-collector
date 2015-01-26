@@ -11,7 +11,7 @@ development:
     password: nil
     pool: 10
   h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
+    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb
   features:
     pre_request_log: true
     post_request_log: true
