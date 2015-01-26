@@ -1,3 +1,4 @@
+require 'uuidtools'
 require_relative "../../core/profile_store.rb"
 
 module Meda
@@ -5,28 +6,37 @@ module Meda
   #load the data store with profile data
   class ProfileLoader
 	
-   	def loadWithDefaultProfile(count,config) 
+   	def loadWithDefaultProfile(amount,config) 
 
       profileStore = Meda::ProfileStore.new(config)
 
-      for i in 0..count
+      for i in 0..amount
 		profileStore.create_profile({})
 	  end
 
     end
 
 
- 	def loadWithSomeProfileData(count,config)
+ 	def loadWithSomeProfileData(amount,config)
 
       profileStore = Meda::ProfileStore.new(config)
-      profileInfo = {}
-      profileInfo["gender"] = "male"
-      profileInfo["age"] = 21
-	  profileInfo["street"] = "piper"
-		
+  
+	 
+      for i in 0..amount
+      	if( i % 100 == 0 )
+      		Meda.logger.info("--Loaded ------- #{i} profiles of #{amount}")
+      	end
+      	profileInfo = {}
+      	profileInfo[:cb] = UUIDTools::UUID.random_create.to_s
+      	profileInfo[:member_id] = UUIDTools::UUID.random_create.to_s
+    
+		profile = profileStore.find_or_create_profile(profileInfo)
+		profile_id = profile[:id]
 
-      for i in 0..count
-		profileStore.create_profile(profileInfo)
+		additional_profile_info = {}
+		additional_profile_info[:age] = 21
+	  	additional_profile_info[:street] = 'piper'
+		profileStore.set_profile(profile_id,additional_profile_info)
 	  end
 
     end

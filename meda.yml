@@ -4,7 +4,7 @@ development:
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 0
+  log_level: 1
   redis:
     host: localhost
     port: 6379
@@ -17,6 +17,7 @@ development:
     post_request_log: true
     logs_postgres: false
     profile_store: mapdb
+    profile_loader: true
 
 production:
   disk_pool: 4
