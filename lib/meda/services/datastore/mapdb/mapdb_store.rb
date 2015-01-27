@@ -8,7 +8,6 @@ module Meda
     attr_reader :mapdb, :path, :tree
 
    	def initialize(config)
-      puts config
       FileUtils.mkdir_p(config["config"].mapdb_path)
       mapdb_path = File.join(config["config"].mapdb_path, config["name"])
       @mapdb = MapDB::DB.new(mapdb_path.to_s)

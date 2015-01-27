@@ -5,6 +5,7 @@ require 'meda'
 require 'meda/collector/connection'
 require 'logger'
 require 'uuidtools'
+require 'meda/services/loader/profile_loader'
 
 module Meda
   module Collector
@@ -27,7 +28,7 @@ module Meda
       before do
         Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
         if Meda.features.is_enabled("pre_request_log",false)
-          logger.info("Starting request... #{request.url} ")
+          logger.info("Starting request... #{request.url} ..")
         end
       end
 
@@ -37,6 +38,27 @@ module Meda
         end
       end
 
+
+      # @method post_meda_load
+      # @overload post "/meda/load"
+      # Testing tool to load data into profile database
+      post '/meda/load' do 
+        if Meda.features.is_enabled("profile_loader",false)       
+          params_hash = JSON.parse(request.body.read)
+          dataset = Meda.datasets[params_hash['dataset']]
+
+          store_config = {}
+          store_config['config'] = Meda.configuration
+          store_config['name'] = dataset.name
+          
+          profileLoader = Meda::ProfileLoader.new()
+          profileLoader.loadWithSomeProfileData(params_hash['amount'],store_config)
+          
+          respond_with_ok
+        else
+          logger.warn("profile loader is disabled.")
+        end
+      end
 
       # @method get_index
       # @overload get "/meda"
@@ -49,19 +71,12 @@ module Meda
       # @overload get "/meda/debug"
       # Thread pool data.
       get '/meda/log' do
-        puts "puts"
+
         logger.debug("debug")
         logger.info("info")
         logger.warn("warn")
         logger.error("error")
         "see logs"
-      end
-
-      # @method get debug info
-      # @overload get "/meda/debug"
-      # Thread pool data.
-      get '/meda/debug' do
-        log.info("pool status => #{settings.connection.to_hash}")
       end
 
       # @method get_static
@@ -80,7 +95,6 @@ module Meda
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
 
-        #puts profile
         if profile
           json({'profile_id' => profile[:id]})
         else
@@ -308,6 +322,9 @@ module Meda
         respond_with_pixel
       end
 
+
+     
+
       # Config
 
       configure do
@@ -421,6 +438,7 @@ module Meda
           :screen_resolution => params[:utmsr]
         })
       end
+
 
       def logger
         @logger ||= Meda.logger || Logger.new(STDOUT)

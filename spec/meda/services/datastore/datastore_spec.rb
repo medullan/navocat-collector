@@ -32,15 +32,15 @@ describe "datastore" do
 
 	describe 'map db store' do
 
-		Meda.configure do |config|
-	  	  config.data_path = 'meda_data'
-		  config.log_path = 'log/test.log'
-		  config.log_level = 0
-		end
+		Meda.configuration.features = {}
+		Meda.configuration.features["profile_store"] = "mapdb"
+
 		store_config = {}
 		store_config["config"] = Meda.configuration
 		store_config["name"] = "testdb_#{rand(10000000)}"
 
+		Meda.featuresNoCache
+		
 		@profile_store = Meda::ProfileStore.new(store_config)
 
 		store = Meda::MapDbStore.new(store_config)
@@ -58,7 +58,7 @@ describe "datastore" do
     end
 
 	describe 'hash db store' do
-		store = Meda::HashDbStore.new()
+		store = Meda::HashDbStore.new({})
 	    it 'encode and decode' do	   
 	    	encode_and_decode(store,key,value)
 	    end

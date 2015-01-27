@@ -102,6 +102,7 @@ module Meda
 
     def stream_hit_to_disk(hit)
       begin
+        logger.info("Starting to write hit to DISK")
         directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
         unless @data_paths[directory]
           # create the data directory if it does not exist
@@ -128,6 +129,7 @@ module Meda
 
     def stream_hit_to_ga(hit)
       begin
+        logger.info("Starting to stream hit to GA")
         @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
         return unless stream_to_ga?
             

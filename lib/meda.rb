@@ -31,6 +31,12 @@ module Meda
     @features    
   end
 
+  def self.featuresNoCache
+    require('meda/services/feature_toggle_service.rb')
+    @features = Meda::FeatureToggleService.new(Meda.configuration.features)
+    @features    
+  end
+
   def self.logger
     if @logger.nil?
       @logger = Meda::LoggingService.new(Meda.configuration)
@@ -94,7 +100,7 @@ module Meda
       :name => "dataset_name"
     }
 
-    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis
+    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis, :h2
 
     def initialize
       DEFAULTS.each do |key,val|
