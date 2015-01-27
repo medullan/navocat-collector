@@ -24,7 +24,6 @@ module Meda
     def initialize(name, meda_config={})
       @name = name
       @meda_config = meda_config
-      #puts "Meda Config:#{@meda_config}"
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
@@ -203,7 +202,6 @@ module Meda
           store_config ={}
           store_config["name"] = path_name
           store_config["config"] = @meda_config
-          puts "Meda Config:#{store_config}"
           @profile_store = Meda::ProfileStore.new(store_config)
       end
       @profile_store

@@ -10,34 +10,54 @@ module Meda
   	REDIS_TIMEOUT_DEFAULT = 5 # seconds
 
    	def initialize(config)
-  		if @redis_pool.nil? && config.redis.present?
-  		  pool_size = config.redis[:pool] || REDIS_POOL_DEFAULT
-  		  @redis_pool = ConnectionPool.new(size: pool_size, timeout: REDIS_TIMEOUT_DEFAULT) do
-  		    Redis.new(:host => config.redis[:host], :port => config.redis[:port], :password => config.redis[:password])
-  		  end
-		end
-		@redis_pool
+   	  #TODO: replace with @config=config
+   	  @config=Meda.configuration
+  		#if @redis_pool.nil? && config.redis.present?
+  		 #pool_size = config.redis[:pool] || REDIS_POOL_DEFAULT
+        #@redis_pool = ConnectionPool.new(size: pool_size, timeout: REDIS_TIMEOUT_DEFAULT) do
+          #Redis.new(:host => config.redis[:host], :port => config.redis[:port], :password => config.redis[:password])
+        #end
+      #end
     end
 
     def encode(key,value)
       redis do |r|
-        r.set(key, value)
+        #r.set(key, value)
+       r.pipelined do |rp|
+          if key.include? "lookup"
+              rp.sadd(key, value)
+          else
+              rp.mapped_hmset(key, value)
+          end
+       end
+      
       end
     end
 
     def key?(key)
-      exists = false
       redis do |r|
-        exists = r.exists(key)
+        return r.exists(key)
       end
-      exists
     end
 
     def decode(key)
-      redis do |r|
-        return r.get(key)
-      end
-     
+       returnVal = nil
+       values = nil
+       redis do |r|
+          #return r.get(key)
+          if key.include? "lookup"
+              values=r.sinter(key)
+              if values.length > 0 
+                returnVal=values.first
+              end
+          else
+              values=r.hgetall(key)
+              if not values.empty?
+                returnVal=values
+              end
+          end
+       end
+       returnVal
     end
 
     def delete(key)
@@ -45,13 +65,22 @@ module Meda
         r.del(key)
       end
     end
-
+    
+    def redis_conn
+      if @redis_pool.nil? && @config.redis.present?
+        pool_size = @config.redis[:pool] || REDIS_POOL_DEFAULT
+        @redis_pool = ConnectionPool.new(size: pool_size, timeout: REDIS_TIMEOUT_DEFAULT) do
+          Redis.new(:host => @config.redis[:host], :port => @config.redis[:port], :password => @config.redis[:password])
+        end
+      end
+      @redis_pool
+    end
 
   	def redis(&block)
       #redis_conn=Redis.new(:host => Meda.configuration.redis[:host], :port => Meda.configuration.redis[:port], :password => Meda.configuration.redis[:password])
       #redis_conn.select(1)
       #yield(redis_conn) if block_given?
-       Meda.redis.with do |conn|
+       redis_conn.with do |conn|
         conn.select(1)
         yield(conn) if block_given?
       end

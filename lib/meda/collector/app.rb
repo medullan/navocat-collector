@@ -80,7 +80,7 @@ module Meda
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
 
-        puts profile
+        #puts profile
         if profile
           json({'profile_id' => profile[:id]})
         else

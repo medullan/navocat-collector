@@ -14,7 +14,7 @@ development:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: mapdb
+    profile_store: redis
 
 production:
   disk_pool: 4
@@ -32,7 +32,7 @@ production:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: mapdb
+    profile_store: redis
     
 performance:
   disk_pool: 4
