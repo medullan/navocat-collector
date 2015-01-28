@@ -47,10 +47,9 @@ module Meda
     # Find or create a profile for the identifying info in the given hash
     def find_or_create_profile(info)
       profile_id = lookup_profile(info)
-
+ 
       logger.info("find_or_create_profile ==> Profile ID: #{profile_id}")
       if profile_id
-        
         get_profile_by_id(profile_id)
       else
         logger.warn("profile id not found, calling create")
@@ -61,8 +60,7 @@ module Meda
     # Return a hash with the profile info for the given profile_id
     def get_profile_by_id(profile_id)
 
-      if @profile_db.key?(profile_key(profile_id))
-
+      if @profile_db.key?(profile_key(profile_id))     
         ActiveSupport::HashWithIndifferentAccess.new(@profile_db.decode(profile_key(profile_id)))
       else
         logger.warn("get_profile_by_id ==> No profile found with key #{profile_key(profile_id)}")
