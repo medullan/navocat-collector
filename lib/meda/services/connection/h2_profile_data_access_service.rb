@@ -28,18 +28,22 @@ module Meda
     def createSchema
       begin
       connection = @db_conn_pool.get_connection()
-      statement = connection.createStatement();
-      statement.executeUpdate("DROP TABLE Profiles IF EXISTS")
-      statement.executeUpdate("CREATE TABLE Profiles (profile_id VARCHAR(255) PRIMARY KEY, age VARCHAR(255), gender VARCHAR(255), memberType VARCHAR(255),Option VARCHAR(255),heathAndConsumerSegmentation VARCHAR(255),healthSegmentation VARCHAR(255),consumerSegmentation VARCHAR(255))")
-      statement.executeUpdate("DROP TABLE ProfileLookups IF EXISTS")
-      statement.executeUpdate("CREATE TABLE ProfileLookups (lookup_key VARCHAR(255) PRIMARY KEY, profile_id VARCHAR(255))")
+        statement = connection.createStatement();
+        statement.executeUpdate("DROP TABLE Profiles IF EXISTS")
+        statement.executeUpdate("CREATE TABLE Profiles (profile_id VARCHAR(255) PRIMARY KEY, age VARCHAR(255), gender VARCHAR(255), memberType VARCHAR(255),Option VARCHAR(255),heathAndConsumerSegmentation VARCHAR(255),healthSegmentation VARCHAR(255),consumerSegmentation VARCHAR(255))")
+        statement.executeUpdate("DROP TABLE ProfileLookups IF EXISTS")
+        statement.executeUpdate("CREATE TABLE ProfileLookups (lookup_key VARCHAR(255) PRIMARY KEY, profile_id VARCHAR(255))")
   
       rescue Exception => error
         puts "!! ERROR CREATING TABLES !! -- #{error.message} -- #{error.backtrace}"
       ensure
+        puts "" 
+        puts "********** createSchema - Before connection closed *********"
+        @db_conn_pool.get_stats
         statement.close()
         connection.close()   
-        #puts "connection closed"
+        puts "********** createSchema - Afters connection closed *********"
+        @db_conn_pool.get_stats
       end      
     end
 
@@ -62,8 +66,13 @@ module Meda
         puts "!! ERROR UPDATING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       ensure
+        puts "" 
+        puts "********** updateProfile - Before connection closed *********"
+        @db_conn_pool.get_stats
         preparedStatement.close()
         connection.close() 
+        puts "********** updateProfile - Afters connection closed *********"
+        @db_conn_pool.get_stats
       end    
     end
 
@@ -76,11 +85,17 @@ module Meda
     	    preparedStatement.executeUpdate()
           return true	
   		rescue Exception => error
+
    			puts "!! ERROR ADDING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       ensure
+        puts ""    
+        puts "********** addProfile - Before connection closed *********"
+        @db_conn_pool.get_stats
         preparedStatement.close()
         connection.close() 
+        puts "********** addProfile - Afters connection closed *********"
+        @db_conn_pool.get_stats
   		end  
   	end
 
@@ -120,9 +135,14 @@ module Meda
         puts "!! ERROR READING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       ensure
+        puts ""    
+        puts "********** getProfile - Before connection closed *********"
+        @db_conn_pool.get_stats
         resultSet.close()          
         preparedStatement.close()
         connection.close()   
+        puts "********** getProfile - Afters connection closed *********"
+        @db_conn_pool.get_stats
       end  
     end
 
@@ -152,6 +172,7 @@ module Meda
         puts "!! ERROR REMOVING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
       ensure      
+
         preparedStatement.close()
         connection.close()
       end  
@@ -168,9 +189,14 @@ module Meda
       rescue Exception => error
         puts "!! ERROR ADDING PROFILE LOOKUP!! -- #{error.message} -- #{error.backtrace}"
         return false 
-      ensure      
+      ensure    
+        puts ""      
+        puts "********** addProfileLookup - Before connection closed *********"
+        @db_conn_pool.get_stats
         preparedStatement.close()
         connection.close()
+        puts "********** addProfileLookup - Afters connection closed *********"
+        @db_conn_pool.get_stats
       end  
     end
 
@@ -199,11 +225,15 @@ module Meda
       rescue Exception => error
         puts "!! ERROR LOOKING UP PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
-      ensure      
+      ensure  
+        puts ""    
+        puts "********** lookupProfile - Before connection closed *********"
+        @db_conn_pool.get_stats
         resultSet.close()
         preparedStatement.close()
         connection.close()  
-        #puts "connections closed"
+        puts "********** lookupProfile - Afters connection closed *********"
+        @db_conn_pool.get_stats
       end  
     end
   end
