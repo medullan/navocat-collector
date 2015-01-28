@@ -1,7 +1,7 @@
 require 'java'
 require_relative '../../../h2-1.3.176.jar'
 #require_relative "../../../HikariCP-2.3.1.jar"
-require_relative "../../../HikariCP-java6-2.0.1.jar"
+require_relative "../../../HikariCP-java6-2.3.1.jar"
 
 #java_import org.h2.jdbcx.JdbcConnectionPool;
 java_import com.zaxxer.hikari.HikariConfig
