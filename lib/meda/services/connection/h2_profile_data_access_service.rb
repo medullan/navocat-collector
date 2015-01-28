@@ -7,7 +7,8 @@ require_relative '../../../h2-1.3.176.jar'
 require_relative "../../../javassist-3.19.0-GA.jar"
 require_relative "../../../slf4j-api-1.7.10.jar"
 require_relative "../../../slf4j-simple-1.7.10.jar"
-require_relative "../../../HikariCP-2.3.1.jar"
+#require_relative "../../../HikariCP-2.3.1.jar"
+require_relative "../../../HikariCP-java6-2.0.1.jar"
 require_relative "h2_connection_pool.rb"
 
 java_import java.sql.DriverManager
@@ -82,7 +83,7 @@ module Meda
             consumerSegmentation           = resultSet.getString("consumerSegmentation")
           end
 
-          
+
           resultSet.close()          
           preparedStatement.close()
           connection.close()  

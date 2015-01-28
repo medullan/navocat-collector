@@ -1,6 +1,7 @@
 require 'java'
 require_relative '../../../h2-1.3.176.jar'
-require_relative "../../../HikariCP-2.3.1.jar"
+#require_relative "../../../HikariCP-2.3.1.jar"
+require_relative "../../../HikariCP-java6-2.0.1.jar"
 
 #java_import org.h2.jdbcx.JdbcConnectionPool;
 java_import com.zaxxer.hikari.HikariConfig
@@ -18,6 +19,7 @@ module Meda
         config.setMaximumPoolSize(50)
         config.setMaxLifetime(3600000)  #one hour
         config.setJdbcUrl(db_conn_url);
+        config.setDriverClassName("org.h2.jdbcx.JdbcDataSource")
         config.setUsername("sa");
         config.setPassword("");
         config.setLeakDetectionThreshold(10000)
@@ -25,6 +27,8 @@ module Meda
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         config.addDataSourceProperty("useServerPrepStmts", "true");
+
+
 
         @cp = HikariDataSource.new(config);
     end
