@@ -4,7 +4,7 @@ development:
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 1
+  log_level: 3
   redis:
     host: localhost
     port: 6379
