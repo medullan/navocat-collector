@@ -21,7 +21,20 @@ module Meda
 
   	def initialize(db_conn_url)
       @db_conn_pool = Meda::H2ConnectionPoolService.new(db_conn_url)
+      createDatabase
 
+    end
+
+    def createDatabase
+      connection = @db_conn_pool.get_connection()
+      statement = connection.createStatement();
+      statement.executeUpdate("DROP TABLE Profiles IF EXISTS")
+      statement.executeUpdate("CREATE TABLE Profiles (profile_id VARCHAR(255) PRIMARY KEY, age VARCHAR(255), gender VARCHAR(255), memberType VARCHAR(255),Option VARCHAR(255),heathAndConsumerSegmentation VARCHAR(255),healthSegmentation VARCHAR(255),consumerSegmentation VARCHAR(255))")
+      statement.executeUpdate("DROP TABLE ProfileLookups IF EXISTS")
+      statement.executeUpdate("CREATE TABLE ProfileLookups (lookup_key VARCHAR(255) PRIMARY KEY, profile_id VARCHAR(255))")
+
+      statement.close()
+      connection.close()      
     end
 
     def updateProfile(profile_id, profile_params)
