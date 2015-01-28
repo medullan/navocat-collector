@@ -43,7 +43,7 @@ module Meda
       # @overload post "/meda/load"
       # Testing tool to load data into profile database
       post '/meda/load' do 
-        if Meda.features.is_enabled("profile_loader",false)       
+        if Meda.features.is_enabled("profile_loader", false)       
           params_hash = JSON.parse(request.body.read)
           dataset = Meda.datasets[params_hash['dataset']]
 
