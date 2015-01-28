@@ -82,6 +82,8 @@ module Meda
             consumerSegmentation           = resultSet.getString("consumerSegmentation")
           end
 
+          
+          resultSet.close()          
           preparedStatement.close()
           connection.close()  
 
@@ -165,6 +167,7 @@ module Meda
             profile_id                          = resultSet.getString("profile_id")
           end
 
+          resultSet.close()
           preparedStatement.close()
           connection.close()  
 

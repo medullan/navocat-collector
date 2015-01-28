@@ -15,10 +15,12 @@ module Meda
         #@cp = JdbcConnectionPool.create(db_conn_url, "sa", "");
         DriverManager.register_driver(org.h2.Driver.new)
         config = HikariConfig.new
-        config.setMaximumPoolSize(40)
+        config.setMaximumPoolSize(50)
+        config.setMaxLifetime(3600000)  #one hour
         config.setJdbcUrl(db_conn_url);
         config.setUsername("sa");
         config.setPassword("");
+        config.setLeakDetectionThreshold(10000)
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
