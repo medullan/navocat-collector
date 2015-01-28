@@ -16,7 +16,7 @@ module Meda
         #@cp = JdbcConnectionPool.create(db_conn_url, "sa", "");
         DriverManager.register_driver(org.h2.Driver.new)
         config = HikariConfig.new
-        config.setMaximumPoolSize(50)
+        config.setMaximumPoolSize(10)
         config.setMaxLifetime(3600000)  #one hour
         config.setJdbcUrl(db_conn_url);
         config.setDriverClassName("org.h2.jdbcx.JdbcDataSource")

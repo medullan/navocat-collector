@@ -21,23 +21,30 @@ module Meda
 
   	def initialize(db_conn_url)
       @db_conn_pool = Meda::H2ConnectionPoolService.new(db_conn_url)
-      createDatabase
+      createSchema
 
     end
 
-    def createDatabase
+    def createSchema
+      begin
       connection = @db_conn_pool.get_connection()
       statement = connection.createStatement();
       statement.executeUpdate("DROP TABLE Profiles IF EXISTS")
       statement.executeUpdate("CREATE TABLE Profiles (profile_id VARCHAR(255) PRIMARY KEY, age VARCHAR(255), gender VARCHAR(255), memberType VARCHAR(255),Option VARCHAR(255),heathAndConsumerSegmentation VARCHAR(255),healthSegmentation VARCHAR(255),consumerSegmentation VARCHAR(255))")
       statement.executeUpdate("DROP TABLE ProfileLookups IF EXISTS")
       statement.executeUpdate("CREATE TABLE ProfileLookups (lookup_key VARCHAR(255) PRIMARY KEY, profile_id VARCHAR(255))")
-
-      statement.close()
-      connection.close()      
+  
+      rescue Exception => error
+        puts "!! ERROR CREATING TABLES !! -- #{error.message} -- #{error.backtrace}"
+      ensure
+        statement.close()
+        connection.close()   
+        #puts "connection closed"
+      end      
     end
 
     def updateProfile(profile_id, profile_params)
+
       begin
           connection = @db_conn_pool.get_connection()
           preparedStatement = connection.prepareStatement("UPDATE Profiles SET age=?, gender=?, memberType=?, Option=?, heathAndConsumerSegmentation=?, healthSegmentation=?, consumerSegmentation=? WHERE profile_id=?")
@@ -49,13 +56,14 @@ module Meda
           preparedStatement.setString(6, profile_params[:healthSegmentation].to_s || "")
           preparedStatement.setString(7, profile_params[:consumerSegmentation].to_s || "")
           preparedStatement.setString(8, profile_id)
-          preparedStatement.executeUpdate()
-          preparedStatement.close()
-          connection.close()        
+          preparedStatement.executeUpdate()     
           return true 
       rescue Exception => error
         puts "!! ERROR UPDATING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure
+        preparedStatement.close()
+        connection.close() 
       end    
     end
 
@@ -66,12 +74,13 @@ module Meda
           preparedStatement = connection.prepareStatement("INSERT INTO Profiles(profile_id) VALUES (?)")
     			preparedStatement.setString(1, profile_id)
     	    preparedStatement.executeUpdate()
-    	    preparedStatement.close()
-    			connection.close()  
           return true	
   		rescue Exception => error
    			puts "!! ERROR ADDING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure
+        preparedStatement.close()
+        connection.close() 
   		end  
   	end
 
@@ -96,11 +105,6 @@ module Meda
             consumerSegmentation           = resultSet.getString("consumerSegmentation")
           end
 
-
-          resultSet.close()          
-          preparedStatement.close()
-          connection.close()  
-
           profile = ActiveSupport::HashWithIndifferentAccess.new({
             :id => profile_id,
             :age => age,
@@ -115,6 +119,10 @@ module Meda
       rescue Exception => error
         puts "!! ERROR READING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure
+        resultSet.close()          
+        preparedStatement.close()
+        connection.close()   
       end  
     end
 
@@ -124,12 +132,12 @@ module Meda
           preparedStatement = connection.prepareStatement("DELETE FROM Profiles WHERE profile_id (?)")
           preparedStatement.setString(1, profile_id)
           preparedStatement.executeUpdate()
-          preparedStatement.close()
-          connection.close()  
           return true 
       rescue Exception => error
         puts "!! ERROR REMOVING PROFILE !! -- #{error.message} -- #{error.backtrace}"
-        return false 
+      ensure      
+        preparedStatement.close()
+        connection.close()
       end  
     end
 
@@ -139,12 +147,13 @@ module Meda
           preparedStatement = connection.prepareStatement("DELETE FROM ProfileLookups WHERE profile_id (?)")
           preparedStatement.setString(1, profile_id)
           preparedStatement.executeUpdate()
-          preparedStatement.close()
-          connection.close()  
           return true 
       rescue Exception => error
         puts "!! ERROR REMOVING PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure      
+        preparedStatement.close()
+        connection.close()
       end  
     end
 
@@ -155,12 +164,13 @@ module Meda
           preparedStatement.setString(1, lookup_key)
           preparedStatement.setString(2, lookup_value)
           preparedStatement.executeUpdate()
-          preparedStatement.close()
-          connection.close()  
           return true 
       rescue Exception => error
         puts "!! ERROR ADDING PROFILE LOOKUP!! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure      
+        preparedStatement.close()
+        connection.close()
       end  
     end
 
@@ -181,10 +191,6 @@ module Meda
             profile_id                          = resultSet.getString("profile_id")
           end
 
-          resultSet.close()
-          preparedStatement.close()
-          connection.close()  
-
           profile = ActiveSupport::HashWithIndifferentAccess.new({
             :lookup_key => lookUpKey,
             :profile_id => profile_id
@@ -193,6 +199,11 @@ module Meda
       rescue Exception => error
         puts "!! ERROR LOOKING UP PROFILE !! -- #{error.message} -- #{error.backtrace}"
         return false 
+      ensure      
+        resultSet.close()
+        preparedStatement.close()
+        connection.close()  
+        #puts "connections closed"
       end  
     end
   end
