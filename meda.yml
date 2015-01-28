@@ -4,14 +4,14 @@ development:
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 1
+  log_level: 3
   redis:
     host: localhost
     port: 6379
     password: nil
     pool: 10
   h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
+    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb
   features:
     pre_request_log: true
     post_request_log: true

@@ -28,13 +28,13 @@ module Meda
       before do
         Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
         if Meda.features.is_enabled("pre_request_log",false)
-          logger.info("Starting request... #{request.url} ..")
+          logger.debug("Starting request... #{request.url} ..")
         end
       end
 
       after do
         if Meda.features.is_enabled("post_request_log",false)
-          logger.info("Ending request... status code #{response.status}")
+          logger.debug("Ending request... status code #{response.status}")
         end
       end
 
@@ -55,6 +55,26 @@ module Meda
           profileLoader.loadWithSomeProfileData(params_hash['amount'],store_config)
           
           respond_with_ok
+        else
+          logger.warn("profile loader is disabled.")
+        end
+      end
+
+      # @method post_meda_load_count
+      # @overload post "/meda/load"
+      # Testing tool to load data into profile database
+      post '/meda/load/count' do 
+        if Meda.features.is_enabled("profile_loader",false)       
+          params_hash = JSON.parse(request.body.read)
+          dataset = Meda.datasets[params_hash['dataset']]
+
+          store_config = {}
+          store_config['config'] = Meda.configuration
+          store_config['name'] = dataset.name
+          
+          store = Meda::ProfileDataStore.new(store_config)
+          result = store.log_size
+           json({'count' => result})
         else
           logger.warn("profile loader is disabled.")
         end

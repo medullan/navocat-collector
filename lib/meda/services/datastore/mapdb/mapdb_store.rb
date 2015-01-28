@@ -29,6 +29,14 @@ module Meda
     def delete(key)
       @tree.delete(key)
     end
+
+    def keys
+      @tree.keys
+    end
+
+    def key_size
+      @tree.size
+    end
   end
 end
 
