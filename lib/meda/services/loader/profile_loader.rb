@@ -38,16 +38,14 @@ module Meda
   		additional_profile_info = {}
   		additional_profile_info[:age] = 21
       additional_profile_info[:gender] = 'male'
-      additional_profile_info[:plan_option] = 'some plan'
-      additional_profile_info[:member_type] = 'member type'
-      additional_profile_info[:health_consumer] = 'some health_consumer'
-      additional_profile_info[:segmentation] = 'some segmentation'
-      additional_profile_info[:health_segmentation] = 'some health_segmentation'
-      additional_profile_info[:consumer_segmentation] = 'some consumer_segmentation'
+      additional_profile_info[:plan_option] = (0...(10 + rand(10))).map { ('a'..'z').to_a[rand(26)] }.join
+      additional_profile_info[:member_type] = (0...(10 + rand(10))).map { ('a'..'z').to_a[rand(26)] }.join
+      additional_profile_info[:health_consumer] = (0...(10 + rand(30))).map { ('a'..'z').to_a[rand(26)] }.join
+      additional_profile_info[:segmentation] = (0...(10 + rand(30))).map { ('a'..'z').to_a[rand(26)] }.join
+      additional_profile_info[:health_segmentation] = (0...(10 + rand(60))).map { ('a'..'z').to_a[rand(26)] }.join
+      additional_profile_info[:consumer_segmentation] = (0...(10 + rand(60))).map { ('a'..'z').to_a[rand(26)] }.join
 
   		profileStore.set_profile(profile_id,additional_profile_info)
-
-      
 
 	  end
 
