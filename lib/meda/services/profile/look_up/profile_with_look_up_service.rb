@@ -2,12 +2,12 @@ require 'uuidtools'
 require 'digest'
 require 'logger'
 
-require_relative '../services/datastore/profile_data_store.rb'
+require_relative '../../datastore/profile_data_store.rb'
 
 module Meda
 
   # Implements persistence of profile data into the MapDB
-  class ProfileStore
+  class ProfileWithLookUpService
 
     attr_reader :profile_db
     def initialize(config)

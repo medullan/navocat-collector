@@ -2,7 +2,8 @@ module Meda
 
   #ruby hash implementation profile database
   class HashDbStore
-	
+	   attr_reader :hash
+
    	def initialize(config)
       @hash = {}
     end
@@ -23,7 +24,7 @@ module Meda
       @hash.delete(key)
     end
 
-    def size()
+    def key_size()
       @hash.length
     end
   end

@@ -114,7 +114,7 @@ module Meda
         identify_data = raw_json_from_request
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
-
+        puts "profile #{profile}"
         if profile
           json({'profile_id' => profile[:id]})
         else

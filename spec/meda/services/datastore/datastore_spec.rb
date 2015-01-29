@@ -1,6 +1,7 @@
 #require_relative '../../../collector/spec_helper.rb'
 require_relative '../../../../lib/meda/services/datastore/mapdb/mapdb_store'
 require_relative '../../../../lib/meda/services/datastore/hashdb/hashdb_store'
+require_relative '../../../../lib/meda/services/datastore/hashdb/hashdb_store'
 require 'tempfile'
 
 describe "datastore" do
@@ -19,7 +20,7 @@ describe "datastore" do
 		store.encode(key,value)
 
 		result = store.key?(key)
-		expect(result).to be_true
+		expect(result).to be_truthy
 	end
 
 	def encode_and_delete(store,key,value)
@@ -27,7 +28,7 @@ describe "datastore" do
 
 		store.delete(key)
 		result = store.key?(key)
-		expect(result).to be_false
+		expect(result).to be_falsey
 	end
 
 	describe 'map db store' do
@@ -41,7 +42,6 @@ describe "datastore" do
 
 		Meda.featuresNoCache
 		
-		@profile_store = Meda::ProfileStore.new(store_config)
 
 		store = Meda::MapDbStore.new(store_config)
 	    it 'encode and decode' do	   

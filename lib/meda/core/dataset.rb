@@ -204,7 +204,7 @@ module Meda
           store_config ={}
           store_config["name"] = path_name
           store_config["config"] = @meda_config
-          @profile_store = Meda::ProfileStore.new(store_config)
+          @profile_store = Meda::ProfileService.new(store_config)
       end
       @profile_store
     end

@@ -11,7 +11,7 @@ describe Meda::FeatureToggleService do
       	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
 
 		result = feature_toggle_service.is_enabled("trueFeature",true)
-		expect(result).to be_true
+		expect(result).to be_truthy
     end
 
     it 'returns false when toggle is faLse' do
@@ -20,7 +20,7 @@ describe Meda::FeatureToggleService do
       	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
 
 		result = feature_toggle_service.is_enabled("falseFeature",true)
-		expect(result).to be_false
+		expect(result).to be_falsey
     end
 
     it 'returns true when toggle is missing but default is true' do
@@ -29,7 +29,7 @@ describe Meda::FeatureToggleService do
       	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
 
 		result = feature_toggle_service.is_enabled("trueFeature",true)
-		expect(result).to be_true
+		expect(result).to be_truthy
     end
 
     it 'returns false when toggle is missing but default is false' do
@@ -38,7 +38,7 @@ describe Meda::FeatureToggleService do
       	feature_toggle_service = Meda::FeatureToggleService.new(featuresHash)	
 
 		result = feature_toggle_service.is_enabled("missingFeature",false)
-		expect(result).to be_false
+		expect(result).to be_falsey
     end
 
     it 'raises exception when features do not exist' do

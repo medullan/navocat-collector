@@ -8,10 +8,9 @@ module Meda
 
   #ruby service wrapper for profile database
   class ProfileDataStore
-	
+	  attr_reader :store
    	def initialize(config)
       feature = Meda.features.get_feature_service("profile_store")
-
       case feature
       when "mapdb"
         @store = Meda::MapDbStore.new(config)
@@ -38,6 +37,7 @@ module Meda
     def key?(key)
       Meda.logger.debug("starting key check")
       startBenchmark = Time.now.to_f
+      puts "@store is #{@store}"
       result = @store.key?(key)
       endBenchmark = Time.now.to_f
       Meda.logger.debug("ending key check  #{endBenchmark-startBenchmark}ms")
@@ -61,6 +61,10 @@ module Meda
       @store.delete(key)
       endBenchmark = Time.now.to_f
       Meda.logger.debug("ending delete in  #{endBenchmark-startBenchmark}ms")
+    end
+
+    def size
+       @store.key_size
     end
 
     def log_size

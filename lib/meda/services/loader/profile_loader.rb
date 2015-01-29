@@ -1,5 +1,5 @@
 require 'uuidtools'
-require_relative "../../core/profile_store.rb"
+require_relative "../../services/profile/profile_service.rb"
 
 module Meda
 
@@ -8,18 +8,18 @@ module Meda
 	
    	def loadWithDefaultProfile(amount, config) 
 
-      profileStore = Meda::ProfileStore.new(config)
+      profileService = Meda::ProfileService.new(config)
 
       for i in 0..amount
-		profileStore.create_profile({})
-	  end
+  	 	   profileService.create_profile({})
+  	  end
 
     end
 
 
  	def loadWithSomeProfileData(amount, config)
 
-      profileStore = Meda::ProfileStore.new(config)
+      profileService = Meda::ProfileService.new(config)
 
       for i in 0..amount
   
@@ -31,7 +31,7 @@ module Meda
       	profileInfo[:cb] = UUIDTools::UUID.random_create.to_s
       	profileInfo[:member_id] = UUIDTools::UUID.random_create.to_s
     
-    		profile = profileStore.find_or_create_profile(profileInfo)
+    		profile = profileService.find_or_create_profile(profileInfo)
     		profile_id = profile[:id]
 
     		additional_profile_info = {}
@@ -47,7 +47,7 @@ module Meda
         additional_profile_info[:some_attrib_two] = (0...200).map { ('a'..'z').to_a[rand(26)] }.join
         additional_profile_info[:some_attrib_three] = (0...200).map { ('a'..'z').to_a[rand(26)] }.join
 
-    		profileStore.set_profile(profile_id,additional_profile_info)
+    		profileService.set_profile(profile_id,additional_profile_info)
 
       end
     end
