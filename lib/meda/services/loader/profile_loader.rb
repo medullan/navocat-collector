@@ -25,7 +25,6 @@ module Meda
 
       	if( i % 100 == 0 )
       		Meda.logger.info("--Loaded ------- #{i} profiles of #{amount}")
-          sleep(4)
       	end
         	
         profileInfo = {}
