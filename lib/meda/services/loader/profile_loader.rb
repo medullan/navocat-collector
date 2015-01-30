@@ -23,13 +23,9 @@ module Meda
 
       for i in 0..amount
 
-        if(i % 1000 == 0)
-          Meda.logger.info("Giving the loader a break")
-          sleep(20)
-        end
-
       	if( i % 100 == 0 )
       		Meda.logger.info("--Loaded ------- #{i} profiles of #{amount}")
+          sleep(4)
       	end
         	
         profileInfo = {}
