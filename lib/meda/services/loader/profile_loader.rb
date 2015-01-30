@@ -25,7 +25,7 @@ module Meda
 
         if(i % 5000 == 0)
           Meda.logger.info("Giving the loader a break")
-          sleep(20)
+          sleep(30)
         end
 
       	if( i % 100 == 0 )
