@@ -166,6 +166,7 @@ module Meda
 
       def process_request(params, &block)
         begin
+          params.delete(:cb)  #remove cb from all requests
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
         rescue StandardError => e
