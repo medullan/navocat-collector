@@ -22,7 +22,12 @@ module Meda
       profileService = Meda::ProfileService.new(config)
 
       for i in 0..amount
-  
+
+        if(amount % 5000 == 0)
+          Meda.logger.info("Giving the loader a break")
+          sleep(30)
+        end
+
       	if( i % 100 == 0 )
       		Meda.logger.info("--Loaded ------- #{i} profiles of #{amount}")
       	end
