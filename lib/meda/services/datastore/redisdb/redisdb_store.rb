@@ -6,8 +6,8 @@ module Meda
   #ruby hash implementation profile database
   class RedisDbStore
 	
-  	REDIS_POOL_DEFAULT = 20 # thread
-  	REDIS_TIMEOUT_DEFAULT = 1000 # seconds
+  	REDIS_POOL_DEFAULT = 10 # thread
+  	REDIS_TIMEOUT_DEFAULT = 10 # seconds
 
    	def initialize(config)
    	  #TODO: replace with @config=config
