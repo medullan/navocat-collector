@@ -37,7 +37,6 @@ module Meda
     def key?(key)
       Meda.logger.debug("starting key check")
       startBenchmark = Time.now.to_f
-      puts "@store is #{@store}"
       result = @store.key?(key)
       endBenchmark = Time.now.to_f
       Meda.logger.debug("ending key check  #{endBenchmark-startBenchmark}ms")
