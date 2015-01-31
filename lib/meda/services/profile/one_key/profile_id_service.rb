@@ -19,7 +19,6 @@ module Meda
     	
     	member_id = hash_information[:member_id]
     	hashing_data = member_id.to_s + HASH_SALT
-    	puts "hashing_data #{hashing_data}"
     	Digest::SHA1.hexdigest(hashing_data)
     end
 
