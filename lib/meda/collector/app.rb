@@ -18,7 +18,10 @@ module Meda
     class App < Sinatra::Base
 
       set :public_folder, 'static'
-
+      configure { 
+        set :show_exceptions, false 
+        set :dump_errors, false
+      }
 
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
@@ -38,6 +41,14 @@ module Meda
         end
       end
 
+      error do |e|
+        Meda.logger.error(e)
+        'Internal Error'
+      end
+
+      not_found do
+        'Request URL or Method is Not Found'
+      end
 
       # @method post_meda_load
       # @overload post "/meda/load"
@@ -114,7 +125,6 @@ module Meda
         identify_data = raw_json_from_request
         #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
-        puts "profile #{profile}"
         if profile
           json({'profile_id' => profile[:id]})
         else

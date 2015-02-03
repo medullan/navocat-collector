@@ -12,11 +12,12 @@ describe "profile service" do
 	store_config = {}
 	store_config["config"] = Meda.configuration
 	store_config["name"] = "testdb_#{rand(10000000)}"
+	store_config["config"].hash_salt = "a test hash"
 	Meda.configuration.log_level = 3
 	Meda.featuresNoCache
 
 	before(:each) do
-		@profileService = Meda::ProfileWithOneKeyService.new(Meda.configuration)
+		@profileService = Meda::ProfileWithOneKeyService.new(store_config)
 	end
 
 	describe 'one key profile service' do

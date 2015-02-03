@@ -1,6 +1,6 @@
 require 'logger'
 require 'json'
-
+require_relative './email_logging_service.rb'
 module Meda
 
   class LoggingService
@@ -14,7 +14,9 @@ module Meda
       @level = config.log_level || Logger::INFO
 
       setup_file_logger(config)
+      setup_additional_error_logger(config)
       setup_console_logger(config)
+      setup_email_error_logger(config)
 
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
@@ -22,29 +24,59 @@ module Meda
     #TODO - move to seaprate file/service
     def setup_file_logger(config)
 
-      FileUtils.mkdir_p(File.dirname(config.log_path))
-      FileUtils.touch(config.log_path)
-      loggingLevel = config.log_level || Logger::INFO
-      @fileLogger = Logger.new(config.log_path)
-      
-      @fileLogger.formatter = proc do |severity, datetime, progname, msg|
-         "#{msg}\n"
+      if features.is_enabled("all_log_file_logger",false)
+        FileUtils.mkdir_p(File.dirname(config.log_path))
+        FileUtils.touch(config.log_path)
+        loggingLevel = config.log_level || Logger::INFO
+        @fileLogger = Logger.new(config.logs["all_log_path"], config.logs["file_history"], config.logs["file_maxsize"])
+        
+        @fileLogger.formatter = proc do |severity, datetime, progname, msg|
+           "#{msg}\n"
+        end
+        @fileLogger.level = loggingLevel  
+        @loggers.push(@fileLogger)
+        puts "file logger setup at #{config.logs['all_log_path']}"
       end
-      @fileLogger.level = loggingLevel  
-      @loggers.push(@fileLogger)
-      puts "file logger setup at #{config.log_path}"
+
+    end
+
+    def setup_additional_error_logger(config)
+      if features.is_enabled("error_file_logger",false)
+        FileUtils.mkdir_p(File.dirname(config.log_path))
+        FileUtils.touch(config.log_path)
+        loggingLevel = Logger::ERROR
+        fileLogger = Logger.new(config.logs["error_log_path"], config.logs["file_history"], config.logs["file_maxsize"])
+        
+        fileLogger.formatter = proc do |severity, datetime, progname, msg|
+           "#{msg}\n"
+        end
+        fileLogger.level = loggingLevel  
+        @loggers.push(fileLogger)
+        puts "error file logger setup at #{config.logs['error_log_path']}"
+      end
+
     end
 
     def setup_console_logger(config)
-      loggingLevel = config.log_level || Logger::INFO
-      @consoleLogger = Logger.new(STDOUT)
-      
-      @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
-         "#{msg}\n\n"
+      if features.is_enabled("stdout_logger",false)
+        loggingLevel = config.log_level || Logger::INFO
+        @consoleLogger = Logger.new(STDOUT, 10, 1024000)
+        
+        @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
+           "#{msg}\n\n"
+        end
+        @consoleLogger.level = loggingLevel
+        @loggers.push(@consoleLogger)
+        puts "console logger setup"
       end
-      @consoleLogger.level = loggingLevel
-      @loggers.push(@consoleLogger)
-      puts "console logger setup"
+    end
+
+    def setup_email_error_logger(config)
+      if features.is_enabled("error_email_logger",false)
+        @emailErrorLogger = Meda::EmailLoggingService.new(config)
+        @loggers.push(@emailErrorLogger)
+        puts "email error logger setup"
+      end
     end
 
     def setup_postgres_logger(config)
@@ -104,7 +136,7 @@ module Meda
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s
 		  hash["stacktrace"] = message.backtrace if message.respond_to?(:backtrace)
-      hash["message"] = message.getMessage() if message.respond_to?(:getMessage)
+      hash["message"] = message.message if message.respond_to?(:message)
    
 
       hash.to_json

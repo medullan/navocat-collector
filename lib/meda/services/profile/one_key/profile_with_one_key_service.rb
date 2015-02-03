@@ -61,7 +61,7 @@ module Meda
       if @profile_db.key?(profile_id)    
         ActiveSupport::HashWithIndifferentAccess.new(@profile_db.decode(profile_id))
       else
-        logger.error("get_profile_by_id ==> No profile found with key #{profile_id}")
+        logger.warn("get_profile_by_id ==> No profile found with key #{profile_id}")
         false # no profile
       end
     end
