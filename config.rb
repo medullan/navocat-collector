@@ -5,7 +5,7 @@ environment 'development'
 
 #daemonize - disabled because it doesn't work on windows
 
-stdout_redirect 'log/server_stdout.log', 'log/server_stderr.log'
+#stdout_redirect 'log/server_stdout.log', 'log/server_stderr.log'
 threads 20, 300
 
 

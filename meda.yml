@@ -10,7 +10,7 @@ development:
     all_log_path: log/app.log
     error_log_path: log/error.log
     file_history: 4
-    file_maxsiz: 1000000000
+    file_maxsize: 1000000000
     error_email_from_account: fepcollector@gmail.com
     error_email_from_account_password: update
     error_email_to_account: [wesley+1@medullan.com,wesley+2@medullan.com]
