@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "httparty"
   spec.add_runtime_dependency "redis", "~> 3.0.1"
   spec.add_runtime_dependency "hiredis", "~> 0.4.5"
-  spec.add_runtime_dependency "connection_pool", "~> 2.1.1"
+  spec.add_runtime_dependency "connection_pool", "~> 2.0.0"
   spec.add_runtime_dependency "logging", "~> 1.8.2"
   spec.add_runtime_dependency "mail", "~> 2.6.3"
   
