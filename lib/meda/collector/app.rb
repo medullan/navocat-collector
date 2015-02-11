@@ -36,7 +36,7 @@ module Meda
           logger.debug("Starting request... #{request.url} ..")
           logger.debug("Request headers #{headers.to_s}")
           logger.debug("Request cookies #{cookies.to_s}")
-          logger.debug("Request referer #{request.referer}")
+          logger.debug("Request referrer #{request.referrer}")
           logger.debug("Request ip #{request.ip}")
           logger.debug("Remote address #{request.env['REMOTE_ADDR'].split(',').first}")
         end
