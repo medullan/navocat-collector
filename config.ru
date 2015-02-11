@@ -2,6 +2,7 @@ require 'rubygems'
 require 'bundler/setup'
 require 'meda'
 require 'meda/collector'
+require 'newrelic_rpm'
 
 use Rack::Deflater
 
@@ -21,6 +22,9 @@ dataset.landing_pages = []
 dataset.whitelisted_urls = []
 dataset.google_analytics = {'record' => false}
 Meda.datasets[dataset.token] = dataset
+
+
+NewRelic::Agent.after_fork(:force_reconnect => true)
 
 run Meda::Collector::App
 

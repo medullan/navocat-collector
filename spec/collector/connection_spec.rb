@@ -16,7 +16,7 @@ describe "Collector Application" do
   page_params = {}
 
   before(:all) do
-    dataset = Meda::Dataset.new({})
+    dataset = Meda::Dataset.new("test_name",{})
     dataset.token = token
     dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
     dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
@@ -48,24 +48,24 @@ describe "Collector Application" do
   describe 'page' do
     it 'returns false with invalidation filter' do
       dataset.hit_filter = InvalidationFilter.new();
-      expect(connection.page(page_params)).to be_false
+      expect(connection.page(page_params)).to be_falsey
     end
 
     it 'returns true with no filter' do
       dataset.hit_filter = nil
-      expect(connection.page(page_params)).to be_true
+      expect(connection.page(page_params)).to be_truthy
     end
   end
 
   describe 'track' do
     it 'returns false with invalidation filter' do
       dataset.hit_filter = InvalidationFilter.new();
-      expect(connection.track(page_params)).to be_false
+      expect(connection.track(page_params)).to be_falsey
     end
 
     it 'returns true with no filter' do
       dataset.hit_filter = nil
-      expect(connection.track(page_params)).to be_true
+      expect(connection.track(page_params)).to be_truthy
     end
   end
 

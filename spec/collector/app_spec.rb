@@ -4,6 +4,15 @@ require File.expand_path '../spec_helper.rb', __FILE__
 
 describe "Collector Application" do
 
+  Meda.configuration.features = {}
+  Meda.configuration.features["profile_store"] = "mapdb"
+
+  store_config = {}
+  store_config["config"] = Meda.configuration
+  store_config["name"] = "testdb_#{rand(10000000)}"
+
+  Meda.featuresNoCache
+
   test_increment = 1
   token = '3423432423423423423423'
   member_id = '384739284793284293'
@@ -46,7 +55,7 @@ describe "Collector Application" do
   describe 'index' do
     it 'says hello world' do
       get '/meda'
-      last_response.should be_ok
+      expect(last_response).to be_ok
     end
   end
 

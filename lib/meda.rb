@@ -1,11 +1,12 @@
 require File.dirname(File.absolute_path(__FILE__)) + '/meda/version.rb'
 Dir.glob(File.dirname(File.absolute_path(__FILE__)) + '/meda/core/*.rb') {|file| require file}
+require File.dirname(File.absolute_path(__FILE__)) + '/meda/services/logging/logging_service.rb'
 require "active_support/all"
 require 'psych'
 require 'pathname'
+ 
 
 module Meda
-
   MEDA_CONFIG_FILE = 'meda.yml'
   DATASETS_CONFIG_FILE = 'datasets.yml'
 
@@ -16,17 +17,29 @@ module Meda
   def self.configure
     self.configuration ||= Configuration.new
     yield(configuration)
+    features
     datasets
     logger
     true
   end
 
+  def self.features
+    require('meda/services/feature_toggle_service.rb')
+    if @features.nil?
+      @features = Meda::FeatureToggleService.new(Meda.configuration.features)
+    end
+    @features    
+  end
+
+  def self.featuresNoCache
+    require('meda/services/feature_toggle_service.rb')
+    @features = Meda::FeatureToggleService.new(Meda.configuration.features)
+    @features    
+  end
+
   def self.logger
-    if @logger.nil? && Meda.configuration.log_path.present?
-      FileUtils.mkdir_p(File.dirname(Meda.configuration.log_path))
-      FileUtils.touch(Meda.configuration.log_path)
-      @logger = Logger.new(Meda.configuration.log_path)
-      @logger.level = Meda.configuration.log_level || Logger::INFO
+    if @logger.nil?
+      @logger = Meda::LoggingService.new(Meda.configuration)
     end
     @logger
   end
@@ -37,15 +50,16 @@ module Meda
       begin
         config = Psych.load(File.open(Meda::DATASETS_CONFIG_FILE))
         config.each do |d_name, d_config|
+
           begin
             puts "#{d_name} dataset configuration started"
             d = Meda::Dataset.new(d_name, Meda.configuration)
             d_config.each_pair { |key, val| d.send("#{key}=", val) } 
-     
+            d.name = d_name
             configure_custom_filter(d)
          
             @datasets[d.token] = d
-            puts "#{d_name} dataset configuration completed"
+            puts "#{d_name} #{d.token} dataset configuration completed"
           rescue Exception => e
             puts "Error: datasets.yml is incorrectly setup, please review - #{e.message}"
           end
@@ -80,10 +94,15 @@ module Meda
       :log_path => File.join(Dir.pwd, 'log/server.log'),
       :log_level => 1,
       :disk_pool => 2,
-      :google_analytics_pool => 2
+      :google_analytics_pool => 2,
+      :features => [],
+      :redis => [],
+      :name => 'dataset_name',
+      :logs => [],
+      :hash_salt => ''
     }
 
-    attr_accessor :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool
+    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis, :h2, :logs, :hash_salt
 
     def initialize
       DEFAULTS.each do |key,val|
@@ -106,5 +125,4 @@ Meda.configure do |config|
   end
 end
 
-Meda
 

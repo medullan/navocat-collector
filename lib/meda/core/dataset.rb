@@ -14,8 +14,8 @@ module Meda
   # and also the logic for writing to disk and Google Analytics.
   class Dataset
 
-    attr_reader :data_uuid, :name, :meda_config, :hit_filter
-    attr_accessor :google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
+    attr_reader :data_uuid, :meda_config, :hit_filter
+    attr_accessor :name,:google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
 
     # Readers primarily used for tests, not especially thread-safe :p
@@ -32,6 +32,7 @@ module Meda
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
       @after_identify.call(self, profile)
+      Meda.logger.info("profile #{profile}")
       return profile
     end
 
@@ -54,13 +55,17 @@ module Meda
         if profile
           profile.delete('id')
           hit.profile_props = profile
+        else
+          logger.info("add_hit ==> Unable to find profile")
         end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
+        logger.info("add_hit ==> Hit has no profile id")
       end
 
       hit = custom_hit_filter(hit)
+      hit.request_uuid = Thread.current["request_uuid"]
       @last_hit = hit
       hit.validate!
 
@@ -79,15 +84,14 @@ module Meda
     end
 
     def get_profile(profile_id)
-      if(enable_data_retrivals)
-        store.get_profile_by_id(profile_id)
-      end
+      store.get_profile_by_id(profile_id)
     end
 
     def delete_profile(profile_id)
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
+      logger.info("delete_profile ==> Unable to delete profile")
       return false
     end
 
@@ -95,36 +99,42 @@ module Meda
       !!google_analytics && !!google_analytics['record']
     end
 
+
     def stream_hit_to_disk(hit)
-      directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
-      unless @data_paths[directory]
-        # create the data directory if it does not exist
-        @data_paths[directory] = FileUtils.mkdir_p(directory)
-      end
-      filename = "#{hit.hour}-#{self.data_uuid}.json".gsub(':', '-')  #Replace : with - because can't save files with : on windows
-      path = File.join(directory, filename)
       begin
+        logger.info("Starting to write hit to DISK")
+        directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
+        unless @data_paths[directory]
+          # create the data directory if it does not exist
+          @data_paths[directory] = FileUtils.mkdir_p(directory)
+        end
+
+        filename = "#{hit.hour}-#{self.data_uuid}.json".gsub(':', '-')  #Replace : with - because can't save files with : on windows
+        path = File.join(directory, filename)
+
         File.open(path, 'a') do |f|
           f.puts(hit.to_json)
         end
+
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.debug("Writing hit #{hit.id} to #{path}")
+        logger.info("Writing hit #{hit.id} to disk #{path}")
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)
-        raise e
       end
       true
     end
 
     def stream_hit_to_ga(hit)
-      @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
-      return unless stream_to_ga?
-      #tracker = Staccato.tracker(google_analytics['tracking_id'], hit.client_id)
-      tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
       begin
+        logger.info("Starting to stream hit to GA")
+        @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
+        return unless stream_to_ga?
+            
+        tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
+      
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
         elsif hit.hit_type == 'event'
@@ -142,12 +152,11 @@ module Meda
         end
         @last_ga_hit[:staccato_hit] = ga_hit
         @last_ga_hit[:response] = ga_hit.track!
-        logger.debug("Writing hit #{hit.id} to Google Analytics")
+        logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to GA")
         logger.error(e)
-        raise e
       end
       true
     end
@@ -192,9 +201,10 @@ module Meda
 
     def store
       if @profile_store.nil?
-        FileUtils.mkdir_p(meda_config.mapdb_path)
-        mapdb_path = File.join(meda_config.mapdb_path, path_name)
-        @profile_store = Meda::ProfileStore.new(mapdb_path)
+          store_config ={}
+          store_config["name"] = path_name
+          store_config["config"] = @meda_config
+          @profile_store = Meda::ProfileService.new(store_config)
       end
       @profile_store
     end

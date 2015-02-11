@@ -1,6 +1,6 @@
 require 'java'
 require 'forwardable'
-require_relative '../../../lib/mapdb-1.0.6.jar'
+require_relative '../../../../../lib/mapdb-1.0.6.jar'
 
 # Implements a jRuby interface to the embedded MapDB database
 module MapDB
@@ -11,6 +11,8 @@ module MapDB
     attr_reader :tree, :mapdb
 
     def initialize(name, mapdb)
+      Meda.logger.info("mapdb location #{mapdb}")
+      Meda.logger.info("name #{name}")
       @mapdb = mapdb
       @tree = @mapdb.getTreeMap(name.to_s)
     end
@@ -38,7 +40,7 @@ module MapDB
       re = Regexp.new "#{pattern}", Regexp::EXTENDED | Regexp::IGNORECASE
       @tree.select{ |k,v| "#{k}" =~ re }.map(&:first)
     end
-    
+
     def delete(key)
       @tree.delete(key)
       @mapdb.commit()
@@ -73,9 +75,9 @@ module MapDB
         @mapdb = Java::OrgMapdb::DBMaker.
           newFileDB(Java::JavaIo::File.new("#{path}")).
           closeOnJvmShutdown().
- #         transactionDisable(). was throwing an error on windows
+       #   transactionDisable(). #was throwing an error on windows
           mmapFileEnable().
- #         asyncWriteEnable(). commented out because it was throughing an error 
+       #   asyncWriteEnable(). #commented out because it was throughing an error
           make()
       end
     end
@@ -87,4 +89,3 @@ module MapDB
     def_delegators :@mapdb, :close, :closed?, :compact
   end
 end
-
