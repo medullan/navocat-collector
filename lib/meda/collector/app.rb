@@ -26,12 +26,19 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
-      
 
       before do
         Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
+      end      
+
+      before do
         if Meda.features.is_enabled("pre_request_log",false)
           logger.debug("Starting request... #{request.url} ..")
+          logger.debug("Request headers #{headers.to_s}")
+          logger.debug("Request cookies #{cookies.to_s}")
+          logger.debug("Request referer #{request.referer}")
+          logger.debug("Request ip #{request.ip}")
+          logger.debug("Remote address #{request.env['REMOTE_ADDR'].split(',').first}")
         end
       end
 
