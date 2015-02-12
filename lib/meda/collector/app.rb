@@ -6,6 +6,7 @@ require 'meda/collector/connection'
 require 'logger'
 require 'uuidtools'
 require 'meda/services/loader/profile_loader'
+require 'meda/services/filter/request_url_filter_service'
 
 module Meda
   module Collector
@@ -26,6 +27,9 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
+      helperConfig = {}
+      helperConfig["config"] = Meda.configuration
+      @@request_url_filter_service = Meda::RequestURLFilterService.new(helperConfig)
 
       before do
         Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
@@ -33,12 +37,14 @@ module Meda
 
       before do
         if Meda.features.is_enabled("pre_request_log",false)
-          logger.debug("Starting request... #{request.url} ..")
+          logger.debug("Starting request... #{@@request_url_filter_service.filter(request.url)} ..")
           logger.debug("Request headers #{headers.to_s}")
           logger.debug("Request cookies #{cookies.to_s}")
           logger.debug("Request referrer #{request.referrer}")
-          logger.debug("Request ip #{request.ip}")
-          logger.debug("Remote address #{request.env['REMOTE_ADDR'].split(',').first}")
+          logger.debug("Request referer #{request.referer}")
+          logger.debug("Request ip __hashed #{Digest::SHA1.hexdigest(request.ip)}")
+          logger.debug("Remote address #{Digest::SHA1.hexdigest(request.env['REMOTE_ADDR'].split(',').first)}")
+
         end
       end
 
