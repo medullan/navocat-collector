@@ -23,7 +23,6 @@ module Meda
       	return url
       end
   		
-  		puts "\n\n aa#{member_id}aa"
       profileIdHashInformation = {}
       profileIdHashInformation[:member_id] = member_id
       member_id_hashed = @profile_id_service.mapToHash(profileIdHashInformation)
