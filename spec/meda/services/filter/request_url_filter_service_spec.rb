@@ -17,7 +17,7 @@ Meda.featuresNoCache
   describe 'request_url_filter_service' do
     it 'hashes member id from request' do
       	start_string = 'http://www.a.org/meda/identify.gif?dataset=ss\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\u0026member_id=13655045'
-      	expected_end_string = 'http://www.a.org/meda/identify.gif?dataset=ss\\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\\u0026member_id__hashed=426078600bb3140371cd40349e1f2b9037b3ac83'
+      	expected_end_string = 'http://www.a.org/meda/identify.gif?dataset=ss\\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\\u0026member_id__hashed=0342094955b65cf608139e4eced98793a6a6494d'
 
       	request_url_filter_service = Meda::RequestURLFilterService.new(config)
 		actual_end_string = request_url_filter_service.filter(start_string)
