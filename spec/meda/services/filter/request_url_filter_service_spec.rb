@@ -23,7 +23,24 @@ Meda.featuresNoCache
 		actual_end_string = request_url_filter_service.filter(start_string)
 		expect(actual_end_string).to eql(expected_end_string)
     end
+
+	  it 'same url when member_id is missing' do
+	      	start_string = 'http://www.a.org/meda/identify.gif?dataset=ss\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\u0026'
+	      	expected_end_string = 'http://www.a.org/meda/identify.gif?dataset=ss\\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\\u0026'
+
+	      	request_url_filter_service = Meda::RequestURLFilterService.new(config)
+			actual_end_string = request_url_filter_service.filter(start_string)
+			expect(actual_end_string).to eql(expected_end_string)
+	    
+	  end
+
+  	it 'should return same url when not identify.gif call' do
+      	start_string = 'http://www.a.org/meda/identify2.gif?dataset=ss\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\u0026'
+      	expected_end_string = 'http://www.a.org/meda/identify2.gif?dataset=ss\\u0026cb=4a262f24ff0c6847ed493d96f8f8c784e83d\\u0026'
+
+      	request_url_filter_service = Meda::RequestURLFilterService.new(config)
+		actual_end_string = request_url_filter_service.filter(start_string)
+		expect(actual_end_string).to eql(expected_end_string)
+    end
   end
-
-
 end
