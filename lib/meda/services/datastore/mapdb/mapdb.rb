@@ -11,8 +11,8 @@ module MapDB
     attr_reader :tree, :mapdb
 
     def initialize(name, mapdb)
-      Meda.logger.info("mapdb location #{mapdb}")
-      Meda.logger.info("name #{name}")
+      Meda.logger.debug("mapdb location #{mapdb}")
+      Meda.logger.debug("name #{name}")
       @mapdb = mapdb
       @tree = @mapdb.getTreeMap(name.to_s)
     end
