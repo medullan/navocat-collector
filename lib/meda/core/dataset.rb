@@ -32,7 +32,7 @@ module Meda
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
       @after_identify.call(self, profile)
-      Meda.logger.info("profile #{profile}")
+      Meda.logger.debug("profile #{profile}")
       return profile
     end
 
@@ -56,12 +56,12 @@ module Meda
           profile.delete('id')
           hit.profile_props = profile
         else
-          logger.info("add_hit ==> Unable to find profile")
+          logger.debug("add_hit ==> Unable to find profile")
         end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
-        logger.info("add_hit ==> Hit has no profile id")
+        logger.debug("add_hit ==> Hit has no profile id")
       end
 
       hit = custom_hit_filter(hit)
@@ -91,7 +91,7 @@ module Meda
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
-      logger.info("delete_profile ==> Unable to delete profile")
+      logger.debug("delete_profile ==> Unable to delete profile")
       return false
     end
 
@@ -102,7 +102,7 @@ module Meda
 
     def stream_hit_to_disk(hit)
       begin
-        logger.info("Starting to write hit to DISK")
+        logger.debug("Starting to write hit to DISK")
         directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
         unless @data_paths[directory]
           # create the data directory if it does not exist
@@ -119,7 +119,7 @@ module Meda
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.info("Writing hit #{hit.id} to disk #{path}")
+        logger.debug("Writing hit #{hit.id} to disk #{path}")
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)
