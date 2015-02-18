@@ -96,7 +96,7 @@ module Meda
                 dataset.stream_hit_to_ga(hit)
               end
             else
-              logger.info("track ==> Data did not stream to GA")
+              logger.error("track ==> Data did not stream to GA")
             end
           end
           Meda.logger.debug("main thread has sent pool requests")
@@ -111,7 +111,7 @@ module Meda
           hit = dataset.add_pageview(page_params)
 
           if(hit.is_invalid)
-            logger.info("page ==> Invalid hit")
+            logger.error("page ==> Invalid hit")
             return false
           end
 
@@ -131,7 +131,7 @@ module Meda
                 dataset.stream_hit_to_ga(hit)
               end
             else
-              logger.info("track ==> Data did not stream to GA")
+              logger.error("track ==> Data did not stream to GA")
             end
           end
            true   
