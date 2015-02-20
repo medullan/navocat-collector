@@ -14,6 +14,9 @@ module Meda
       @loggers = []
       @level = config.log_level || Logger::INFO
 
+      FileUtils.mkdir_p(File.dirname(config.log_path))
+      FileUtils.touch(config.log_path)
+
       setup_file_logger(config)
       setup_additional_error_logger(config)
       setup_console_logger(config)
@@ -26,6 +29,7 @@ module Meda
     def setup_file_logger(config)
 
       if features.is_enabled("all_log_file_logger",false)
+
         appender = Logging.appenders.rolling_file( 'all_log_path',
            :filename   => config.logs["all_log_path"],
            :size       => config.logs["file_maxsize"],
@@ -34,7 +38,6 @@ module Meda
            :roll_by    => "date",
            :layout     => Logging.layouts.pattern.new(:pattern => "%m\n"))
           
-
           log = Logging.logger['all_log_path']
           log.add_appenders 'all_log_path'
           log.level = config.log_level
