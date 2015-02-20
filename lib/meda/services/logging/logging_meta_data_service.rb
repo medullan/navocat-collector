@@ -21,6 +21,7 @@ module Meda
         hash = Hash.new()
         hash["request_uuid"] = UUIDTools::UUID.random_create.to_s
         hash["request_url"] = @@request_url_filter_service.filter(request)
+        hash["request_url_path"] = request.path_info
         
         hash = hash.merge(cookies)
         hash = hash.merge(headers)
@@ -50,7 +51,7 @@ module Meda
         hash.delete("starts")
         hash.delete("alert-expires")
         hash.delete("i18next")
-        
+
         Logging.mdc.clear
         Logging.mdc["meta_logs"] = hash.to_json
   
