@@ -1,4 +1,5 @@
 require 'logger'
+require 'logging'
 require 'json'
 require_relative './email_logging_service.rb'
 module Meda
@@ -130,15 +131,18 @@ module Meda
 
       hash = Hash.new()
       hash["message"] = message
-      hash["request_uuid"] = Thread.current["request_uuid"]
       hash["severity"] = severity
       hash["file"] = caller.second.split(":in")
       hash["timestamp"] = Time.now
       hash["thread"] = Thread.current.object_id.to_s
 		  hash["stacktrace"] = message.backtrace if message.respond_to?(:backtrace)
       hash["message"] = message.message if message.respond_to?(:message)
-   
 
+      if(Logging.mdc["meta_logs"].to_s.length>0)
+        meta_logs = JSON.parse Logging.mdc["meta_logs"].to_s
+        hash = hash.merge(meta_logs)
+      end
+      
       hash.to_json
   	end	
 
