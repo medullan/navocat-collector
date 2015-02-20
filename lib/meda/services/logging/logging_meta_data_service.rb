@@ -47,7 +47,10 @@ module Meda
         hash.delete("SC_ANALYTICS_SESSION_COOKIE")
         hash.delete("BIPApp")
         hash.delete("BIPCore")
-
+        hash.delete("starts")
+        hash.delete("alert-expires")
+        hash.delete("i18next")
+        
         Logging.mdc.clear
         Logging.mdc["meta_logs"] = hash.to_json
   
