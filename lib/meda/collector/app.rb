@@ -34,7 +34,7 @@ module Meda
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
 
       before do
-        @@logging_meta_data_service.setup_meta_logs(request,headers,cookies)
+        @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
       end      
 
       before do
