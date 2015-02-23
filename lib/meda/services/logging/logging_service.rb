@@ -25,8 +25,43 @@ module Meda
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
-    #TODO - move to seaprate file/service
+
     def setup_file_logger(config)
+
+      if features.is_enabled("all_log_file_logger",false)
+        FileUtils.mkdir_p(File.dirname(config.log_path))
+        FileUtils.touch(config.log_path)
+        loggingLevel = config.log_level || Logger::INFO
+        @fileLogger = Logger.new(config.logs["all_log_path"], config.logs["file_history"], config.logs["file_maxsize"])
+        
+        @fileLogger.formatter = proc do |severity, datetime, progname, msg|
+           "#{msg}\n"
+        end
+        @fileLogger.level = loggingLevel  
+        @loggers.push(@fileLogger)
+        puts "file logger setup at #{config.logs['all_log_path']}"
+      end
+
+    end
+
+    def setup_additional_error_logger(config)
+      if features.is_enabled("error_file_logger",false)
+        FileUtils.mkdir_p(File.dirname(config.log_path))
+        FileUtils.touch(config.log_path)
+        loggingLevel = Logger::ERROR
+        fileLogger = Logger.new(config.logs["error_log_path"], config.logs["file_history"], config.logs["file_maxsize"])
+        
+        fileLogger.formatter = proc do |severity, datetime, progname, msg|
+           "#{msg}\n"
+        end
+        fileLogger.level = loggingLevel  
+        @loggers.push(fileLogger)
+        puts "error file logger setup at #{config.logs['error_log_path']}"
+      end
+
+    end
+
+    def setup_file_logger_with_rolling_date(config)
 
       if features.is_enabled("all_log_file_logger",false)
 
@@ -48,7 +83,7 @@ module Meda
 
     end
 
-    def setup_additional_error_logger(config)
+    def setup_additional_error_rolling_date(config)
       if features.is_enabled("error_file_logger",false)
          appender = Logging.appenders.rolling_file( 'error_log',
            :filename   => config.logs["error_log_path"],
