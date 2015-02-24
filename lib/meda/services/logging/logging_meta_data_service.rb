@@ -68,6 +68,17 @@ module Meda
        
     end
 
+    def add_to_mdc(key, value)
+        if(Logging.mdc["meta_logs"].to_s.length > 0)    
+            logging_hash =  JSON.parse Logging.mdc["meta_logs"].to_s 
+        else
+            logging_hash = Hash.new()
+        end
+        
+        logging_hash[key] = value
+        Logging.mdc["meta_logs"] = logging_hash.to_json
+    end
+
 
     def prefix_hash(prefix,hash)
         if hash.nil? 

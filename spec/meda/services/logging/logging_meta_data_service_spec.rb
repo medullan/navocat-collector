@@ -99,6 +99,42 @@ describe Meda::LoggingMetaDataService do
     	expect(logging_hash["cookie_test_cookie"]).to eql("one")
     end
 
+    it 'adds to mdc with empty logging' do
+    	Logging.mdc.clear
+    	super_config = {}
+      	config = Meda::Configuration.new();
+      	super_config["config"] = config
+    	
+    	logging_meta_data_service = Meda::LoggingMetaDataService.new(super_config)
+
+    	logging_meta_data_service.add_to_mdc("test_key","test_value")
+    	logging_hash =  JSON.parse Logging.mdc["meta_logs"].to_s
+
+    	expect(logging_hash["test_key"]).to eql("test_value")
+    	expect(logging_hash.keys.size).to eql(1)
+    end
+
+    it 'adds to mdc with existing mdc' do
+
+		hash = Hash.new()
+		hash["rack.input"] = "rack.input"
+
+    	Logging.mdc.clear
+    	Logging.mdc["meta_logs"] = hash.to_json
+
+    	super_config = {}
+      	config = Meda::Configuration.new();
+      	super_config["config"] = config
+    	
+    	logging_meta_data_service = Meda::LoggingMetaDataService.new(super_config)
+
+    	logging_meta_data_service.add_to_mdc("test_key","test_value")
+    	logging_hash =  JSON.parse Logging.mdc["meta_logs"].to_s
+
+    	expect(logging_hash["test_key"]).to eql("test_value")
+    	expect(logging_hash.keys.size).to eql(2)
+    end
+
   end
 
 
