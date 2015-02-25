@@ -12,7 +12,7 @@ module Meda
     end
 
    	def initialize(config)
-       @@request_url_filter_service = Meda::RequestURLFilterService.new(config)
+       @request_url_filter_service = Meda::RequestURLFilterService.new(config)
        @profile_id_service = Meda::ProfileIdService.new(config)
     end
 
@@ -20,7 +20,7 @@ module Meda
 
         hash = Hash.new()
         hash["request_uuid"] = UUIDTools::UUID.random_create.to_s
-        hash["request_url"] = @@request_url_filter_service.filter(request)
+        hash["request_url"] = @request_url_filter_service.filter(request)
         hash["request_url_path"] = request.path_info
         hash["referrer"] = request.referrer
         hash["referer"] = request.referer

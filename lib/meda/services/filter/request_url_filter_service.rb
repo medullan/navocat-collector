@@ -22,7 +22,6 @@ module Meda
       member_id = request.params["member_id"]
 
       if(member_id.nil? || member_id.length == 0)
-      	Meda.logger.error('missing member_id on identify call')
       	return url
       end
 

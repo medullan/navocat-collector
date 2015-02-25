@@ -146,6 +146,13 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
+        url = request.url
+        member_id = request.params["member_id"]
+
+        if(member_id.nil? || member_id.length == 0)
+          Meda.logger.error('missing member_id on identify call')
+        end
+
         profile = settings.connection.identify(params)
         if profile
           set_profile_id_in_cookie(profile['id'])
