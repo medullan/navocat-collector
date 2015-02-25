@@ -10,24 +10,29 @@ module Meda
     end
 
     #todo : update to use actual url
-    def filter(url)
-     
-	  if(!url.include? 'identify.gif')
-	  	return url
-	  end
+    def filter(request)
+         
+      request_path = request.env['REQUEST_PATH']
+      url = request.url
+  	  if(!request_path.nil? && !request_path.end_with?('/identify.gif'))
+  	  	return url
+  	  end
 
- 	  without_member_id, member_id = url.split('member_id=')	
+      url = request.url
+      member_id = request.params["member_id"]
 
-      if((url.include? 'identify.gif') && (member_id.nil? || member_id.length == 0))
-      	Meda.logger.error('missing member_id on identify call')
+      if(member_id.nil? || member_id.length == 0)
       	return url
       end
-  		
+
       profileIdHashInformation = {}
       profileIdHashInformation[:member_id] = member_id
       member_id_hashed = @profile_id_service.mapToHash(profileIdHashInformation)
-      with_hashed_member_id = "#{without_member_id}member_id__hashed=#{member_id_hashed}"
-      with_hashed_member_id
+
+      url = url.gsub "member_id", "member_id__hashed"
+      url = url.gsub member_id, member_id_hashed
+
+      url
 
     end
 

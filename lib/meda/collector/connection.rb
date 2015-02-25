@@ -84,15 +84,13 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
 
           if Meda.features.is_enabled("google_analytics_store",true)
             if dataset.stream_to_ga?
-              ga_pool.submit do
-                Thread.current["request_uuid"] = hit.request_uuid              
+              ga_pool.submit do            
                 dataset.stream_hit_to_ga(hit)
               end
             else
@@ -117,7 +115,6 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -127,7 +124,6 @@ module Meda
           
             if dataset.stream_to_ga?
               ga_pool.submit do
-                Thread.current["request_uuid"] = hit.request_uuid
                 dataset.stream_hit_to_ga(hit)
               end
             else

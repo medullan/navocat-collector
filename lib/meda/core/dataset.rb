@@ -65,7 +65,10 @@ module Meda
       end
 
       hit = custom_hit_filter(hit)
-      hit.request_uuid = Thread.current["request_uuid"]
+
+      if(Logging.mdc["meta_logs"].to_s.length>0)
+        hit.meta_logs = Logging.mdc["meta_logs"].to_s
+      end
       @last_hit = hit
       hit.validate!
 
@@ -91,7 +94,7 @@ module Meda
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
-      logger.debug("delete_profile ==> Unable to delete profile")
+      logger.warn("delete_profile ==> Unable to delete profile")
       return false
     end
 
@@ -102,7 +105,8 @@ module Meda
 
     def stream_hit_to_disk(hit)
       begin
-        logger.debug("Starting to write hit to DISK")
+        Logging.mdc["meta_logs"] = hit.meta_logs
+        logger.info("Starting to write hit to DISK")
         directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
         unless @data_paths[directory]
           # create the data directory if it does not exist
@@ -119,7 +123,7 @@ module Meda
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.debug("Writing hit #{hit.id} to disk #{path}")
+        logger.info("Writing hit #{hit.id} to disk #{path}")
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)
@@ -129,6 +133,7 @@ module Meda
 
     def stream_hit_to_ga(hit)
       begin
+        Logging.mdc["meta_logs"] = hit.meta_logs
         logger.info("Starting to stream hit to GA")
         @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
         return unless stream_to_ga?

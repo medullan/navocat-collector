@@ -14,10 +14,13 @@ module Meda
     end
 
     def mapToHash(hash_information)  	
-    	
     	member_id = hash_information[:member_id]
-    	hashing_data = member_id.to_s + @hash_salt
-    	Digest::SHA1.hexdigest(hashing_data)
+    	stringToHash(member_id)
+    end
+
+    def stringToHash(string_to_hash)   
+      hashing_data = string_to_hash.to_s + @hash_salt
+      Digest::SHA1.hexdigest(hashing_data)
     end
 
   end

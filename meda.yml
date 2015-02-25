@@ -9,11 +9,11 @@ development:
   logs:
     all_log_path: log/app.log
     error_log_path: log/error.log
-    file_history: 4
-    file_maxsize: 1000000000
-    error_email_from_account: fepcollector@gmail.com
+    file_history: 10
+    file_maxsize: 10000
+    error_email_from_account: collector@gmail.com
     error_email_from_account_password: update
-    error_email_to_account: [wesley+1@medullan.com,wesley+2@medullan.com]
+    error_email_to_account: [x@medullan.com,x@medullan.com]
   redis:
     host: localhost
     port: 6379
