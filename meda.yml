@@ -6,6 +6,7 @@ development:
   log_path: log/development.log
   log_level: 0
   hash_salt: b03dac7c42cc49ac805dcbbd0902e660
+  p3p: CP=\"DSP\"
   logs:
     all_log_path: log/app.log
     error_log_path: log/error.log
@@ -33,6 +34,7 @@ development:
     error_file_logger: true
     stdout_logger: true
     error_email_logger: false
+    p3p: true 
 
 production:
   disk_pool: 4
