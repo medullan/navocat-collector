@@ -2,6 +2,8 @@
 
 <head>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 
@@ -12,82 +14,161 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
-	function doIdentify(){
-		alert('s');
+
+	if (!String.prototype.format) {
+	  String.prototype.format = function() {
+	    var args = arguments;
+	    return this.replace(/{(\d+)}/g, function(match, number) { 
+	      return typeof args[number] != 'undefined'
+	        ? args[number]
+	        : match
+	      ;
+	    });
+	  };
 	}
 
-	function doIdentify(){
-		
+</script>
+
+<script type="text/javascript">
+	function identify(){
+			
+		var params = $.param(
+			{
+				dataset:$("#dataset").val(), 
+				cb:Math.random()*10,
+				member_id:$("#member_id").val()
+
+			}
+		);
+
+		var URL = $("#collector_host").val() + "identify.gif?" + params;
+
+		var image = $('<img />').attr("src", URL);
+		$("body").append(image);
+
 	}
 
-	function doIdentify(){
-		
+	function profile(){
+		var params = $.param(
+			{
+				dataset:$("#dataset").val(),
+				cb:Math.random()*10,
+				client_id:$("#client_id").val()
+			}
+		);
+
+		var URL = $("#collector_host").val() + "profile.gif?" + params;
+
+		var image = $('<img />').attr("src", URL);
+		$("body").append(image);
 	}
 
-	function doIdentify(){
-		
+	function page(){
+		var params = $.param(
+			{
+				dataset:$("#dataset").val(),
+				cb:Math.random()*10,
+				client_id:$("#client_id").val(),
+				path:$("#path").val(),
+				hostname:$("#hostname").val(),
+				title:$("#title").val(),
+				referrer:$("#referrer").val()
+			}
+		);
+
+		var URL = $("#collector_host").val() + "page.gif?" + params;
+
+		var image = $('<img />').attr("src", URL);
+		$("body").append(image);
 	}
 
-	function doIdentify(){
-		
+	function track(){
+		var params = $.param(
+			{
+				dataset:$("#dataset").val(),
+				cb:Math.random()*10,
+				client_id:$("#client_id").val(),
+				path:$("#path").val(),
+				hostname:$("#hostname").val(),
+				title:$("#title").val(),
+				referrer:$("#referrer").val()
+			}
+		);
+
+		var URL = $("#collector_host").val() + "track.gif?" + params;
+		var image = $('<img />').attr("src", URL);
+		$("body").append(image);
+	}
+
+	function endsession(){
+
+		var URL = $("#collector_host").val() + "endsession.gif"
+		var image = $('<img />').attr("src", URL);
+		$("body").append(image);
 	}
 </script>
 </head>
 
-    "client_id": "super",
-    "title": "Home",
-    "hostname": "http: //www.example.com",
-    "path": "/index.html"
-
+   
 <body>
-	<form>
+	<div class="container">
+		<div class="row">
+			 <div class="col-md-6">
+			<form>
 
-	  <div class="form-group">
-	    <label for="collector_host">collector host</label>
-	    <input type="text" class="form-control" id="collector_host" placeholder="Collector host">
-	  </div>
+			  <div class="form-group">
+			    <label for="collector_host">collector host</label>
+			    <input type="text" class="form-control" id="collector_host" placeholder="Collector host" value="http://">
+			  </div>
 
-	  <div class="form-group">
-	    <label for="dataset">Dataset</label>
-	    <input type="text" class="form-control" id="dataset" placeholder="Dataset">
-	  </div>
-	  <div class="form-group">
-	    <label for="cb">CB</label>
-	    <input type="text" class="form-control" id="cb" placeholder="CB">
-	  </div>
+			  <div class="form-group">
+			    <label for="dataset">Dataset</label>
+			    <input type="text" class="form-control" id="dataset" placeholder="Dataset" >
+			  </div>
 
-  	  <div class="form-group">
-	    <label for="member_id">CB</label>
-	    <input type="text" class="form-control" id="member_id" placeholder="Member Id">
-	  </div>
+		  	  <div class="form-group">
+			    <label for="member_id">Member ID</label>
+			    <input type="text" class="form-control" id="member_id" placeholder="Member Id">
+			  </div>
 
-	  <div class="form-group">
-	    <label for="client_id">client_id</label>
-	    <input type="text" class="form-control" id="client_id" placeholder="Client Id">
-	  </div>
+			  <div class="form-group">
+			    <label for="client_id">Client ID</label>
+			    <input type="text" class="form-control" id="client_id" placeholder="Client Id">
+			  </div>
 
-	  <div class="form-group">
-	    <label for="title">title</label>
-	    <input type="text" class="form-control" id="title" placeholder="Title">
-	  </div>
+			  <div class="form-group">
+			    <label for="title">Title</label>
+			    <input type="text" class="form-control" id="title" placeholder="Title">
+			  </div>
 
-  	  <div class="form-group">
-	    <label for="hostname">hostname</label>
-	    <input type="text" class="form-control" id="hostname" placeholder="Hostname">
-	  </div>
+		  	  <div class="form-group">
+			    <label for="hostname">Hostname</label>
+			    <input type="text" class="form-control" id="hostname" placeholder="Hostname">
+			  </div>
 
-	  	  <div class="form-group">
-	    <label for="path">path</label>
-	    <input type="text" class="form-control" id="path" placeholder="path">
-	  </div>
+	  	  		<div class="form-group">
+			    <label for="path">Path</label>
+			    <input type="text" class="form-control" id="path" placeholder="path">
+			  </div>
+		  	  
+		  	  <div class="form-group">
+			    <label for="referrer">Referrer</label>
+			    <input type="text" class="form-control" id="referrer" placeholder="referrer">
+			  </div>
 
-		<button onclick="doIdentify()" class="btn btn-default">IDENTIFY</button>
-		<button class="btn btn-default">PROFILE</button>
-		<button class="btn btn-default">PAGE</button>
-		<button class="btn btn-default">TRACK</button>
-		<button class="btn btn-default">END SESSION</button>
-	</form>
+			</form>
+		</div>
 
+		 <div class="col-md-6">
+				<button onclick="identify()" class="btn btn-default">IDENTIFY</button>
+				<button onclick="profile()" class="btn btn-default">PROFILE</button>
+				<button onclick="page()" class="btn btn-default">PAGE</button>
+				<button onclick="track()" class="btn btn-default">TRACK</button>
+				<button onclick="endsession()" class="btn btn-default">END SESSION</button>
+
+			</div>
+		</div>
+	</div>
 </body>
 
 </html>
