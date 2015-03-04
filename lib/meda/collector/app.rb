@@ -44,8 +44,13 @@ module Meda
       end
 
       after do
+        if Meda.features.is_enabled("p3p", true)
+          response.headers['P3P'] = Meda.configuration.p3p
+        end
+      end
+
+      after do
         if Meda.features.is_enabled("post_request_log",false)
-          @@logging_meta_data_service.add_to_mdc("status_code",response.status)
           logger.info("Ending request... status code #{response.status}")
         end
       end
@@ -146,13 +151,6 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
-        url = request.url
-        member_id = request.params["member_id"]
-
-        if(member_id.nil? || member_id.length == 0)
-          Meda.logger.error('missing member_id on identify call')
-        end
-
         profile = settings.connection.identify(params)
         if profile
           set_profile_id_in_cookie(profile['id'])
@@ -369,6 +367,9 @@ module Meda
       end
 
 
+      get 'meda/gettest.page' do
+
+      end
      
 
       # Config
