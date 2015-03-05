@@ -145,6 +145,7 @@ module Meda
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
+        # TODO review this code
         if(hit.profile_id != default_profile_id)
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
@@ -167,6 +168,7 @@ module Meda
     end
 
 
+    # TODO: Review, this code is not needed anymore
     def update_client_id(hit)
       begin
         profile_id = hit.profile_id
