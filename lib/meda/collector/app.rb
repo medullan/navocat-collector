@@ -45,6 +45,18 @@ module Meda
         end
       end
 
+      before do
+        # TODO put #{__method__} to all logger calls
+        if not client_id_cookie_exist?
+          logger.info("#{__method__} client_id doesn't exist, creating client_id")
+          uuid = UUIDTools::UUID.timestamp_create.hexdigest
+          set_client_id_cookie(uuid)
+          logger.info("#{__method__} client_id created: #{get_client_id_cookie}")
+        else
+          logger.info("#{__method__} client_id already created")
+        end
+      end
+
       after do
         if Meda.features.is_enabled("p3p", true)
           response.headers['P3P'] = Meda.configuration.p3p
@@ -169,7 +181,7 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         #print_out_params(profile_data)
-        if @@validation_service.valid_request?(profile_data)
+        if @@validation_service.valid_request?(get_client_id_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
             respond_with_ok
@@ -188,7 +200,7 @@ module Meda
       delete '/meda/profile.json', :provides => :json do
 
         profile_data = raw_json_from_request
-        if @@validation_service.valid_request?(profile_data)
+        if @@validation_service.valid_request?(get_client_id_cookie, profile_data)
           result = settings.connection.delete_profile(profile_data)
           if result
             respond_with_ok
@@ -207,7 +219,7 @@ module Meda
       get '/meda/profile_delete.gif' do
 
         get_profile_id_from_cookie
-        if @@validation_service.valid_request?(params)
+        if @@validation_service.valid_request?(get_client_id_cookie, params)
           result = settings.connection.delete_profile(params)
           if result
             respond_with_pixel
@@ -225,7 +237,7 @@ module Meda
       # Displays a profile for given profile_id
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
-        if @@validation_service.valid_request?(profile_data)
+        if @@validation_service.valid_request?(get_client_id_cookie, profile_data)
           profile = settings.connection.get_profile_by_id(profile_data)
           if profile
             profile.to_json
@@ -264,7 +276,7 @@ module Meda
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
         #print_out_params(params)
-        if @@validation_service.valid_request?(params)
+        if @@validation_service.valid_request?(get_client_id_cookie, params)
           settings.connection.profile(params)
           respond_with_pixel
         else
@@ -281,7 +293,7 @@ module Meda
 
         if params[:utmt] == 'event'
           utm_data = event_params_from_utm
-          if @@validation_service.valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(get_client_id_cookie, utm_data)
             settings.connection.track(utm_data)
             respond_with_pixel
           else
@@ -290,7 +302,7 @@ module Meda
           end
         else
           utm_data = page_params_from_utm
-          if @@validation_service.valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(get_client_id_cookie, utm_data)
             settings.connection.page(utm_data)
             respond_with_pixel
           else
@@ -307,7 +319,7 @@ module Meda
         logger.debug("in page")
         page_data = json_from_request
         #print_out_params(page_data)
-        if @@validation_service.valid_hit_request?(page_data)
+        if @@validation_service.valid_hit_request?(get_client_id_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
@@ -322,7 +334,7 @@ module Meda
       # Record a pageview
       get '/meda/page.gif' do
         get_profile_id_from_cookie
-        if @@validation_service.valid_hit_request?(params)
+        if @@validation_service.valid_hit_request?(get_client_id_cookie, params)
           #print_out_params(params)
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
@@ -338,7 +350,7 @@ module Meda
       post '/meda/track.json', :provides => :json do
         track_data = json_from_request
         #print_out_params(track_data)
-        if @@validation_service.valid_hit_request?(track_data)
+        if @@validation_service.valid_hit_request?(get_client_id_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok
         else
@@ -352,7 +364,7 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         get_profile_id_from_cookie
-        if @@validation_service.valid_hit_request?(params)
+        if @@validation_service.valid_hit_request?(get_client_id_cookie, params)
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
@@ -422,6 +434,27 @@ module Meda
 
       def get_profile_id_from_cookie
         params[:profile_id] ||= cookies[:'_meda_profile_id']
+      end
+
+      def set_client_id_cookie(id)
+        # TODO update with final client_id cookie
+        cookies[:'__test_ci_0'] = id
+      end
+
+      def get_client_id_cookie
+        # TODO update with final client_id cookie
+        cookies[:'__test_ci_0']
+      end
+
+      def client_id_cookie_exist?
+        #TODO consider refactoring out this code
+        if cookies['__test_ci_0'].nil? || cookies['__test_ci_0'] == ''
+          logger.info("#{__method__} => client_id doesn't exists")
+          return false
+        else
+          logger.info("#{__method__} => client_id exist")
+          return true
+        end
       end
 
       # Extracts hit params from request environment
