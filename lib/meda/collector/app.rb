@@ -8,6 +8,7 @@ require 'uuidtools'
 require 'meda/services/loader/profile_loader'
 require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/validation/validation_service'
 
 module Meda
   module Collector
@@ -32,6 +33,7 @@ module Meda
       helperConfig["config"] = Meda.configuration
      
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@validation_service = Meda::ValidationService.new()
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
@@ -167,7 +169,7 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         #print_out_params(profile_data)
-        if valid_request?(profile_data)
+        if @@validation_service.valid_request?(profile_data)
           result = settings.connection.profile(profile_data)
           if result
             respond_with_ok
@@ -186,7 +188,7 @@ module Meda
       delete '/meda/profile.json', :provides => :json do
 
         profile_data = raw_json_from_request
-        if valid_request?(profile_data)
+        if @@validation_service.valid_request?(profile_data)
           result = settings.connection.delete_profile(profile_data)
           if result
             respond_with_ok
@@ -205,7 +207,7 @@ module Meda
       get '/meda/profile_delete.gif' do
 
         get_profile_id_from_cookie
-        if valid_request?(params)
+        if @@validation_service.valid_request?(params)
           result = settings.connection.delete_profile(params)
           if result
             respond_with_pixel
@@ -223,7 +225,7 @@ module Meda
       # Displays a profile for given profile_id
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
-        if valid_request?(profile_data)
+        if @@validation_service.valid_request?(profile_data)
           profile = settings.connection.get_profile_by_id(profile_data)
           if profile
             profile.to_json
@@ -262,7 +264,7 @@ module Meda
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
         #print_out_params(params)
-        if valid_request?(params)
+        if @@validation_service.valid_request?(params)
           settings.connection.profile(params)
           respond_with_pixel
         else
@@ -279,7 +281,7 @@ module Meda
 
         if params[:utmt] == 'event'
           utm_data = event_params_from_utm
-          if valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(utm_data)
             settings.connection.track(utm_data)
             respond_with_pixel
           else
@@ -288,7 +290,7 @@ module Meda
           end
         else
           utm_data = page_params_from_utm
-          if valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(utm_data)
             settings.connection.page(utm_data)
             respond_with_pixel
           else
@@ -305,7 +307,7 @@ module Meda
         logger.debug("in page")
         page_data = json_from_request
         #print_out_params(page_data)
-        if valid_hit_request?(page_data)
+        if @@validation_service.valid_hit_request?(page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
@@ -320,7 +322,7 @@ module Meda
       # Record a pageview
       get '/meda/page.gif' do
         get_profile_id_from_cookie
-        if valid_hit_request?(params)
+        if @@validation_service.valid_hit_request?(params)
           #print_out_params(params)
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
@@ -336,7 +338,7 @@ module Meda
       post '/meda/track.json', :provides => :json do
         track_data = json_from_request
         #print_out_params(track_data)
-        if valid_hit_request?(track_data)
+        if @@validation_service.valid_hit_request?(track_data)
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok
         else
@@ -350,7 +352,7 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         get_profile_id_from_cookie
-        if valid_hit_request?(params)
+        if @@validation_service.valid_hit_request?(params)
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
@@ -420,16 +422,6 @@ module Meda
 
       def get_profile_id_from_cookie
         params[:profile_id] ||= cookies[:'_meda_profile_id']
-      end
-
-
-      def valid_request?(request_params)
-        [:dataset, :profile_id].all? {|p| request_params[p].present? }
-      end
-
-
-      def valid_hit_request?(request_params)
-        valid_request?(request_params) && ([:client_id, :path].all? {|p| request_params[p].present? })
       end
 
       # Extracts hit params from request environment

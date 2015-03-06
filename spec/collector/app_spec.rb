@@ -239,7 +239,7 @@ describe "Collector Application" do
     context 'with missing client_id' do
       it 'responds with bad request' do
         post_data = {
-          'dataset' => token, 'client_id' => client_id,
+          'dataset' => token, 'client_id' => nil,
           'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1', 'path' => '/'
         }
         post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
