@@ -14,7 +14,7 @@ module Meda
         Meda.logger.info("#{__method__} was called with dataset set to #{request_params[:dataset]}")
         return true
       else
-        Meda.logger.error("#{__method__} was called with empty dataset")
+        Meda.logger.error("#{__method__} was called with empty dataset, #{__method__} was called from #{__callee__}")
         return false
       end
     end
@@ -25,11 +25,10 @@ module Meda
           Meda.logger.info("#{__method__} was call with client_id: #{request_params[:client_id]} and path: #{request_params[:path]}")
           return true
         else
-          Meda.logger.error("#{__method__} was called with invalid values, client_id: #{request_params[:client_id]} and path: #{request_params[:path]}")
+          Meda.logger.error("#{__method__} was called with invalid values, client_id: #{request_params[:client_id]}, path: #{request_params[:path]}")
           return false
         end
       end
     end
-
   end
 end
