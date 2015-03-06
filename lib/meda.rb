@@ -87,7 +87,7 @@ module Meda
   end  
 
   class Configuration
-
+#TODO consider using HASHIE
     DEFAULTS = {
       :mapdb_path => File.join(Dir.pwd, 'db'),
       :data_path => File.join(Dir.pwd, 'data'),
