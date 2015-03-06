@@ -13,13 +13,24 @@ describe 'Validation service' do
       @dataset = { :dataset => "123456" }
     end
 
-    it 'should ensure dataset exist' do
-      expect(@validation_service.valid_request?(@dataset)).to be_truthy
+    context 'with valid dataset' do
+      it 'should return true' do
+        expect(@validation_service.valid_request?(@dataset)).to be_truthy
+      end
     end
 
-    it 'should log error message when dataset is missing and return false' do
-      @dataset[:dataset] = nil
-      expect(@validation_service.valid_request?(@dataset)).to be_falsey
+    context 'with nil dataset'  do
+      it 'should return false' do
+        @dataset[:dataset] = nil
+        expect(@validation_service.valid_request?(@dataset)).to be_falsey
+      end
+    end
+
+    context 'with empty dataset' do
+      it "should return false" do
+        @dataset[:dataset] = ''
+        expect(@validation_service.valid_hit_request?(@dataset)).to be_falsey
+      end
     end
 
   end
@@ -30,19 +41,40 @@ describe 'Validation service' do
       @request_hash = {:dataset => "123456", :client_id => "123456", :path => "/test/path"}
     end
 
-    it 'should ensure valid_hit_request? is called with request params and is valid' do
-      expect(@validation_service.valid_hit_request?(@request_hash)).to be_truthy
+    context 'with valid client_id' do
+      it "should return true" do
+        expect(@validation_service.valid_hit_request?(@request_hash)).to be_truthy
+      end
     end
 
-    it 'should ensure valid_hit_request? is called with a valid client_id' do
-      @request_hash[:client_id] = nil
-      expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+    context 'with nil client_id' do
+      it 'should return false' do
+        @request_hash[:client_id] = nil
+        expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+      end
     end
 
-    it 'should ensure valid_hit_request? is called with a valid path' do
-      @request_hash[:path] = nil
-      expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+    context 'with empty client_id' do
+      it 'should return false' do
+        @request_hash[:client_id] = ''
+        expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+      end
     end
+
+    context 'with nil path' do
+      it 'should return false' do
+        @request_hash[:path] = nil
+        expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+      end
+    end
+
+    context 'with nil path' do
+      it 'should return false' do
+        @request_hash[:path] = ''
+        expect(@validation_service.valid_hit_request?(@request_hash)).to be_falsey
+      end
+    end
+
   end
 
 end
