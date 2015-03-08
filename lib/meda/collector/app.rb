@@ -276,7 +276,7 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
-        #print_out_params(params)
+        # TODO passive profile_id validation
         if @@validation_service.valid_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           respond_with_pixel
