@@ -172,22 +172,13 @@ module Meda
     def update_client_id(hit)
       begin
         profile_id = hit.profile_id
-        if profile_id != default_profile_id
-          temp = ActiveSupport::HashWithIndifferentAccess.new({
-            :client_id => hit.client_id
-          })
-          current_path = hit.props[:path]
-          regex_of_paths = Regexp.union(landing_pages)
-          if (regex_of_paths.match(current_path))
+        if !profile_id.nil?
+          profile = get_profile(profile_id)
+          if profile && profile[:client_id] != hit.client_id
+            temp = ActiveSupport::HashWithIndifferentAccess.new({
+                :client_id => hit.client_id
+              })
             set_profile(profile_id, temp)
-          else
-            profile = get_profile(profile_id)
-            if profile
-              profile_client_id = profile[:client_id]
-              if profile_client_id
-                hit.client_id = profile_client_id
-              end
-            end
           end
         end
       rescue StandardError => e
