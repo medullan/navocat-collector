@@ -112,7 +112,7 @@ describe "Collector Application" do
 
 
   describe 'delete_profile.json' do
-    it 'delete profile' do
+    xit 'delete profile' do
       test_increment += 1
       delete_member_id = Time.now.getutc.to_i + test_increment
       delete_profile_id = setup_delete_profile_id(token, delete_member_id)
@@ -167,7 +167,7 @@ describe "Collector Application" do
   describe 'page.json' do
 
     context 'with missing client_id' do
-      it 'responds with bad request' do
+      xit 'responds with bad request' do
         post_data = {
           'dataset' => token, 'profile_id' => profile_id,
           'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
@@ -237,7 +237,7 @@ describe "Collector Application" do
   describe 'track.json' do
 
     context 'with missing client_id' do
-      it 'responds with bad request' do
+      xit 'responds with bad request' do
         post_data = {
           'dataset' => token, 'client_id' => nil,
           'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1', 'path' => '/'
