@@ -446,6 +446,10 @@ module Meda
         cookies[:'__test_ci_0']
       end
 
+      def set_client_id_param(client_id)
+        params[:client_id] = client_id
+      end
+
       def client_id_cookie_exist?
         #TODO consider refactoring out this code
         if cookies['__test_ci_0'].nil? || cookies['__test_ci_0'] == ''
