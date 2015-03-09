@@ -17,7 +17,7 @@ module Meda
 
     def valid_hit_request?(client_id_cookie, request_params)
       if valid_request?(client_id_cookie, request_params)
-        if !request_params[:path].nil? && !request_params[:path].empty?
+        if !request_params[:path].blank?
           Meda.logger.info("#{__method__} was call with path: #{request_params[:path]}")
           return true
         else
@@ -27,6 +27,16 @@ module Meda
       end
       Meda.logger.error("#{__method__}: valid_request? returned false")
       return false
+    end
+
+    def valid_profile_request?(client_id_cookie, request_params)
+      if !request_params[:profile_id].blank?
+        Meda.logger.info("#{__method__} was called with profile_id: #{request_params[:profile_id]}")
+        return valid_hit_request?(client_id_cookie, request_params)
+      else
+        Meda.logger.error("#{__method__} was called with an empty profile_id: #{request_params[:profile_id]}")
+        return false
+      end
     end
   end
 end
