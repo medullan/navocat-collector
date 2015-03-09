@@ -77,4 +77,23 @@ describe Meda::ValidationService do
 
   end
 
+  describe '.valid_profile_request?' do
+    let(:request_hash) { {:profile_id => "12345665432",:dataset => "123456", :path => "/test/path"} }
+
+    context 'when profile_id is present' do
+      it "should return true" do
+        allow(subject).to receive(:valid_hit_request?).and_return(true)
+        expect(subject.valid_profile_request?(client_id, request_hash)).to eql(true)
+      end
+    end
+
+    context 'when profile_id is not present' do
+      it "should should return false" do
+        allow(subject).to receive(:valid_hit_request?).and_return(true)
+        request_hash[:profile_id] = ''
+        expect(subject.valid_profile_request?(client_id, request_hash)).to eql(false)
+      end
+    end
+  end
+
 end
