@@ -173,10 +173,10 @@ module Meda
         if !profile_id.blank?
           profile = get_profile(profile_id)
           if profile && profile[:client_id] != hit.client_id
-            temp = ActiveSupport::HashWithIndifferentAccess.new({
+            new_client_id = ActiveSupport::HashWithIndifferentAccess.new({
                 :client_id => hit.client_id
               })
-            set_profile(profile_id, temp)
+            set_profile(profile_id, new_client_id)
           end
         end
       rescue StandardError => e
