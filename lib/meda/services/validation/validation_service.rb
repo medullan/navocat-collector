@@ -6,7 +6,7 @@ module Meda
   class ValidationService
 
     def valid_request?(client_id_cookie, request_params)
-      if !client_id_cookie.nil? && client_id_cookie != '' && !request_params[:dataset].nil? && request_params[:dataset] != ''
+      if !client_id_cookie.blank? && !request_params[:dataset].blank?
         Meda.logger.info("#{__method__} was called with client_id: #{client_id_cookie} and dataset: #{request_params[:dataset]}")
         return true
       else

@@ -46,7 +46,6 @@ module Meda
       end
 
       before do
-        # TODO put #{__method__} to all logger calls
         if not client_id_cookie_exist?
           logger.info("#{__method__} client_id doesn't exist, creating client_id")
           uuid = UUIDTools::UUID.timestamp_create.hexdigest
@@ -434,12 +433,11 @@ module Meda
 
       def set_client_id_cookie(id)
         # TODO update with final client_id cookie
-        cookies[:'__test_ci_0'] = id
+        cookies[:'__collector_client_id_v1'] = id
       end
 
       def get_client_id_from_cookie
-        # TODO update with final client_id cookie
-        cookies[:'__test_ci_0']
+        cookies[:'__collector_client_id_v1']
       end
 
       def set_client_id_param(client_id)
@@ -447,8 +445,7 @@ module Meda
       end
 
       def client_id_cookie_exist?
-        #TODO consider refactoring out this code
-        if cookies['__test_ci_0'].nil? || cookies['__test_ci_0'] == ''
+        if cookies['__collector_client_id_v1'].blank?
           logger.info("#{__method__} => client_id doesn't exists")
           return false
         else
