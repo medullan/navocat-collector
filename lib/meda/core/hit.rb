@@ -10,15 +10,14 @@ module Meda
 
   class Hit < Struct.new(:time, :profile_id, :client_id, :props)
 
-    attr_accessor :de, :profile_props, :id, :dataset, :default_profile_id, :tracking_id, :is_invalid, :request_uuid, :meta_logs
+    attr_accessor :de, :profile_props, :id, :dataset, :tracking_id, :is_invalid, :request_uuid, :meta_logs
 
-    def initialize(props, default_profile_id, dataset)
+    def initialize(props, dataset)
       @id = UUIDTools::UUID.timestamp_create.hexdigest
       @tracking_id = dataset.google_analytics['tracking_id'] if (dataset && dataset.google_analytics)
       time = props.delete(:time)
       profile_id = props.delete(:profile_id)
       client_id = props.delete(:client_id)
-      @default_profile_id = default_profile_id
       @dataset = dataset
       profile_props = {}
       super(time, profile_id, client_id, props)
@@ -66,7 +65,7 @@ module Meda
     end
 
     def add_extra_props
-      if(profile_id != default_profile_id)
+      if !profile_id.blank?
         props[:user_id] = profile_id
       end      
       props[:cache_buster] = id

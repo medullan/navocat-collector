@@ -9,7 +9,6 @@ describe Meda::Dataset do
     member_id = '384739284793284293'
 
     dataset.token = token
-    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
     dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
     dataset.enable_data_retrivals = true

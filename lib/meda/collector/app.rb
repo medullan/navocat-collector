@@ -199,7 +199,6 @@ module Meda
       # @method delete_profile_json
       # Deletes a given profile by profileid and dataset
       delete '/meda/profile.json', :provides => :json do
-
         profile_data = raw_json_from_request
         if @@validation_service.valid_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.delete_profile(profile_data)
@@ -319,7 +318,6 @@ module Meda
       post '/meda/page.json', :provides => :json do
         logger.debug("in page")
         page_data = json_from_request
-        #print_out_params(page_data)
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
@@ -349,7 +347,6 @@ module Meda
       # Record an event
       post '/meda/track.json', :provides => :json do
         track_data = json_from_request
-        #print_out_params(track_data)
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok

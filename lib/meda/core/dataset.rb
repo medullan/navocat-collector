@@ -15,7 +15,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :meda_config, :hit_filter
-    attr_accessor :name,:google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
+    attr_accessor :name,:google_analytics, :token, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
 
     # Readers primarily used for tests, not especially thread-safe :p
@@ -39,13 +39,13 @@ module Meda
     def add_event(event_props)
       event_props[:time] ||= DateTime.now.to_s
       event_props[:category] ||= 'none'
-      event = Meda::Event.new(event_props, default_profile_id, self)
+      event = Meda::Event.new(event_props, self)
       add_hit(event)
     end
 
     def add_pageview(page_props)
       page_props[:time] ||= DateTime.now.to_s
-      pageview = Meda::Pageview.new(page_props, default_profile_id, self)
+      pageview = Meda::Pageview.new(page_props, self)
       add_hit(pageview)
     end
 
@@ -146,7 +146,7 @@ module Meda
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
         # TODO review this code
-        if(hit.profile_id != default_profile_id)
+        if !hit.profile_id.blank?
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
             #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA
@@ -172,7 +172,7 @@ module Meda
     def update_client_id(hit)
       begin
         profile_id = hit.profile_id
-        if !profile_id.nil?
+        if !profile_id.blank?
           profile = get_profile(profile_id)
           if profile && profile[:client_id] != hit.client_id
             temp = ActiveSupport::HashWithIndifferentAccess.new({
@@ -182,7 +182,7 @@ module Meda
           end
         end
       rescue StandardError => e
-        logger.error("Failure getting client_id from profile")
+        logger.error("Failure updating client_id on profile")
         logger.error(e)
       end
       hit
