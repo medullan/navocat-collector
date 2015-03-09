@@ -112,7 +112,7 @@ describe "Collector Application" do
 
 
   describe 'delete_profile.json' do
-    xit 'delete profile' do
+    it 'delete profile' do
       test_increment += 1
       delete_member_id = Time.now.getutc.to_i + test_increment
       delete_profile_id = setup_delete_profile_id(token, delete_member_id)
