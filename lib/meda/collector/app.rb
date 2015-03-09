@@ -280,7 +280,7 @@ module Meda
           settings.connection.profile(params)
           respond_with_pixel
         else
-          logger.error("get_profile_id_from_cookie ==> Invalid request")
+          logger.error("profile.gif bad request request")
           respond_with_bad_request
         end
       end
