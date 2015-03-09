@@ -18,7 +18,6 @@ describe "Collector Application" do
   member_id = '384739284793284293'
   delete_member_id = 'AA84739284793284293'
   dataset = nil
-  dataset = nil
   profile_id = nil
   delete_profile_id = nil
   client_id = 'abcd1234abcd1234'
