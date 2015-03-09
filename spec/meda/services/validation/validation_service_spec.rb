@@ -75,6 +75,12 @@ describe Meda::ValidationService do
       end
     end
 
+    context 'when valid_hit_request? is called' do
+      it "should call valid_request?" do
+        expect(subject).to receive(:valid_request?).with(client_id, request_hash)
+        subject.valid_hit_request?(client_id, request_hash)
+      end
+    end
   end
 
   describe '.valid_profile_request?' do
@@ -82,16 +88,23 @@ describe Meda::ValidationService do
 
     context 'when profile_id is present' do
       it "should return true" do
-        allow(subject).to receive(:valid_hit_request?).and_return(true)
+        allow(subject).to receive(:valid_request?).and_return(true)
         expect(subject.valid_profile_request?(client_id, request_hash)).to eql(true)
       end
     end
 
     context 'when profile_id is not present' do
       it "should should return false" do
-        allow(subject).to receive(:valid_hit_request?).and_return(true)
+        allow(subject).to receive(:valid_request?).and_return(true)
         request_hash[:profile_id] = ''
         expect(subject.valid_profile_request?(client_id, request_hash)).to eql(false)
+      end
+    end
+
+    context 'when profile_id is valid' do
+      it "should call valid_request?" do
+        expect(subject).to receive(:valid_request?).with(client_id, request_hash)
+        subject.valid_profile_request?(client_id, request_hash)
       end
     end
   end

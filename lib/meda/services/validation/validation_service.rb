@@ -32,7 +32,7 @@ module Meda
     def valid_profile_request?(client_id_cookie, request_params)
       if !request_params[:profile_id].blank?
         Meda.logger.info("#{__method__} was called with profile_id: #{request_params[:profile_id]}")
-        return valid_hit_request?(client_id_cookie, request_params)
+        return valid_request?(client_id_cookie, request_params)
       else
         Meda.logger.error("#{__method__} was called with an empty profile_id: #{request_params[:profile_id]}")
         return false
