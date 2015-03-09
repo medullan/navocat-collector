@@ -182,7 +182,7 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
         #print_out_params(profile_data)
-        if @@validation_service.valid_request?(get_client_id_from_cookie, profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
             respond_with_ok
@@ -200,7 +200,7 @@ module Meda
       # Deletes a given profile by profileid and dataset
       delete '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
-        if @@validation_service.valid_request?(get_client_id_from_cookie, profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.delete_profile(profile_data)
           if result
             respond_with_ok
@@ -237,7 +237,7 @@ module Meda
       # Displays a profile for given profile_id
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
-        if @@validation_service.valid_request?(get_client_id_from_cookie, profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           profile = settings.connection.get_profile_by_id(profile_data)
           if profile
             profile.to_json
@@ -276,7 +276,7 @@ module Meda
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
         # TODO passive profile_id validation
-        if @@validation_service.valid_request?(get_client_id_from_cookie, params)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           respond_with_pixel
         else
