@@ -222,20 +222,6 @@ describe "Collector Application" do
 
   describe 'track.json' do
 
-    context 'with missing client_id' do
-      # TODO refactor test
-      xit 'responds with bad request' do
-        post_data = {
-          'dataset' => token, 'client_id' => nil,
-          'category' => 'foo', 'action' => 'testing', 'label' => 'boop!', 'value' => '1', 'path' => '/'
-        }
-        post 'meda/track.json', post_data.to_json, :content_type => 'application/json'
-        app.settings.connection.join_threads
-
-        expect(last_response).to be_bad_request
-      end
-    end
-
     context 'with dataset, profile_id, client_id, and event params' do
       it 'records the event' do
         post_data = {
