@@ -123,7 +123,6 @@ describe "Collector Application" do
       post_data = {'dataset' => token, 'profile_id' => delete_profile_id}
       post 'meda/getprofile.json', post_data.to_json, :content_type => 'application/json' 
       expect(last_response).to be_bad_request
-
     end
 
     it 'delete profile with bad id' do
@@ -165,20 +164,6 @@ describe "Collector Application" do
 
 
   describe 'page.json' do
-
-    context 'with missing client_id' do
-      # TODO refactor test
-      xit 'responds with bad request' do
-        post_data = {
-          'dataset' => token, 'profile_id' => profile_id,
-          'title' => 'foo', 'hostname' => 'http://www.example.com', 'path' => '/'
-        }
-        post 'meda/page.json', post_data.to_json, :content_type => 'application/json'
-        app.settings.connection.join_threads
-
-        expect(last_response).to be_bad_request
-      end
-    end
 
     context 'with dataset, profile_id, client_id, and page params' do
       it 'records the pageview' do
@@ -302,8 +287,5 @@ describe "Collector Application" do
       end
     end
   end
-
-
-
 end
 
