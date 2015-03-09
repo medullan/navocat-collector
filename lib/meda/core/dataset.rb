@@ -167,8 +167,6 @@ module Meda
       true
     end
 
-
-    # TODO: Review, this code is not needed anymore
     def update_client_id(hit)
       begin
         profile_id = hit.profile_id
