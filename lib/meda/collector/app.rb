@@ -65,6 +65,7 @@ module Meda
 
       after do
         if Meda.features.is_enabled("post_request_log",false)
+          @@logging_meta_data_service.add_to_mdc("status_code",response.status)
           logger.info("Ending request... status code #{response.status}")
         end
       end
