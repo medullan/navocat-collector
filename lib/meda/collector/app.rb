@@ -440,7 +440,13 @@ module Meda
       end
 
       def set_client_id_param(client_id)
+        if params[:client_id].blank?
+          logger.info("client_id param is blank")
+        else
+          logger.info("overwriting client_id with new value")
+        end
         params[:client_id] = client_id
+        logger.info("set client_id param with new value of #{params[:client_id]}")
       end
 
       def client_id_cookie_exist?
