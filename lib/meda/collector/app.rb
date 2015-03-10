@@ -432,11 +432,11 @@ module Meda
       end
 
       def set_client_id_cookie(id)
-        cookies[:'__collector_client_id_v1'] = id
+        cookies[:'__collector_client_id'] = id
       end
 
       def get_client_id_from_cookie
-        cookies[:'__collector_client_id_v1']
+        cookies[:'__collector_client_id']
       end
 
       def set_client_id_param(client_id)
@@ -450,7 +450,7 @@ module Meda
       end
 
       def client_id_cookie_exist?
-        if cookies['__collector_client_id_v1'].blank?
+        if cookies[:'__collector_client_id'].blank?
           logger.info("client_id doesn't exists")
           return false
         else
