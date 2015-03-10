@@ -48,7 +48,7 @@ module Meda
       before do
         if not client_id_cookie_exist?
           logger.info("client_id doesn't exist, creating client_id")
-          uuid = UUIDTools::UUID.timestamp_create.hexdigest
+          uuid = UUIDTools::UUID.random_create.to_s
           set_client_id_cookie(uuid)
           logger.info("client_id created: #{get_client_id_from_cookie}")
         else
