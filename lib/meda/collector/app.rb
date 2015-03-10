@@ -432,7 +432,6 @@ module Meda
       end
 
       def set_client_id_cookie(id)
-        # TODO update with final client_id cookie
         cookies[:'__collector_client_id_v1'] = id
       end
 
