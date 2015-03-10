@@ -432,8 +432,9 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
-      def set_client_id_cookie(id)
-        cookies[:'__collector_client_id'] = id
+      def set_client_id_cookie(client_id)
+        @@logging_meta_data_service.add_to_mdc("new__collector_client_id", client_id)
+        cookies[:'__collector_client_id'] = client_id
       end
 
       def get_client_id_from_cookie
