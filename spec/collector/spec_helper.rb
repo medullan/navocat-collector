@@ -24,6 +24,7 @@ Meda.configure do |config|
   config.data_path = 'meda_data'
   config.log_path = 'log/test.log'
   config.log_level = 3
+  config.hash_salt = ""
 end
 
 # Also needs to set up and tear down a redis server for the test

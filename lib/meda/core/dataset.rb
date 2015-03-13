@@ -5,6 +5,8 @@ require 'csv'
 require 'securerandom'
 require 'staccato'
 require 'logger'
+require 'meda'
+require 'meda/services/logging/logging_meta_data_service'
 
 module Meda
 
@@ -17,7 +19,6 @@ module Meda
     attr_reader :data_uuid, :meda_config, :hit_filter
     attr_accessor :name,:google_analytics, :token, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
-
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit, :hit_filter
 
@@ -27,6 +28,9 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
+      helperConfig = {}
+      helperConfig["config"] = Meda.configuration
+      @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
     end
 
     def identify_profile(info)
@@ -137,7 +141,7 @@ module Meda
         logger.info("Starting to stream hit to GA")
         @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
         return unless stream_to_ga?
-            
+
         tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
       
         if hit.hit_type == 'pageview'
@@ -161,11 +165,21 @@ module Meda
 
         ga_response, debug_ga_response = @last_ga_hit[:response]
 
-        logger.debug("Start of staccato logs")
         # TODO update with a more appropriate array reference
-        logger.debug(debug_ga_response[0])
-        logger.debug(debug_ga_response[1])
-        logger.debug("End of staccato logs")
+
+        @logging_meta_data_service.add_to_mdc("ga_debug_validity", debug_ga_response[0]['hit_parsing_result'][0]['valid'])
+
+        debug_messages = debug_ga_response[0]['hit_parsing_result'][0]['parser_message']
+
+        full_debug_message = ""
+
+        debug_messages.each do |item|
+          full_debug_message += item['description'] + "--"
+        end
+
+        @logging_meta_data_service.add_to_mdc("ga_debug_message", full_debug_message)
+        @logging_meta_data_service.add_to_mdc("ga_debug_full_json", debug_ga_response[0])
+        @logging_meta_data_service.add_to_mdc_hash("ga_debug", debug_ga_response[1])
 
         logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)

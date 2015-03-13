@@ -2,6 +2,7 @@ require 'logging'
 require 'json'
 require 'uuidtools'
 require_relative "../profile/one_key/profile_id_service"
+require_relative '../../services/filter/request_url_filter_service'
 
 module Meda
 
@@ -66,6 +67,14 @@ module Meda
         Logging.mdc.clear
         Logging.mdc["meta_logs"] = hash.to_json
        
+    end
+
+    def add_to_mdc_hash(prefix, hash)
+      new_hash = prefix_hash(prefix, hash)
+
+      new_hash.each do |key, value|
+        add_to_mdc(key, value)
+      end
     end
 
     def add_to_mdc(key, value)
