@@ -157,7 +157,7 @@ module Meda
           end
         end
         @last_ga_hit[:staccato_hit] = ga_hit
-        @last_ga_hit[:response] = ga_hit.track!
+        @last_ga_hit[:response] = ga_hit.track_debug!
 
 
         ga_response, debug_ga_response = @last_ga_hit[:response]
