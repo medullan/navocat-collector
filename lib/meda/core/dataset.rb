@@ -159,10 +159,13 @@ module Meda
         @last_ga_hit[:staccato_hit] = ga_hit
         @last_ga_hit[:response] = ga_hit.track_debug!
 
-
         ga_response, debug_ga_response = @last_ga_hit[:response]
 
-        puts debug_ga_response
+        logger.debug("Start of staccato logs")
+        # TODO update with a more appropriate array reference
+        logger.debug(debug_ga_response[0])
+        logger.debug(debug_ga_response[1])
+        logger.debug("End of staccato logs")
 
         logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
