@@ -145,7 +145,7 @@ module Meda
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
-        # TODO review this code
+
         if !hit.profile_id.blank?
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
@@ -158,6 +158,12 @@ module Meda
         end
         @last_ga_hit[:staccato_hit] = ga_hit
         @last_ga_hit[:response] = ga_hit.track!
+
+
+        ga_response, debug_ga_response = @last_ga_hit[:response]
+
+        puts debug_ga_response
+
         logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
       rescue StandardError => e
