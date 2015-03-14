@@ -160,26 +160,21 @@ module Meda
             end
           end
         end
+
         @last_ga_hit[:staccato_hit] = ga_hit
-        @last_ga_hit[:response] = ga_hit.track_debug!
 
-        ga_response, debug_ga_response = @last_ga_hit[:response]
+        @last_ga_response = ga_hit.track_debug!
 
-        # TODO update with a more appropriate array reference
-
-        @logging_meta_data_service.add_to_mdc("ga_debug_validity", debug_ga_response[0]['hit_parsing_result'][0]['valid'])
-
-        debug_messages = debug_ga_response[0]['hit_parsing_result'][0]['parser_message']
-
-        full_debug_message = ""
-
-        debug_messages.each do |item|
-          full_debug_message += item['description'] + "--"
+        if !last_ga_hit.nil?
+          @debug_ga_response = @last_ga_response
+          @logging_meta_data_service.add_to_mdc("ga_debug_validity", @debug_ga_response[:validity])
+          @logging_meta_data_service.add_to_mdc("ga_debug_message", @debug_ga_response[:parser_message])
+          @logging_meta_data_service.add_to_mdc_hash("ga_debug", @debug_ga_response[:params_sent_to_ga])
+        else
+          logger.error("last ga response returned with nil") # TODO used for debugging only
         end
 
-        @logging_meta_data_service.add_to_mdc("ga_debug_message", full_debug_message)
-        @logging_meta_data_service.add_to_mdc("ga_debug_full_json", debug_ga_response[0])
-        @logging_meta_data_service.add_to_mdc_hash("ga_debug", debug_ga_response[1])
+        @last_ga_hit[:response] = @last_ga_response
 
         logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
