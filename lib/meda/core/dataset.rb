@@ -163,10 +163,10 @@ module Meda
 
         @last_ga_hit[:staccato_hit] = ga_hit
 
-        @last_ga_response = ga_hit.track_debug!
+        @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
 
         if !last_ga_hit.nil?
-          @debug_ga_response = @last_ga_response
+          @debug_ga_response = @last_debug_ga_response
           @logging_meta_data_service.add_to_mdc("ga_debug_validity", @debug_ga_response[:validity])
           @logging_meta_data_service.add_to_mdc("ga_debug_message", @debug_ga_response[:parser_message])
           @logging_meta_data_service.add_to_mdc_hash("ga_debug", @debug_ga_response[:params_sent_to_ga])
@@ -174,7 +174,7 @@ module Meda
           logger.error("last ga response returned with nil") # TODO used for debugging only
         end
 
-        @last_ga_hit[:response] = @last_ga_response
+        @last_ga_hit[:response] = @last_debug_ga_response
 
         logger.info("Wrote hit #{hit.id} to Google Analytics")
         logger.debug(ga_hit.inspect)
