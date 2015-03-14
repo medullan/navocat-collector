@@ -166,6 +166,8 @@ module Meda
         ga_response, debug_ga_response = @last_ga_hit[:response]
 
         # TODO update with a more appropriate array reference
+        @logging_meta_data_service.add_to_mdc("ga_debug_response", debug_ga_response)
+        logger.info("ga_debug_response")
 
         @logging_meta_data_service.add_to_mdc("ga_debug_validity", debug_ga_response[0]['hit_parsing_result'][0]['valid'])
 
