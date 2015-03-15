@@ -165,11 +165,10 @@ module Meda
 
         @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
 
-        if !last_ga_hit.nil?
-          @debug_ga_response = @last_debug_ga_response
-          @logging_meta_data_service.add_to_mdc("ga_debug_validity", @debug_ga_response[:validity])
-          @logging_meta_data_service.add_to_mdc("ga_debug_message", @debug_ga_response[:parser_message])
-          @logging_meta_data_service.add_to_mdc_hash("ga_debug", @debug_ga_response[:params_sent_to_ga])
+        if !@last_debug_ga_response.nil?
+          @logging_meta_data_service.add_to_mdc("ga_debug_validity", @last_debug_ga_response[:validity])
+          @logging_meta_data_service.add_to_mdc("ga_debug_message", @last_debug_ga_response[:parser_message])
+          @logging_meta_data_service.add_to_mdc_hash("ga_debug", @last_debug_ga_response[:params_sent_to_ga])
         else
           logger.error("last ga response returned with nil") # TODO used for debugging only
         end
