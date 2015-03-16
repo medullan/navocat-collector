@@ -7,6 +7,7 @@ require 'staccato'
 require 'logger'
 require 'meda'
 require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/ga_debug/ga_debug_service'
 
 module Meda
 
@@ -31,6 +32,7 @@ module Meda
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@ga_debug_service = Meda::GAHitDebugService.new(Meda.configuration)
     end
 
     def identify_profile(info)
@@ -165,13 +167,7 @@ module Meda
 
         @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
 
-        if !@last_debug_ga_response.nil?
-          @logging_meta_data_service.add_to_mdc("ga_debug_validity", @last_debug_ga_response[:validity])
-          @logging_meta_data_service.add_to_mdc("ga_debug_message", @last_debug_ga_response[:parser_message])
-          @logging_meta_data_service.add_to_mdc_hash("ga_debug", @last_debug_ga_response[:params_sent_to_ga])
-        else
-          logger.error("last ga response returned with nil") # TODO used for debugging only
-        end
+        @@ga_debug_service.debug_ga_response(@last_debug_ga_response)
 
         @last_ga_hit[:response] = @last_debug_ga_response
 
