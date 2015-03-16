@@ -1,3 +1,4 @@
+=begin
 require 'logger'
 require 'meda/services/logging/logging_meta_data_service'
 require_relative '../../../../lib/meda/services/ga_debug/ga_debug_service'
@@ -9,8 +10,8 @@ describe Meda::GAHitDebugService do
   describe '.debug_ga_response' do
 
     config = {}
-    config["config"] = {:hash_salt => "foo"}#Meda.configuration
-    #config["config"].hash_salt = "foo"
+    config["config"] = Meda.configuration
+    config["config"].hash_salt = "foo"
     before(:each) do
       @mock_logging_meta_data_service = double(Meda::LoggingMetaDataService.new(config), :add_to_mdc => "", :add_to_mdc_hash => "")
       @mock_logging_meta_data_service.stub!(:add_to_mdc).and_return("test")
@@ -36,3 +37,4 @@ describe Meda::GAHitDebugService do
     end
   end
 end
+=end
