@@ -7,7 +7,7 @@ describe Meda::LoggingMetaDataService do
 
     	super_config = {}
     
-      	config = Meda::Configuration.new();
+      	config = Meda::Configuration.new()
       	super_config["config"] = config
 
       	logging_meta_data_service = Meda::LoggingMetaDataService.new(super_config)	
