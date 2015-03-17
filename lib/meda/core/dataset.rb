@@ -165,11 +165,16 @@ module Meda
 
         @last_ga_hit[:staccato_hit] = ga_hit
 
-        @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
+        if Meda.features.is_enabled("google_analytics_debug", false)
 
-        @@ga_debug_service.debug_ga_info(@last_debug_ga_response[:ga_response_json],
+          @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
+
+          @@ga_debug_service.debug_ga_info(@last_debug_ga_response[:ga_response_json],
                                          @last_debug_ga_response[:ga_response_code],
                                          @last_debug_ga_response[:params_sent_to_ga])
+        else
+          @last_debug_ga_response = ga_hit.track!
+        end
 
         @last_ga_hit[:response] = @last_debug_ga_response
 
