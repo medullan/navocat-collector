@@ -1,4 +1,3 @@
-require 'json'
 require 'logger'
 require 'meda'
 require 'meda/services/logging/logging_meta_data_service'
@@ -76,7 +75,11 @@ describe Meda::GAHitDebugService do
 
   describe '.parse_ga_response' do
     context 'when ga_response_json is not blank' do
-      it "should call JSON.parse"
+      it "should call JSON.parse" do
+        allow(JSON).to receive(:parse).and_return("{}")
+        subject.parse_ga_response("{}")
+        expect(JSON).to have_received(:parse).with("{}")
+      end
     end
 
     context 'when ga_response_json is nil' do
