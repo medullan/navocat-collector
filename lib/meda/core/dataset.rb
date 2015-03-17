@@ -85,7 +85,7 @@ module Meda
       if(!hit_filter.nil?)
         hit = hit_filter.filter_hit(hit,self)
       end
-      hit = update_client_id(hit)
+      hit
     end
 
     def set_profile(profile_id, profile_info)
@@ -184,26 +184,6 @@ module Meda
       end
       true
     end
-
-    def update_client_id(hit)
-      begin
-        profile_id = hit.profile_id
-        if !profile_id.blank?
-          profile = get_profile(profile_id)
-          if profile && profile[:client_id] != hit.client_id
-            new_client_id = ActiveSupport::HashWithIndifferentAccess.new({
-                :client_id => hit.client_id
-              })
-            set_profile(profile_id, new_client_id)
-          end
-        end
-      rescue StandardError => e
-        logger.error("Failure updating client_id on profile")
-        logger.error(e)
-      end
-      hit
-    end
-
 
     def after_identify(&block)
       @after_identify = block
