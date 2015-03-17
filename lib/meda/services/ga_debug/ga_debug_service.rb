@@ -14,25 +14,24 @@ module Meda
     end
 
     def debug_ga_info(debug_ga_response)
+      begin
+        ga_response_json = debug_ga_response[:ga_response_json]
+        ga_response_code = debug_ga_response[:ga_response_code]
+        params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
 
-      ga_response_json = debug_ga_response[:ga_response_json]
-      ga_response_code = debug_ga_response[:ga_response_code]
-      params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
+        @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
 
-      @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
-
-      if !ga_response_json.blank? && !params_sent_to_ga.blank? && ga_response_code == "200"
-        begin
+        if !ga_response_json.blank? && !params_sent_to_ga.blank? && ga_response_code == "200"
           ga_response_json = parse_ga_response(ga_response_json)
           ga_response = construct_ga_debug_object(ga_response_json)
           @logging_meta_data_service.add_to_mdc("ga_debug_validity", ga_response[:validity])
           @logging_meta_data_service.add_to_mdc("ga_debug_message", ga_response[:parser_message])
           @logging_meta_data_service.add_to_mdc_hash("ga_debug", params_sent_to_ga)
           @logging_meta_data_service.add_to_mdc_hash("ga_debug_raw_json", ga_response_json)
-        rescue StandardError => e
-          Meda.logger.error("Failure logging ga debug information")
-          Meda.logger.error(e)
         end
+      rescue StandardError => e
+        Meda.logger.error("Failure logging ga debug information")
+        Meda.logger.error(e)
       end
     end
 
