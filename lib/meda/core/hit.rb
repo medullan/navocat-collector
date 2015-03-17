@@ -68,7 +68,6 @@ module Meda
       if !profile_id.blank?
         props[:user_id] = profile_id
       end      
-      props[:cache_buster] = id
       props[:anonymize_ip] = 1
     end
 
