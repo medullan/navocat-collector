@@ -6,26 +6,18 @@ require_relative '../../../../lib/meda/services/ga_debug/ga_debug_service'
 
 describe Meda::GAHitDebugService do
 
-  describe '.debug_ga_response' do
+  describe '.debug_ga_info' do
 
-    before(:each) do
+    let(:debug_ga_response) { {:ga_response_code => "200",
+                               :ga_response_json => "foo bar",
+                               :params_sent_to_ga => {'v' => 1, 'tid' => 'foo', 't' => 'pageview'}} }
 
+    context 'when last_debug_ga_response contain a non 200 http request' do
+      it "should only log response code"
     end
 
-    context 'when ga_response is valid' do
-      it 'should call logging_meta_data_service.add_to_mdc' do
-        allow(@mock_logging_meta_data_service).to receive(:add_to_mdc).and_return("")
-        allow(@mock_logging_meta_data_service).to receive(:add_to_mdc_hash).and_return("")
-
-      end
-
-      it 'should call logging_meta_data_service.add_to_mdc_hash'
-    end
-
-    context 'when ga_response is not valid' do
-      it 'should throw an exception'
-
-      it 'should not call logging_meta_data_service'
+    context 'when last_debug_ga_response contains a 200 http request' do
+      it 'should call mdc services'
     end
   end
 
@@ -84,16 +76,11 @@ describe Meda::GAHitDebugService do
 
   describe '.parse_ga_response' do
     context 'when ga_response_json is not blank' do
-      it "should call JSON.parse" do
-        allow(JSON).to receive(:parse).and_return("{}")
-        subject.parse_ga_response("{}")
-        expect(JSON).to receive(:parse)
-      end
+      it "should call JSON.parse"
     end
 
     context 'when ga_response_json is nil' do
-      # TODO revisit test
-      xit "should return nil" do
+      it "should return nil" do
         expect(subject.parse_ga_response(nil)).to be_nil
       end
     end
