@@ -32,7 +32,7 @@ module Meda
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
-      @@ga_debug_service = Meda::GAHitDebugService.new(Meda.configuration)
+      @@ga_debug_service = Meda::GAHitDebugService.new()
     end
 
     def identify_profile(info)
