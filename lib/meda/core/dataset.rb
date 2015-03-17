@@ -167,7 +167,9 @@ module Meda
 
         @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
 
-        @@ga_debug_service.debug_ga_response(@last_debug_ga_response)
+        @@ga_debug_service.debug_ga_info(@last_debug_ga_response[:ga_response_json],
+                                         @last_debug_ga_response[:ga_response_code],
+                                         @last_debug_ga_response[:params_sent_to_ga])
 
         @last_ga_hit[:response] = @last_debug_ga_response
 
