@@ -7,16 +7,17 @@ module Meda
 
   class GAHitDebugService
 
-    def initialize(config)
+    def initialize()
       helperConfig = {}
-      helperConfig["config"] = config
+      helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
     end
 
-    def debug_ga_info(last_debug_ga_response)
-      ga_response_json = last_debug_ga_response[:ga_response_json]
-      ga_response_code = last_debug_ga_response[:ga_response_code]
-      params_sent_to_ga = last_debug_ga_response[:params_sent_to_ga]
+    def debug_ga_info(debug_ga_response)
+
+      ga_response_json = debug_ga_response[:ga_response_json]
+      ga_response_code = debug_ga_response[:ga_response_code]
+      params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
 
       @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
 
