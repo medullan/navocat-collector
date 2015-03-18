@@ -24,7 +24,6 @@ describe "Collector Application" do
 
     dataset = Meda::Dataset.new("test_name", options)
     dataset.token = token
-    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
     dataset.enable_data_retrivals = true
     dataset.enable_profile_delete = true

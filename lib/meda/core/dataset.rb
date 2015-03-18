@@ -18,7 +18,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :meda_config, :hit_filter
-    attr_accessor :name,:google_analytics, :token, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
+    attr_accessor :name,:google_analytics, :token, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit, :hit_filter

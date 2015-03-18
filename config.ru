@@ -17,7 +17,6 @@ end
 
 dataset = Meda::Dataset.new("perf_#{Time.now.to_i}", Meda.configuration)
 dataset.token = 'LOCAL_TEST'
-dataset.landing_pages = []
 dataset.whitelisted_urls = []
 dataset.google_analytics = {'record' => false}
 Meda.datasets[dataset.token] = dataset
