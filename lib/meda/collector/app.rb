@@ -52,7 +52,7 @@ module Meda
           set_client_id_cookie(uuid)
           logger.info("client_id created: #{get_client_id_from_cookie}")
         else
-          logger.info("client_id already created")
+          logger.debug("client_id already created")
         end
         set_client_id_param(get_client_id_from_cookie)
       end
@@ -443,20 +443,20 @@ module Meda
 
       def set_client_id_param(client_id)
         if params[:client_id].blank?
-          logger.info("client_id param is blank")
+          logger.debug("client_id param is blank")
         else
-          logger.info("overwriting client_id with new value")
+          logger.debug("overwriting client_id with new value")
         end
         params[:client_id] = client_id
-        logger.info("set client_id param with new value of #{params[:client_id]}")
+        logger.debug("set client_id param with new value of #{params[:client_id]}")
       end
 
       def client_id_cookie_exist?
         if cookies[:'__collector_client_id'].blank?
-          logger.info("client_id doesn't exists")
+          logger.debug("client_id doesn't exists")
           return false
         else
-          logger.info("client_id already exist")
+          logger.debug("client_id already exist")
           return true
         end
       end
