@@ -20,14 +20,17 @@ module Meda
         params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
 
         @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
-        @logging_meta_data_service.add_to_mdc_hash("ga_debug_raw_json", ga_response_json)
 
-        if !ga_response_json.blank? && !params_sent_to_ga.blank? && ga_response_code == "200"
-            ga_response_json = parse_ga_response(ga_response_json)
+        if !ga_response_json.blank?
+          ga_response_json = parse_ga_response(ga_response_json)
+          @logging_meta_data_service.add_to_mdc_hash("ga_debug_raw_json", ga_response_json)
+
+          if !params_sent_to_ga.blank? && ga_response_code == "200"
             ga_response = construct_ga_debug_object(ga_response_json)
             @logging_meta_data_service.add_to_mdc("ga_debug_validity", ga_response[:validity])
             @logging_meta_data_service.add_to_mdc("ga_debug_message", ga_response[:parser_message])
             @logging_meta_data_service.add_to_mdc_hash("ga_debug", params_sent_to_ga)
+          end
         end
 
       rescue StandardError => e

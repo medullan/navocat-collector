@@ -20,7 +20,7 @@ describe Meda::GAHitDebugService do
   describe '.debug_ga_info' do
 
     before(:each) do
-      allow(subject).to receive(:parse_ga_response).and_return("{}")
+      allow(subject).to receive(:parse_ga_response).and_return(ga_response_json)
       allow(subject).to receive(:construct_ga_debug_object).and_return(ga_response)
     end
 
@@ -29,9 +29,9 @@ describe Meda::GAHitDebugService do
         debug_ga_response[:ga_response_code] = "302"
       end
 
-      it "should not call parse_ga_response" do
+      it "should call parse_ga_response once" do
         subject.debug_ga_info(debug_ga_response)
-        expect(subject).to have_received(:parse_ga_response).exactly(0).times
+        expect(subject).to have_received(:parse_ga_response).once
       end
 
       it "should not call construct_ga_debug_object" do
