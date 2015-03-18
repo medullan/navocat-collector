@@ -5,27 +5,55 @@ require_relative '../../../../lib/meda/services/ga_debug/ga_debug_service'
 
 describe Meda::GAHitDebugService do
 
+  let(:ga_response_json) { {'hit_parsing_result' =>
+                                [{'valid' => true, 'parser_message' =>
+                                     [{'message_type' => "INFO", 'description' => "foo"}],
+                                  'hit' => "foo bar"}]} }
+
+  let(:debug_ga_response) { {:ga_response_code => "200",
+                             :ga_response_json => ga_response_json,
+                             :params_sent_to_ga => {'v' => 1, 'tid' => 'foo', 't' => 'pageview'}} }
+
+  let(:ga_response) { {:validity => true,
+                       :parser_message => "foo bar"} }
+
   describe '.debug_ga_info' do
 
-    let(:debug_ga_response) { {:ga_response_code => "200",
-                               :ga_response_json => "foo bar",
-                               :params_sent_to_ga => {'v' => 1, 'tid' => 'foo', 't' => 'pageview'}} }
+    before(:each) do
+      allow(subject).to receive(:parse_ga_response).and_return("{}")
+      allow(subject).to receive(:construct_ga_debug_object).and_return(ga_response)
+    end
 
     context 'when last_debug_ga_response contain a non 200 http request' do
-      it "should only log response code"
+      before(:each) do
+        debug_ga_response[:ga_response_code] = "302"
+      end
+
+      it "should not call parse_ga_response" do
+        subject.debug_ga_info(debug_ga_response)
+        expect(subject).to have_received(:parse_ga_response).exactly(0).times
+      end
+
+      it "should not call construct_ga_debug_object" do
+        subject.debug_ga_info(debug_ga_response)
+        expect(subject).to have_received(:construct_ga_debug_object).exactly(0).times
+      end
     end
 
     context 'when last_debug_ga_response contains a 200 http request' do
-      it 'should call mdc services'
+      it 'should call parse_ga_response once' do
+        subject.debug_ga_info(debug_ga_response)
+        expect(subject).to have_received(:parse_ga_response).once
+      end
+
+      it "should call construct_ga_debug_object once" do
+        subject.debug_ga_info(debug_ga_response)
+        expect(subject).to have_received(:construct_ga_debug_object).once
+      end
     end
   end
 
   describe '.construct_ga_debug_object' do
-
-    let(:ga_response_json) { {'hit_parsing_result' =>
-                                  [{'valid' => true, 'parser_message' =>
-                                       [{'message_type' => "INFO", 'description' => "foo"}],
-                                    'hit' => "foo bar"}]} }
 
     context 'when param is nil' do
       it "should return hash with nil items" do
@@ -78,7 +106,7 @@ describe Meda::GAHitDebugService do
       it "should call JSON.parse" do
         allow(JSON).to receive(:parse).and_return("{}")
         subject.parse_ga_response("{}")
-        expect(JSON).to have_received(:parse).with("{}")
+        expect(JSON).to have_received(:parse).with("{}").once
       end
     end
 
