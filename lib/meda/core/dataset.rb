@@ -129,7 +129,9 @@ module Meda
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.info("Writing hit #{hit.id} to disk #{path}")
+
+        @logging_meta_data_service.add_to_mdc("disk_hit_id", hit.id)
+        @logging_meta_data_service.add_to_mdc("disk_hit_path", path)
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)
@@ -176,8 +178,9 @@ module Meda
 
         @last_ga_hit[:response] = @last_debug_ga_response
 
-        logger.info("Wrote hit #{hit.id} to Google Analytics")
+        @logging_meta_data_service.add_to_mdc("ga_hit_id", hit.id)
         logger.debug(ga_hit.inspect)
+
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to GA")
         logger.error(e)
