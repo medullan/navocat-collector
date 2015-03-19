@@ -47,12 +47,12 @@ module Meda
 
       before do
         if not client_id_cookie_exist?
-          logger.debug("client_id doesn't exist, creating client_id")
+          logger.info("client_id doesn't exist, creating client_id")
           uuid = UUIDTools::UUID.random_create.to_s
           set_client_id_cookie(uuid)
-          logger.debug("client_id created: #{get_client_id_from_cookie}")
+          logger.info("client_id created: #{get_client_id_from_cookie}")
         else
-          logger.debug("client_id already created")
+          logger.info("client_id already created")
         end
         set_client_id_param(get_client_id_from_cookie)
       end
