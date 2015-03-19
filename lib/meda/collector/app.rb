@@ -181,7 +181,6 @@ module Meda
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
-        #print_out_params(profile_data)
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
@@ -383,7 +382,6 @@ module Meda
      
 
       # Config
-
       configure do
         set :connection, Meda::Collector::Connection.new
       end
@@ -442,18 +440,18 @@ module Meda
       end
 
       def set_client_id_param(client_id)
-        if params[:client_id].blank?
-          logger.debug("client_id param is blank")
+        if params['client_id'].blank?
+          logger.info("client_id param is blank")
         else
-          logger.debug("overwriting client_id with new value")
+          logger.debug("overwriting client_id params with new value of #{params['client_id']}")
         end
-        params[:client_id] = client_id
-        logger.debug("set client_id param with new value of #{params[:client_id]}")
+        params['client_id'] = client_id
+        logger.debug("set client_id param with new value of #{params['client_id']}")
       end
 
       def client_id_cookie_exist?
         if cookies[:'__collector_client_id'].blank?
-          logger.debug("client_id doesn't exists")
+          logger.debug("client_id doesn't exist")
           return false
         else
           logger.debug("client_id already exist")
