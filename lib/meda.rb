@@ -43,6 +43,11 @@ module Meda
     end
     @logger
   end
+  
+  def self.loggerNoCache
+    @logger = Meda::LoggingService.new(Meda.configuration)
+    @logger
+  end
 
   def self.datasets
     if @datasets.nil?
@@ -125,5 +130,3 @@ Meda.configure do |config|
     puts "Warning: Missing meda.yml, please configure manually #{error.message}"
   end
 end
-
-
