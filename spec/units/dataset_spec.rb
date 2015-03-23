@@ -9,8 +9,6 @@ describe Meda::Dataset do
     member_id = '384739284793284293'
 
     dataset.token = token
-    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
-    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
     dataset.enable_data_retrivals = true
     dataset.google_analytics = {
@@ -62,7 +60,7 @@ describe Meda::Dataset do
         expect(hit.hit_type).to eq('event')
         expect(hit.time).to be_present
         expect(hit.profile_id).to eq(profile_id)
-        expect(hit.props).to eq({:category => 'shop', :action => 'purchase', :user_id=>profile_id, :cache_buster=>hit.id, :anonymize_ip=>1})
+        expect(hit.props).to eq({:category => 'shop', :action => 'purchase', :user_id=>profile_id, :anonymize_ip=>1})
         expect(hit.profile_props).to eq(profile_info)
       end
     end
@@ -81,7 +79,7 @@ describe Meda::Dataset do
         expect(hit.time).to be_present
         expect(hit.profile_id).to eq(profile_id)
         expect(hit.props).to eq({:hostname => 'example.com',
-          :path => '/shopping/index.html', :title => 'Buy Stuff', :user_id=>profile_id, :cache_buster=>hit.id, :anonymize_ip=>1})
+          :path => '/shopping/index.html', :title => 'Buy Stuff', :user_id=>profile_id, :anonymize_ip=>1})
         expect(hit.profile_props).to eq(profile_info)
       end
     end

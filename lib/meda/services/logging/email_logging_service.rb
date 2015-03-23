@@ -13,7 +13,7 @@ module Meda
        	appender = Logging.appenders.email( 'email',
            :from       => config.logs["error_email_from_account"],
            :to         => config.logs["error_email_to_account"],
-           :subject    => "FEP Collector Error in #{Socket.gethostname}",  
+           :subject    => "Collector Error in #{Socket.gethostname}",  
            :address    => "smtp.gmail.com",
            :port       => 587,
            :domain     => "gmail.com",
@@ -21,7 +21,7 @@ module Meda
            :password   => config.logs["error_email_from_account_password"],
            :authentication => :login,
            :enable_starttls_auto => true,
-     	   :auto_flushing => 10,     # send an email after x messages have been buffered
+     	     :auto_flushing => 10,     # send an email after x messages have been buffered
            :flush_period  => 5,     # send an email after x minutes
            :level         => :error # only process log events that are "error" or "fatal"
 		)

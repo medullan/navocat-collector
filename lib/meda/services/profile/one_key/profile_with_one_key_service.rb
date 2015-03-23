@@ -57,12 +57,11 @@ module Meda
 
     # Return a hash with the profile info for the given profile_id
     def get_profile_by_id(profile_id)
-
       if @profile_db.key?(profile_id)    
         ActiveSupport::HashWithIndifferentAccess.new(@profile_db.decode(profile_id))
       else
-        logger.warn("get_profile_by_id ==> No profile found with key #{profile_id}")
-        false # no profile
+        logger.debug("get_profile_by_id ==> No profile found with key #{profile_id}")
+        false
       end
     end
 

@@ -4,16 +4,17 @@ development:
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 0
+  log_level: 3
   hash_salt: b03dac7c42cc49ac805dcbbd0902e660
+  p3p: CP=\"DSP\"
   logs:
     all_log_path: log/app.log
     error_log_path: log/error.log
-    file_history: 4
-    file_maxsize: 1000000000
-    error_email_from_account: fepcollector@gmail.com
+    file_history: 10
+    file_maxsize: 10000
+    error_email_from_account: collector@gmail.com
     error_email_from_account_password: update
-    error_email_to_account: [wesley+1@medullan.com,wesley+2@medullan.com]
+    error_email_to_account: [x@medullan.com,x@medullan.com]
   redis:
     host: localhost
     port: 6379
@@ -33,6 +34,8 @@ development:
     error_file_logger: true
     stdout_logger: true
     error_email_logger: false
+    google_analytics_debug: false
+    p3p: true 
 
 production:
   disk_pool: 4

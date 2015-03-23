@@ -87,7 +87,7 @@ module Meda
   end  
 
   class Configuration
-
+#TODO consider using HASHIE
     DEFAULTS = {
       :mapdb_path => File.join(Dir.pwd, 'db'),
       :data_path => File.join(Dir.pwd, 'data'),
@@ -99,10 +99,11 @@ module Meda
       :redis => [],
       :name => 'dataset_name',
       :logs => [],
-      :hash_salt => ''
+      :hash_salt => '',
+      :p3p => ''
     }
 
-    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis, :h2, :logs, :hash_salt
+    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis, :h2, :logs, :hash_salt, :p3p
 
     def initialize
       DEFAULTS.each do |key,val|

@@ -16,10 +16,14 @@ describe "Collector Application" do
   page_params = {}
 
   before(:all) do
-    dataset = Meda::Dataset.new("test_name",{})
+    options = {}
+    options["disk_pool"] = 2
+    options["google_analytics_pool"] = 2
+    options["hash_salt"] = ""
+    options["config"] = options
+
+    dataset = Meda::Dataset.new("test_name", options)
     dataset.token = token
-    dataset.default_profile_id = '471bb8f0593711e48c1e44fb42fffeaa'
-    dataset.landing_pages = [/\/pilot\/landingpage/,/\/members\/myblue\/dashboard/]
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
     dataset.enable_data_retrivals = true
     dataset.enable_profile_delete = true
@@ -30,10 +34,6 @@ describe "Collector Application" do
     }
 
     Meda.datasets[token] = dataset
-
-    options = {}
-    options["disk_pool"] = 2
-    options["google_analytics_pool"] = 2
 
 	connection = Meda::Collector::Connection.new(options)
 

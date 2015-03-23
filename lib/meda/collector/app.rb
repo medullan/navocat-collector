@@ -6,6 +6,9 @@ require 'meda/collector/connection'
 require 'logger'
 require 'uuidtools'
 require 'meda/services/loader/profile_loader'
+require 'meda/services/filter/request_url_filter_service'
+require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/validation/validation_service'
 
 module Meda
   module Collector
@@ -26,18 +29,44 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
-      
+      helperConfig = {}
+      helperConfig["config"] = Meda.configuration
+     
+      @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@validation_service = Meda::ValidationService.new()
 
       before do
-        Thread.current["request_uuid"] = UUIDTools::UUID.random_create.to_s
+        @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
+      end      
+
+      before do
         if Meda.features.is_enabled("pre_request_log",false)
-          logger.debug("Starting request... #{request.url} ..")
+          logger.info("Starting request... ")
+        end
+      end
+
+      before do
+        if not client_id_cookie_exist?
+          logger.info("client_id doesn't exist, creating client_id")
+          uuid = UUIDTools::UUID.random_create.to_s
+          set_client_id_cookie(uuid)
+          logger.info("client_id created: #{get_client_id_from_cookie}")
+        else
+          logger.info("client_id already created")
+        end
+        set_client_id_param(get_client_id_from_cookie)
+      end
+
+      after do
+        if Meda.features.is_enabled("p3p", true)
+          response.headers['P3P'] = Meda.configuration.p3p
         end
       end
 
       after do
         if Meda.features.is_enabled("post_request_log",false)
-          logger.debug("Ending request... status code #{response.status}")
+          @@logging_meta_data_service.add_to_mdc("status_code",response.status)
+          logger.info("Ending request... status code #{response.status}")
         end
       end
 
@@ -152,17 +181,16 @@ module Meda
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
         profile_data = raw_json_from_request
-        #print_out_params(profile_data)
-        if valid_request?(profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
             respond_with_ok
           else
-            logger.info("post /meda/profile.json ==> Invalid result")
+            logger.error("post /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
-          logger.info("post /meda/profile.json ==> Invalid request")
+          logger.error("post /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -170,18 +198,17 @@ module Meda
       # @method delete_profile_json
       # Deletes a given profile by profileid and dataset
       delete '/meda/profile.json', :provides => :json do
-
         profile_data = raw_json_from_request
-        if valid_request?(profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.delete_profile(profile_data)
           if result
             respond_with_ok
           else
-            logger.info("delete /meda/profile.json ==> Invalid result")
+            logger.error("delete /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
-          logger.info("delete /meda/profile.json ==> Invalid request")
+          logger.error("delete /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -191,16 +218,16 @@ module Meda
       get '/meda/profile_delete.gif' do
 
         get_profile_id_from_cookie
-        if valid_request?(params)
+        if @@validation_service.valid_request?(get_client_id_from_cookie, params)
           result = settings.connection.delete_profile(params)
           if result
             respond_with_pixel
           else
-            logger.info("get_profile_id_from_cookie ==> Unable to delete profile")
+            logger.error("get_profile_id_from_cookie ==> Unable to delete profile")
             respond_with_bad_request
           end
         else
-          logger.info("get_profile_id_from_cookie ==> Invalid request")
+          logger.error("get_profile_id_from_cookie ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -209,16 +236,16 @@ module Meda
       # Displays a profile for given profile_id
       post '/meda/getprofile.json', :provides => :json do
         profile_data = raw_json_from_request
-        if valid_request?(profile_data)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           profile = settings.connection.get_profile_by_id(profile_data)
           if profile
             profile.to_json
           else
-            logger.info("post /meda/getprofile.json ==> Unable to find profile")
+            logger.error("post /meda/getprofile.json ==> Unable to find profile")
             respond_with_bad_request
           end
         else
-          logger.info("post /meda/getprofile.json ==> Invalid request")
+          logger.error("post /meda/getprofile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -231,13 +258,13 @@ module Meda
         if request_data[:dataset]
           last_hit = settings.connection.get_last_hit(request_data)
         else
-          logger.info("post /meda/getlasthit.json ==> Invalid request")
+          logger.error("post /meda/getlasthit.json ==> Invalid request")
           respond_with_bad_request
         end
         if last_hit
           last_hit.to_json
         else
-          logger.info("post /meda/getlasthit.json ==> Failed to get last hit")
+          logger.error("post /meda/getlasthit.json ==> Failed to get last hit")
         end
       end
 
@@ -247,12 +274,11 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         get_profile_id_from_cookie
-        #print_out_params(params)
-        if valid_request?(params)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           respond_with_pixel
         else
-          logger.info("get_profile_id_from_cookie ==> Invalid request")
+          logger.error("profile.gif bad request request")
           respond_with_bad_request
         end
       end
@@ -265,20 +291,20 @@ module Meda
 
         if params[:utmt] == 'event'
           utm_data = event_params_from_utm
-          if valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(get_client_id_from_cookie, utm_data)
             settings.connection.track(utm_data)
             respond_with_pixel
           else
-            logger.info("get /meda/:dataset/__utm.gif ==> Invalid hit request")
+            logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         else
           utm_data = page_params_from_utm
-          if valid_hit_request?(utm_data)
+          if @@validation_service.valid_hit_request?(get_client_id_from_cookie, utm_data)
             settings.connection.page(utm_data)
             respond_with_pixel
           else
-            logger.info("get /meda/:dataset/__utm.gif ==> Invalid hit request")
+            logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         end
@@ -290,13 +316,12 @@ module Meda
       post '/meda/page.json', :provides => :json do
         logger.debug("in page")
         page_data = json_from_request
-        #print_out_params(page_data)
-        if valid_hit_request?(page_data)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else
-          logger.warn("post /meda/page.json ==> Invalid hit request")
+          logger.error("post /meda/page.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -306,12 +331,11 @@ module Meda
       # Record a pageview
       get '/meda/page.gif' do
         get_profile_id_from_cookie
-        if valid_hit_request?(params)
-          #print_out_params(params)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.warn("get /meda/page.gif ==> Invalid hit request")
+          logger.error("get /meda/page.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -321,12 +345,11 @@ module Meda
       # Record an event
       post '/meda/track.json', :provides => :json do
         track_data = json_from_request
-        #print_out_params(track_data)
-        if valid_hit_request?(track_data)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok
         else
-          logger.info("post /meda/track.json ==> Invalid hit request")
+          logger.error("post /meda/track.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -336,11 +359,11 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         get_profile_id_from_cookie
-        if valid_hit_request?(params)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.info("get /meda/track.gif ==> Invalid hit request")
+          logger.error("get /meda/track.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -353,10 +376,12 @@ module Meda
       end
 
 
+      get 'meda/gettest.page' do
+
+      end
      
 
       # Config
-
       configure do
         set :connection, Meda::Collector::Connection.new
       end
@@ -405,14 +430,33 @@ module Meda
         params[:profile_id] ||= cookies[:'_meda_profile_id']
       end
 
-
-      def valid_request?(request_params)
-        [:dataset, :profile_id].all? {|p| request_params[p].present? }
+      def set_client_id_cookie(client_id)
+        @@logging_meta_data_service.add_to_mdc("new__collector_client_id", client_id)
+        cookies[:'__collector_client_id'] = client_id
       end
 
+      def get_client_id_from_cookie
+        cookies[:'__collector_client_id']
+      end
 
-      def valid_hit_request?(request_params)
-        valid_request?(request_params) && ([:client_id, :path].all? {|p| request_params[p].present? })
+      def set_client_id_param(client_id)
+        if params['client_id'].blank?
+          logger.info("client_id param is blank")
+        else
+          logger.debug("overwriting client_id params with new value of #{params['client_id']}")
+        end
+        params['client_id'] = client_id
+        logger.debug("set client_id param with new value of #{params['client_id']}")
+      end
+
+      def client_id_cookie_exist?
+        if cookies[:'__collector_client_id'].blank?
+          logger.debug("client_id doesn't exist")
+          return false
+        else
+          logger.debug("client_id already exist")
+          return true
+        end
       end
 
       # Extracts hit params from request environment

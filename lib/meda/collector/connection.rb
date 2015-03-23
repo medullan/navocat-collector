@@ -84,19 +84,17 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
 
           if Meda.features.is_enabled("google_analytics_store",true)
             if dataset.stream_to_ga?
-              ga_pool.submit do
-                Thread.current["request_uuid"] = hit.request_uuid              
+              ga_pool.submit do            
                 dataset.stream_hit_to_ga(hit)
               end
             else
-              logger.info("track ==> Data did not stream to GA")
+              logger.error("track ==> Data did not stream to GA")
             end
           end
           Meda.logger.debug("main thread has sent pool requests")
@@ -111,13 +109,12 @@ module Meda
           hit = dataset.add_pageview(page_params)
 
           if(hit.is_invalid)
-            logger.info("page ==> Invalid hit")
+            logger.error("page ==> Invalid hit")
             return false
           end
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current["request_uuid"] = hit.request_uuid
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -127,11 +124,10 @@ module Meda
           
             if dataset.stream_to_ga?
               ga_pool.submit do
-                Thread.current["request_uuid"] = hit.request_uuid
                 dataset.stream_hit_to_ga(hit)
               end
             else
-              logger.info("track ==> Data did not stream to GA")
+              logger.error("track ==> Data did not stream to GA")
             end
           end
            true   
@@ -166,7 +162,7 @@ module Meda
 
       def process_request(params, &block)
         begin
-          params.delete(:cb)  #remove cb from all requests
+          params.delete('cb')  #remove cb from all requests
           dataset, other_params = extract_dataset_from_params(params)
           yield(dataset, other_params) if block_given?
 

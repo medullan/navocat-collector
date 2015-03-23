@@ -5,6 +5,9 @@ require 'csv'
 require 'securerandom'
 require 'staccato'
 require 'logger'
+require 'meda'
+require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/ga_debug/ga_debug_service'
 
 module Meda
 
@@ -15,8 +18,7 @@ module Meda
   class Dataset
 
     attr_reader :data_uuid, :meda_config, :hit_filter
-    attr_accessor :name,:google_analytics, :token, :default_profile_id, :landing_pages, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
-
+    attr_accessor :name,:google_analytics, :token, :whitelisted_urls, :enable_data_retrivals, :hit_filter, :filter_file_name, :filter_class_name, :enable_profile_delete
 
     # Readers primarily used for tests, not especially thread-safe :p
     attr_reader :last_hit, :last_disk_hit, :last_ga_hit, :hit_filter
@@ -27,25 +29,29 @@ module Meda
       @data_uuid = UUIDTools::UUID.timestamp_create.hexdigest
       @data_paths = {}
       @after_identify = lambda {|dataset, user| }
+      helperConfig = {}
+      helperConfig["config"] = Meda.configuration
+      @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@ga_debug_service = Meda::GAHitDebugService.new()
     end
 
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
       @after_identify.call(self, profile)
-      Meda.logger.info("profile #{profile}")
+      Meda.logger.debug("profile #{profile}")
       return profile
     end
 
     def add_event(event_props)
       event_props[:time] ||= DateTime.now.to_s
       event_props[:category] ||= 'none'
-      event = Meda::Event.new(event_props, default_profile_id, self)
+      event = Meda::Event.new(event_props, self)
       add_hit(event)
     end
 
     def add_pageview(page_props)
       page_props[:time] ||= DateTime.now.to_s
-      pageview = Meda::Pageview.new(page_props, default_profile_id, self)
+      pageview = Meda::Pageview.new(page_props, self)
       add_hit(pageview)
     end
 
@@ -56,16 +62,19 @@ module Meda
           profile.delete('id')
           hit.profile_props = profile
         else
-          logger.info("add_hit ==> Unable to find profile")
+          logger.debug("add_hit ==> Unable to find profile")
         end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
-        logger.info("add_hit ==> Hit has no profile id")
+        logger.debug("add_hit ==> Hit has no profile id")
       end
 
       hit = custom_hit_filter(hit)
-      hit.request_uuid = Thread.current["request_uuid"]
+
+      if(Logging.mdc["meta_logs"].to_s.length>0)
+        hit.meta_logs = Logging.mdc["meta_logs"].to_s
+      end
       @last_hit = hit
       hit.validate!
 
@@ -76,7 +85,7 @@ module Meda
       if(!hit_filter.nil?)
         hit = hit_filter.filter_hit(hit,self)
       end
-      hit = update_client_id(hit)
+      hit
     end
 
     def set_profile(profile_id, profile_info)
@@ -91,7 +100,7 @@ module Meda
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
-      logger.info("delete_profile ==> Unable to delete profile")
+      logger.warn("delete_profile ==> Unable to delete profile")
       return false
     end
 
@@ -102,6 +111,7 @@ module Meda
 
     def stream_hit_to_disk(hit)
       begin
+        Logging.mdc["meta_logs"] = hit.meta_logs
         logger.info("Starting to write hit to DISK")
         directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
         unless @data_paths[directory]
@@ -119,7 +129,10 @@ module Meda
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
-        logger.info("Writing hit #{hit.id} to disk #{path}")
+
+        @logging_meta_data_service.add_to_mdc("disk_hit_id", hit.id)
+        @logging_meta_data_service.add_to_mdc("disk_hit_path", path)
+        logger.info("wrote hit to disk")
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to #{path}")
         logger.error(e)
@@ -129,10 +142,11 @@ module Meda
 
     def stream_hit_to_ga(hit)
       begin
+        Logging.mdc["meta_logs"] = hit.meta_logs
         logger.info("Starting to stream hit to GA")
         @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
         return unless stream_to_ga?
-            
+
         tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
       
         if hit.hit_type == 'pageview'
@@ -140,7 +154,8 @@ module Meda
         elsif hit.hit_type == 'event'
           ga_hit = Staccato::Event.new(tracker, hit.as_ga)
         end
-        if(hit.profile_id != default_profile_id)
+
+        if !hit.profile_id.blank?
           google_analytics['custom_dimensions'].each_pair do |dim, val|
             #The naming of profile fields in the json request to fields in the dataset.yml must be identical
             #The index of cust. dim fields in the datasets.yml must be the same for the index of custom dimensions in GA
@@ -150,46 +165,31 @@ module Meda
             end
           end
         end
+
         @last_ga_hit[:staccato_hit] = ga_hit
-        @last_ga_hit[:response] = ga_hit.track!
-        logger.info("Wrote hit #{hit.id} to Google Analytics")
+
+        if Meda.features.is_enabled("google_analytics_debug", false)
+
+          @last_ga_response, @last_debug_ga_response = ga_hit.track_debug!
+
+          @@ga_debug_service.debug_ga_info(@last_debug_ga_response)
+        else
+          @last_debug_ga_response = ga_hit.track!
+        end
+
+        @last_ga_hit[:response] = @last_debug_ga_response
+
+        @logging_meta_data_service.add_to_mdc("ga_hit_id", hit.id)
+
+        logger.info("wrote hit to google analytics")
         logger.debug(ga_hit.inspect)
+
       rescue StandardError => e
         logger.error("Failure writing hit #{hit.id} to GA")
         logger.error(e)
       end
       true
     end
-
-
-    def update_client_id(hit)
-      begin
-        profile_id = hit.profile_id
-        if profile_id != default_profile_id
-          temp = ActiveSupport::HashWithIndifferentAccess.new({
-            :client_id => hit.client_id
-          })
-          current_path = hit.props[:path]
-          regex_of_paths = Regexp.union(landing_pages)
-          if (regex_of_paths.match(current_path))
-            set_profile(profile_id, temp)
-          else
-            profile = get_profile(profile_id)
-            if profile
-              profile_client_id = profile[:client_id]
-              if profile_client_id
-                hit.client_id = profile_client_id
-              end
-            end
-          end
-        end
-      rescue StandardError => e
-        logger.error("Failure getting client_id from profile")
-        logger.error(e)
-      end
-      hit
-    end
-
 
     def after_identify(&block)
       @after_identify = block
