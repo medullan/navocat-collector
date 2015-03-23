@@ -70,31 +70,6 @@ module Meda
       Meda.logger.warn("gettting db size")
       Meda.logger.warn("key size #{@store.key_size}")
       @store.key_size
-=begin
-      keys = @store.keys
-      Meda.logger.warn("key size #{key}")
-      
-      profile_keys = 0
-      lookup_keys = 0
-      unknown_keys = 0
-
-      keys.each do |key| 
-
-        if key.start_with?('profile:lookup:')
-          lookup_keys = lookup_keys + 1
-        elsif key.start_with?('profile')
-          profile_keys = profile_keys + 1
-        else
-          Meda.logger.warn("bad db key #{key}")
-          unknown_keys = unknown_keys + 1
-        end
-
-      end
-
-      Meda.logger.warn("Total profile keys #{profile_keys}")
-      Meda.logger.warn("Total lookup keys #{lookup_keys}")
-      Meda.logger.warn("Total unknown keys #{unknown_keys}")
-=end
     end
   end
 end

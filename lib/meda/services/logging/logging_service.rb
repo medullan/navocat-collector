@@ -20,8 +20,6 @@ module Meda
       setup_file_logger(config)
       setup_additional_error_logger(config)
       setup_console_logger(config)
-   #   setup_email_error_logger(config)
-   #   setup_rolling_date_file_logger(config)
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
@@ -210,10 +208,7 @@ module Meda
       end
       
       hash.to_json
-  	end	
-
-
-
+  	end
   end
 end
 
