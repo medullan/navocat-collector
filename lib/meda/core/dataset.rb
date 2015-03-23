@@ -62,12 +62,12 @@ module Meda
           profile.delete('id')
           hit.profile_props = profile
         else
-          logger.debug("add_hit ==> Unable to find profile")
+          Meda.logger.debug("add_hit ==> Unable to find profile")
         end
       else
         # Hit has no profile
         # Leave it anonymous-ish for now. Figure out what to do later.
-        logger.debug("add_hit ==> Hit has no profile id")
+        Meda.logger.debug("add_hit ==> Hit has no profile id")
       end
 
       hit = custom_hit_filter(hit)
@@ -100,7 +100,7 @@ module Meda
       if(enable_profile_delete)
         return store.delete_profile(profile_id)
       end
-      logger.warn("delete_profile ==> Unable to delete profile")
+      Meda.logger.warn("delete_profile ==> Unable to delete profile")
       return false
     end
 
@@ -112,7 +112,7 @@ module Meda
     def stream_hit_to_disk(hit)
       begin
         Logging.mdc["meta_logs"] = hit.meta_logs
-        logger.info("Starting to write hit to DISK")
+        Meda.logger.info("Starting to write hit to DISK")
         directory = File.join(meda_config.data_path, path_name, hit.hit_type_plural, hit.day) # i.e. 'meda_data/name/events/2014-04-01'
         unless @data_paths[directory]
           # create the data directory if it does not exist
@@ -132,10 +132,10 @@ module Meda
 
         @logging_meta_data_service.add_to_mdc("disk_hit_id", hit.id)
         @logging_meta_data_service.add_to_mdc("disk_hit_path", path)
-        logger.info("wrote hit to disk")
+        Meda.logger.info("wrote hit to disk")
       rescue StandardError => e
-        logger.error("Failure writing hit #{hit.id} to #{path}")
-        logger.error(e)
+        Meda.logger.error("Failure writing hit #{hit.id} to #{path}")
+        Meda.logger.error(e)
       end
       true
     end
@@ -143,7 +143,7 @@ module Meda
     def stream_hit_to_ga(hit)
       begin
         Logging.mdc["meta_logs"] = hit.meta_logs
-        logger.info("Starting to stream hit to GA")
+        Meda.logger.info("Starting to stream hit to GA")
         @last_ga_hit = {:hit => hit, :staccato_hit => nil, :response => nil}
         return unless stream_to_ga?
 
@@ -181,12 +181,12 @@ module Meda
 
         @logging_meta_data_service.add_to_mdc("ga_hit_id", hit.id)
 
-        logger.info("wrote hit to google analytics")
-        logger.debug(ga_hit.inspect)
+        Meda.logger.info("wrote hit to google analytics")
+        Meda.logger.debug(ga_hit.inspect)
 
       rescue StandardError => e
-        logger.error("Failure writing hit #{hit.id} to GA")
-        logger.error(e)
+        Meda.logger.error("Failure writing hit #{hit.id} to GA")
+        Meda.logger.error(e)
       end
       true
     end
@@ -208,12 +208,5 @@ module Meda
       end
       @profile_store
     end
-
-    protected
-
-    def logger
-      @logger ||= Meda.logger || Logger.new(STDOUT)
-    end
-
   end
 end
