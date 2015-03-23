@@ -9,6 +9,7 @@ require 'meda/services/loader/profile_loader'
 require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
 require 'meda/services/validation/validation_service'
+require 'meda/services/config/dynamic_config_service'
 
 module Meda
   module Collector
@@ -34,25 +35,31 @@ module Meda
      
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@validation_service = Meda::ValidationService.new()
+      @@dynamic_config_service = Meda::DynamicConfigService.new()
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
-      end      
+      end
+
+      before do
+        Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
+        Meda.loggerNoCache
+      end
 
       before do
         if Meda.features.is_enabled("pre_request_log",false)
-          logger.info("Starting request... ")
+          Meda.logger.info("Starting request... ")
         end
       end
 
       before do
         if not client_id_cookie_exist?
-          logger.info("client_id doesn't exist, creating client_id")
+          Meda.logger.info("client_id doesn't exist, creating client_id")
           uuid = UUIDTools::UUID.random_create.to_s
           set_client_id_cookie(uuid)
-          logger.info("client_id created: #{get_client_id_from_cookie}")
+          Meda.logger.info("client_id created: #{get_client_id_from_cookie}")
         else
-          logger.info("client_id already created")
+          Meda.logger.info("client_id already created")
         end
         set_client_id_param(get_client_id_from_cookie)
       end
@@ -66,7 +73,7 @@ module Meda
       after do
         if Meda.features.is_enabled("post_request_log",false)
           @@logging_meta_data_service.add_to_mdc("status_code",response.status)
-          logger.info("Ending request... status code #{response.status}")
+          Meda.logger.info("Ending request... status code #{response.status}")
         end
       end
 
@@ -96,7 +103,7 @@ module Meda
           
           respond_with_ok
         else
-          logger.warn("profile loader is disabled.")
+          Meda.logger.warn("profile loader is disabled.")
         end
       end
 
@@ -116,7 +123,7 @@ module Meda
           result = store.log_size
            json({'count' => result})
         else
-          logger.warn("profile loader is disabled.")
+          Meda.logger.warn("profile loader is disabled.")
         end
       end
 
@@ -132,10 +139,10 @@ module Meda
       # Thread pool data.
       get '/meda/log' do
 
-        logger.debug("debug")
-        logger.info("info")
-        logger.warn("warn")
-        logger.error("error")
+        Meda.logger.debug("debug")
+        Meda.logger.info("info")
+        Meda.logger.warn("warn")
+        Meda.logger.error("error")
         "see logs"
       end
 
@@ -157,7 +164,7 @@ module Meda
         if profile
           json({'profile_id' => profile[:id]})
         else
-          logger.error("post /meda/identify.json ==> Unable to find profile")
+          Meda.logger.error("post /meda/identify.json ==> Unable to find profile")
           respond_with_bad_request
         end
       end
@@ -171,7 +178,7 @@ module Meda
           set_profile_id_in_cookie(profile['id'])
           respond_with_pixel
         else
-          logger.error("get /meda/identify.gif ==> Unable to find profile")
+          Meda.logger.error("get /meda/identify.gif ==> Unable to find profile")
           respond_with_bad_request
         end
       end
@@ -186,11 +193,11 @@ module Meda
           if result
             respond_with_ok
           else
-            logger.error("post /meda/profile.json ==> Invalid result")
+            Meda.logger.error("post /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
-          logger.error("post /meda/profile.json ==> Invalid request")
+          Meda.logger.error("post /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -204,11 +211,11 @@ module Meda
           if result
             respond_with_ok
           else
-            logger.error("delete /meda/profile.json ==> Invalid result")
+            Meda.logger.error("delete /meda/profile.json ==> Invalid result")
             respond_with_bad_request
           end
         else
-          logger.error("delete /meda/profile.json ==> Invalid request")
+          Meda.logger.error("delete /meda/profile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -223,11 +230,11 @@ module Meda
           if result
             respond_with_pixel
           else
-            logger.error("get_profile_id_from_cookie ==> Unable to delete profile")
+            Meda.logger.error("get_profile_id_from_cookie ==> Unable to delete profile")
             respond_with_bad_request
           end
         else
-          logger.error("get_profile_id_from_cookie ==> Invalid request")
+          Meda.logger.error("get_profile_id_from_cookie ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -241,11 +248,11 @@ module Meda
           if profile
             profile.to_json
           else
-            logger.error("post /meda/getprofile.json ==> Unable to find profile")
+            Meda.logger.error("post /meda/getprofile.json ==> Unable to find profile")
             respond_with_bad_request
           end
         else
-          logger.error("post /meda/getprofile.json ==> Invalid request")
+          Meda.logger.error("post /meda/getprofile.json ==> Invalid request")
           respond_with_bad_request
         end
       end
@@ -258,13 +265,13 @@ module Meda
         if request_data[:dataset]
           last_hit = settings.connection.get_last_hit(request_data)
         else
-          logger.error("post /meda/getlasthit.json ==> Invalid request")
+          Meda.logger.error("post /meda/getlasthit.json ==> Invalid request")
           respond_with_bad_request
         end
         if last_hit
           last_hit.to_json
         else
-          logger.error("post /meda/getlasthit.json ==> Failed to get last hit")
+          Meda.logger.error("post /meda/getlasthit.json ==> Failed to get last hit")
         end
       end
 
@@ -278,7 +285,7 @@ module Meda
           settings.connection.profile(params)
           respond_with_pixel
         else
-          logger.error("profile.gif bad request request")
+          Meda.logger.error("profile.gif bad request request")
           respond_with_bad_request
         end
       end
@@ -295,7 +302,7 @@ module Meda
             settings.connection.track(utm_data)
             respond_with_pixel
           else
-            logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
+            Meda.logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         else
@@ -304,7 +311,7 @@ module Meda
             settings.connection.page(utm_data)
             respond_with_pixel
           else
-            logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
+            Meda.logger.error("get /meda/:dataset/__utm.gif ==> Invalid hit request")
             respond_with_bad_request
           end
         end
@@ -314,14 +321,14 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
-        logger.debug("in page")
+        Meda.logger.debug("in page")
         page_data = json_from_request
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
-          logger.debug("in page, hit validated")
+          Meda.logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
           respond_with_ok
         else
-          logger.error("post /meda/page.json ==> Invalid hit request")
+          Meda.logger.error("post /meda/page.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -335,7 +342,7 @@ module Meda
           settings.connection.page(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.error("get /meda/page.gif ==> Invalid hit request")
+          Meda.logger.error("get /meda/page.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -349,7 +356,7 @@ module Meda
           settings.connection.track(request_environment.merge(track_data))
           respond_with_ok
         else
-          logger.error("post /meda/track.json ==> Invalid hit request")
+          Meda.logger.error("post /meda/track.json ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -363,7 +370,7 @@ module Meda
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
         else
-          logger.error("get /meda/track.gif ==> Invalid hit request")
+          Meda.logger.error("get /meda/track.gif ==> Invalid hit request")
           respond_with_bad_request
         end
       end
@@ -441,20 +448,20 @@ module Meda
 
       def set_client_id_param(client_id)
         if params['client_id'].blank?
-          logger.info("client_id param is blank")
+          Meda.logger.info("client_id param is blank")
         else
-          logger.debug("overwriting client_id params with new value of #{params['client_id']}")
+          Meda.logger.debug("overwriting client_id params with new value of #{params['client_id']}")
         end
         params['client_id'] = client_id
-        logger.debug("set client_id param with new value of #{params['client_id']}")
+        Meda.logger.debug("set client_id param with new value of #{params['client_id']}")
       end
 
       def client_id_cookie_exist?
         if cookies[:'__collector_client_id'].blank?
-          logger.debug("client_id doesn't exist")
+          Meda.logger.debug("client_id doesn't exist")
           return false
         else
-          logger.debug("client_id already exist")
+          Meda.logger.debug("client_id already exist")
           return true
         end
       end
@@ -512,12 +519,6 @@ module Meda
           :screen_resolution => params[:utmsr]
         })
       end
-
-
-      def logger
-        @logger ||= Meda.logger || Logger.new(STDOUT)
-      end
-
     end
 
   end
