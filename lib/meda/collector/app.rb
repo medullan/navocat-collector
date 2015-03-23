@@ -42,8 +42,10 @@ module Meda
       end
 
       before do
-        Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
-        Meda.loggerNoCache
+        if @@dynamic_config_service.config_changed?
+          Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
+          Meda.loggerNoCache
+        end
       end
 
       before do
