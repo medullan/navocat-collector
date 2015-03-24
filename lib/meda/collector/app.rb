@@ -161,7 +161,6 @@ module Meda
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
         identify_data = raw_json_from_request
-        #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
         if profile
           json({'profile_id' => profile[:id]})
