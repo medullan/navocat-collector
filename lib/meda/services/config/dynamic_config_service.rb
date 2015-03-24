@@ -4,6 +4,8 @@ require 'meda'
 module Meda
   class DynamicConfigService
 
+    attr_accessor :last_modified_time
+
     def initialize
       @last_modified_time = File.mtime(Meda::MEDA_CONFIG_FILE)
     end
@@ -23,10 +25,11 @@ module Meda
       new_meda_configs
     end
 
+    # TODO make this a util method for sharing among classes
     def get_update_configs(meda_configs)
       begin
-          app_configs = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
-          meda_configs.log_level = app_configs['log_level']
+        app_configs = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
+        meda_configs.log_level = app_configs['log_level']
       rescue Errno::ENOENT => error
         puts error
       end
