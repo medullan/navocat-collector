@@ -1,6 +1,6 @@
 require_relative '../../../../lib/meda/services/config/dynamic_config_service'
 
-describe Meda::DynamicConfigService do
+describe Meda::DynamicConfigService.new(Meda.configuration) do
 
   let(:log_config) { {  'log_level' => 0 } }
   let(:config) { {'development' => log_config } }

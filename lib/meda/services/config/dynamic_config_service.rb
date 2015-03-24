@@ -7,7 +7,7 @@ module Meda
     attr_accessor :last_modified_time, :next_check_time
 
     def initialize(config)
-      @config_check_interval = config.config_check
+      @config_check_interval = config.config_check_interval
       @last_modified_time = File.mtime(Meda::MEDA_CONFIG_FILE)
       @next_check_time = next_check_time(@config_check_interval)
     end
