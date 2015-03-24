@@ -4,10 +4,23 @@ require 'meda'
 module Meda
   class DynamicConfigService
 
-    attr_accessor :last_modified_time
+    attr_accessor :last_modified_time, :next_check_time
 
     def initialize
       @last_modified_time = File.mtime(Meda::MEDA_CONFIG_FILE)
+      @next_check_time = next_check_time(600)
+    end
+
+    def timed_config_changed?
+      if Time.now >= @next_check_time
+        @next_check_time = next_check_time(600)
+        return config_changed?
+      end
+    end
+
+    def next_check_time(seconds_from_now)
+      time = ((Time.now) + seconds_from_now)
+      return time
     end
 
     def config_changed?
