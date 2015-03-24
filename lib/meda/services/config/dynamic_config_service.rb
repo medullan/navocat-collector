@@ -6,14 +6,15 @@ module Meda
 
     attr_accessor :last_modified_time, :next_check_time
 
-    def initialize
+    def initialize(config)
+      @config_check_interval = config.config_check
       @last_modified_time = File.mtime(Meda::MEDA_CONFIG_FILE)
-      @next_check_time = next_check_time(600)
+      @next_check_time = next_check_time(@config_check_interval)
     end
 
     def timed_config_changed?
       if Time.now >= @next_check_time
-        @next_check_time = next_check_time(600)
+        @next_check_time = next_check_time(@config_check_interval)
         return config_changed?
       end
     end
