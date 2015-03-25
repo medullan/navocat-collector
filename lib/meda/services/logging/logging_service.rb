@@ -14,7 +14,6 @@ module Meda
 
    	def initialize(config)
       @@file_count = @@file_count + 1
-      @log_timestamp = Time.now
       @loggers = []
       @level = config.log_level || Logger::INFO
 
@@ -33,15 +32,18 @@ module Meda
       if features.is_enabled("all_log_file_logger",false)
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
+
+        filename = config.logs["all_log_path"] + @@file_count.to_s
+
         loggingLevel = config.log_level || Logger::INFO
-        @fileLogger = Logger.new(config.logs["all_log_path"] + @@file_count.to_s, config.logs["file_history"], config.logs["file_maxsize"])
+          @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
         
         @fileLogger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
         @fileLogger.level = loggingLevel  
         @loggers.push(@fileLogger)
-        puts "file logger setup at #{config.logs['all_log_path'] + @@file_count.to_s}"
+        puts "file logger setup at #{filename}"
       end
 
     end
@@ -50,36 +52,18 @@ module Meda
       if features.is_enabled("error_file_logger",false)
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
+
+        filename = config.logs["error_log_path"] + @@file_count.to_s
+
         loggingLevel = Logger::ERROR
-        fileLogger = Logger.new(config.logs["error_log_path"] + @@file_count.to_s, config.logs["file_history"], config.logs["file_maxsize"])
+        fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
         
         fileLogger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
         fileLogger.level = loggingLevel  
         @loggers.push(fileLogger)
-        puts "error file logger setup at #{config.logs['error_log_path'] + @@file_count.to_s}"
-      end
-
-    end
-
-    def setup_additional_error_rolling_date(config)
-      if features.is_enabled("error_file_logger",false)
-         appender = Logging.appenders.rolling_file( 'error_log',
-           :filename   => config.logs["error_log_path"],
-           :size       => config.logs["file_maxsize"],
-           :age        => "daily", 
-           :keep       => config.logs["file_keep"],
-           :roll_by    => "date",
-           :layout     => Logging.layouts.pattern.new(:pattern => "%m\n"))
-          
-
-          log = Logging.logger['error_log']
-          log.add_appenders 'error_log'
-          log.level = :error
-
-          @loggers.push(log)
-          puts "error only file logger setup at #{config.logs["error_log_path"]}"
+        puts "error file logger setup at #{filename}"
       end
 
     end
