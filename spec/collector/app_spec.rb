@@ -280,13 +280,6 @@ describe "Collector Application" do
       end
     end
 
-    context 'when url has default profile id' do
-      it "should remove it from params hash" do
-        get "meda/page.gif?dataset=#{token}&cb=2219723aea1b964fe9d8c23789a4eded757f&hostname=http%3A%2F%2Flocalhost&referrer=&path=%2Fweb%2Fguest%2Fmyblue&title=fepblue.org+-+Welcome&profile_id=471bb8f0593711e48c1e44fb42fffeaa&client_id=d43ce2c8d9daca4ddaca70d3d0957ca96113"
-        puts last_response.inspect
-      end
-    end
-
     context 'without a path parameter' do
       it 'should return a bad request' do
         get request_path.sub! 'path', 'paths'
