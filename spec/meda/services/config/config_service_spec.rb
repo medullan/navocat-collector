@@ -71,8 +71,4 @@ describe Meda::DynamicConfigService.new(Meda.configuration) do
       expect(subject).to have_received(:get_update_configs).with(meda_config_obj).once
     end
   end
-
-  describe '.get_update_config' do
-    it "should set meda configs log level"
-  end
 end

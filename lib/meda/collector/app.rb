@@ -42,6 +42,10 @@ module Meda
       end
 
       before do
+        remove_default_profile_id(params)
+      end
+
+      before do
         if Meda.features.is_enabled("config_check", false)
           if @@dynamic_config_service.timed_config_changed?
             Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
@@ -466,6 +470,13 @@ module Meda
         else
           logger.debug("client_id already exist")
           return true
+        end
+      end
+
+      def remove_default_profile_id(params)
+        if(params['profile_id'].eql? '471bb8f0593711e48c1e44fb42fffeaa')
+          logger.debug("removing default profile_id of #{params['profile_id']} from params")
+          params.delete('profile_id')
         end
       end
 
