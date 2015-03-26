@@ -98,11 +98,11 @@ module Meda
       @level = log_level
 
       if !@file_logger.blank? && !@file_logger.level.blank?
-        @file_logger = log_level
+        @file_logger.level = log_level
       end
 
       if !@console_logger.blank? && !@console_logger.level.blank?
-        @console_logger = log_level
+        @console_logger.level = log_level
       end
     end
 
