@@ -1,4 +1,3 @@
-require 'logger'
 require_relative '../../../../lib/meda/services/validation/validation_service.rb'
 
 describe Meda::ValidationService do

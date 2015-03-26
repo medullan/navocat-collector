@@ -43,6 +43,11 @@ module Meda
     end
     @logger
   end
+  
+  def self.loggerNoCache
+    @logger = Meda::LoggingService.new(Meda.configuration)
+    @logger
+  end
 
   def self.datasets
     if @datasets.nil?
@@ -100,10 +105,13 @@ module Meda
       :name => 'dataset_name',
       :logs => [],
       :hash_salt => '',
-      :p3p => ''
+      :p3p => '',
+      :config_check_interval => 600
     }
 
-    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool, :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger, :redis, :h2, :logs, :hash_salt, :p3p
+    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool,
+                  :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger,
+                  :redis, :h2, :logs, :hash_salt, :p3p, :config_check_interval
 
     def initialize
       DEFAULTS.each do |key,val|
@@ -125,5 +133,3 @@ Meda.configure do |config|
     puts "Warning: Missing meda.yml, please configure manually #{error.message}"
   end
 end
-
-

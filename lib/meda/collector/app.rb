@@ -9,6 +9,7 @@ require 'meda/services/loader/profile_loader'
 require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
 require 'meda/services/validation/validation_service'
+require 'meda/services/config/dynamic_config_service'
 
 module Meda
   module Collector
@@ -34,10 +35,24 @@ module Meda
      
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@validation_service = Meda::ValidationService.new()
+      @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
-      end      
+      end
+
+      before do
+        remove_default_profile_id(params)
+      end
+
+      before do
+        if Meda.features.is_enabled("config_check", false)
+          if @@dynamic_config_service.timed_config_changed?
+            Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
+            Meda.logger.update_log_level(Meda.configuration.log_level)
+          end
+        end
+      end
 
       before do
         if Meda.features.is_enabled("pre_request_log",false)
@@ -47,12 +62,12 @@ module Meda
 
       before do
         if not client_id_cookie_exist?
-          logger.info("client_id doesn't exist, creating client_id")
+          logger.debug("client_id doesn't exist, creating client_id")
           uuid = UUIDTools::UUID.random_create.to_s
           set_client_id_cookie(uuid)
           logger.info("client_id created: #{get_client_id_from_cookie}")
         else
-          logger.info("client_id already created")
+          logger.debug("client_id already created")
         end
         set_client_id_param(get_client_id_from_cookie)
       end
@@ -71,7 +86,7 @@ module Meda
       end
 
       error do |e|
-        Meda.logger.error(e)
+        logger.error(e)
         'Internal Error'
       end
 
@@ -152,7 +167,6 @@ module Meda
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
         identify_data = raw_json_from_request
-        #print_out_params(identify_data)
         profile = settings.connection.identify(identify_data)
         if profile
           json({'profile_id' => profile[:id]})
@@ -441,7 +455,7 @@ module Meda
 
       def set_client_id_param(client_id)
         if params['client_id'].blank?
-          logger.info("client_id param is blank")
+          logger.debug("client_id param is blank")
         else
           logger.debug("overwriting client_id params with new value of #{params['client_id']}")
         end
@@ -456,6 +470,13 @@ module Meda
         else
           logger.debug("client_id already exist")
           return true
+        end
+      end
+
+      def remove_default_profile_id(params)
+        if(params['profile_id'].eql? '471bb8f0593711e48c1e44fb42fffeaa')
+          logger.debug("removing default profile_id of #{params['profile_id']} from params")
+          params.delete('profile_id')
         end
       end
 
@@ -513,11 +534,9 @@ module Meda
         })
       end
 
-
       def logger
-        @logger ||= Meda.logger || Logger.new(STDOUT)
+        Meda.logger || Logger.new(STDOUT)
       end
-
     end
 
   end

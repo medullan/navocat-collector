@@ -38,7 +38,7 @@ module Meda
     def identify_profile(info)
       profile = store.find_or_create_profile(info)
       @after_identify.call(self, profile)
-      Meda.logger.debug("profile #{profile}")
+      logger.debug("profile #{profile}")
       return profile
     end
 
@@ -210,10 +210,8 @@ module Meda
     end
 
     protected
-
-    def logger
-      @logger ||= Meda.logger || Logger.new(STDOUT)
-    end
-
+      def logger
+        Meda.logger || Logger.new(STDOUT)
+      end
   end
 end

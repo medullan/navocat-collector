@@ -192,7 +192,7 @@ module Meda
       end
 
       def logger
-        @logger ||= Meda.logger || Logger.new(STDOUT)
+        Meda.logger || Logger.new(STDOUT)
       end
 
     end
