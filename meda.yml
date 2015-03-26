@@ -1,4 +1,5 @@
 development:
+  config_check_interval: 1 # Intervals in seconds
   disk_pool: 10
   google_analytics_pool: 10
   mapdb_path: db
@@ -35,7 +36,8 @@ development:
     stdout_logger: true
     error_email_logger: false
     google_analytics_debug: false
-    p3p: true 
+    p3p: true
+    config_check: false
 
 production:
   disk_pool: 4
