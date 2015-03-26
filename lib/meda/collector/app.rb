@@ -49,7 +49,7 @@ module Meda
         if Meda.features.is_enabled("config_check", false)
           if @@dynamic_config_service.timed_config_changed?
             Meda.configuration = @@dynamic_config_service.update_config(Meda.configuration)
-            Meda.loggerNoCache
+            Meda.logger.set_log_level(Meda.configuration.log_level)
           end
         end
       end

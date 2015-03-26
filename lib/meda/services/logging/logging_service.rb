@@ -26,6 +26,10 @@ module Meda
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
+    def set_log_level(log_level)
+      @level = log_level
+    end
+
 
     def setup_file_logger(config)
 
@@ -36,7 +40,7 @@ module Meda
         filename = config.logs["all_log_path"] + @@file_count.to_s
 
         loggingLevel = config.log_level || Logger::INFO
-          @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
+        @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
         
         @fileLogger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
@@ -45,7 +49,6 @@ module Meda
         @loggers.push(@fileLogger)
         puts "file logger setup at #{filename}"
       end
-
     end
 
     def setup_additional_error_logger(config)
@@ -66,26 +69,6 @@ module Meda
         puts "error file logger setup at #{filename}"
       end
 
-    end
-
-    def setup_rolling_date_file_logger(config)
-      if features.is_enabled("error_file_logger",false)
-    
-          appender = Logging.appenders.rolling_file( 'error_appender2',
-           :filename   => "log/logname2.log",
-           :size       => config.logs["file_maxsize"],
-           :age        => "daily", 
-           :keep       => config.logs["file_keep"],
-           :roll_by    => "date",
-           :layout     => Logging.layouts.pattern.new(:pattern => "%m\n"))
-          
-
-          log = Logging.logger['error_log2']
-          log.add_appenders 'error_appender2'
-
-          @loggers.push(log)
-          puts "error file logger setup at log/logname.log"
-      end
     end
 
     def setup_console_logger(config)
