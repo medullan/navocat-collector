@@ -5,15 +5,12 @@ require_relative './email_logging_service.rb'
 module Meda
 
   class LoggingService
-
-    @@file_count = 0
 	
 	  def features
       @features ||= Meda.features
     end
 
    	def initialize(config)
-      @@file_count = @@file_count + 1
       @loggers = []
       @level = config.log_level || Logger::INFO
 
@@ -26,26 +23,24 @@ module Meda
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
-
     def setup_file_logger(config)
 
       if features.is_enabled("all_log_file_logger",false)
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
 
-        filename = config.logs["all_log_path"] + @@file_count.to_s
+        filename = config.logs["all_log_path"]
 
         loggingLevel = config.log_level || Logger::INFO
-          @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
-        
-        @fileLogger.formatter = proc do |severity, datetime, progname, msg|
+        @file_logger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
+
+        @file_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
-        @fileLogger.level = loggingLevel  
-        @loggers.push(@fileLogger)
+        @file_logger.level = loggingLevel
+        @loggers.push(@file_logger)
         puts "file logger setup at #{filename}"
       end
-
     end
 
     def setup_additional_error_logger(config)
@@ -53,59 +48,39 @@ module Meda
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
 
-        filename = config.logs["error_log_path"] + @@file_count.to_s
+        filename = config.logs["error_log_path"]
 
         loggingLevel = Logger::ERROR
-        fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
+        @error_file_logger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
         
-        fileLogger.formatter = proc do |severity, datetime, progname, msg|
+        @error_file_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
-        fileLogger.level = loggingLevel  
-        @loggers.push(fileLogger)
+        @error_file_logger.level = loggingLevel
+        @loggers.push(@error_file_logger)
         puts "error file logger setup at #{filename}"
       end
 
     end
 
-    def setup_rolling_date_file_logger(config)
-      if features.is_enabled("error_file_logger",false)
-    
-          appender = Logging.appenders.rolling_file( 'error_appender2',
-           :filename   => "log/logname2.log",
-           :size       => config.logs["file_maxsize"],
-           :age        => "daily", 
-           :keep       => config.logs["file_keep"],
-           :roll_by    => "date",
-           :layout     => Logging.layouts.pattern.new(:pattern => "%m\n"))
-          
-
-          log = Logging.logger['error_log2']
-          log.add_appenders 'error_appender2'
-
-          @loggers.push(log)
-          puts "error file logger setup at log/logname.log"
-      end
-    end
-
     def setup_console_logger(config)
       if features.is_enabled("stdout_logger",false)
         loggingLevel = config.log_level || Logger::INFO
-        @consoleLogger = Logger.new(STDOUT, 10, 1024000)
-        
-        @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
+        @console_logger = Logger.new(STDOUT, 10, 1024000)
+
+        @console_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n\n"
         end
-        @consoleLogger.level = loggingLevel
-        @loggers.push(@consoleLogger)
+        @console_logger.level = loggingLevel
+        @loggers.push(@console_logger)
         puts "console logger setup"
       end
     end
 
     def setup_email_error_logger(config)
       if features.is_enabled("error_email_logger",false)
-        @emailErrorLogger = Meda::EmailLoggingService.new(config)
-        @loggers.push(@emailErrorLogger)
+        @email_error_logger = Meda::EmailLoggingService.new(config)
+        @loggers.push(@email_error_logger)
         puts "email error logger setup"
       end
     end
@@ -117,6 +92,18 @@ module Meda
           @loggers.push(@postgres_logger)
           puts "postgres logger setup"
         end
+    end
+
+    def update_log_level(log_level)
+      @level = log_level
+
+      if !@file_logger.blank? && !@file_logger.level.blank?
+        @file_logger.level = log_level
+      end
+
+      if !@console_logger.blank? && !@console_logger.level.blank?
+        @console_logger.level = log_level
+      end
     end
 
   	def error(message)
