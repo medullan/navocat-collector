@@ -497,6 +497,11 @@ z-index:0;
 opacity:0.85;
 }
 
+#contact p a {
+	text-decoration: underline;
+	
+}
+
 #top {
 padding-top:4em;
 padding-left: 1em;
