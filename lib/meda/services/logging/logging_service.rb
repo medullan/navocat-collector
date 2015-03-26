@@ -23,12 +23,6 @@ module Meda
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
-    def set_log_level(log_level)
-      @level = log_level
-      @file_logger.level = log_level
-      @console_logger.level = log_level
-    end
-
     def setup_file_logger(config)
 
       if features.is_enabled("all_log_file_logger",false)
@@ -85,8 +79,8 @@ module Meda
 
     def setup_email_error_logger(config)
       if features.is_enabled("error_email_logger",false)
-        @emailErrorLogger = Meda::EmailLoggingService.new(config)
-        @loggers.push(@emailErrorLogger)
+        @email_error_logger = Meda::EmailLoggingService.new(config)
+        @loggers.push(@email_error_logger)
         puts "email error logger setup"
       end
     end
@@ -98,6 +92,18 @@ module Meda
           @loggers.push(@postgres_logger)
           puts "postgres logger setup"
         end
+    end
+
+    def update_log_level(log_level)
+      @level = log_level
+
+      if !@file_logger.blank? && !@file_logger.level.blank?
+        @file_logger = log_level
+      end
+
+      if !@console_logger.blank? && !@console_logger.level.blank?
+        @console_logger = log_level
+      end
     end
 
   	def error(message)
