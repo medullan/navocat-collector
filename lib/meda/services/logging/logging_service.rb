@@ -25,7 +25,7 @@ module Meda
 
     def set_log_level(log_level)
       @level = log_level
-      @loggers.each { |log| log.level log_level if log.respond_to?(:level) }
+      @loggers.each { |log| log.level = log_level if log.respond_to?(:level) }
     end
 
     def setup_file_logger(config)
