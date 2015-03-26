@@ -25,7 +25,8 @@ module Meda
 
     def set_log_level(log_level)
       @level = log_level
-      @loggers.each { |log| log.level = log_level if log.respond_to?(:level) }
+      @file_logger.level = log_level
+      @console_logger.level = log_level
     end
 
     def setup_file_logger(config)
@@ -37,13 +38,13 @@ module Meda
         filename = config.logs["all_log_path"]
 
         loggingLevel = config.log_level || Logger::INFO
-        @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
-        
-        @fileLogger.formatter = proc do |severity, datetime, progname, msg|
+        @file_logger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
+
+        @file_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
-        @fileLogger.level = loggingLevel  
-        @loggers.push(@fileLogger)
+        @file_logger.level = loggingLevel
+        @loggers.push(@file_logger)
         puts "file logger setup at #{filename}"
       end
     end
@@ -56,13 +57,13 @@ module Meda
         filename = config.logs["error_log_path"]
 
         loggingLevel = Logger::ERROR
-        fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
+        @error_file_logger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
         
-        fileLogger.formatter = proc do |severity, datetime, progname, msg|
+        @error_file_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n"
         end
-        fileLogger.level = loggingLevel  
-        @loggers.push(fileLogger)
+        @error_file_logger.level = loggingLevel
+        @loggers.push(@error_file_logger)
         puts "error file logger setup at #{filename}"
       end
 
@@ -71,13 +72,13 @@ module Meda
     def setup_console_logger(config)
       if features.is_enabled("stdout_logger",false)
         loggingLevel = config.log_level || Logger::INFO
-        @consoleLogger = Logger.new(STDOUT, 10, 1024000)
-        
-        @consoleLogger.formatter = proc do |severity, datetime, progname, msg|
+        @console_logger = Logger.new(STDOUT, 10, 1024000)
+
+        @console_logger.formatter = proc do |severity, datetime, progname, msg|
            "#{msg}\n\n"
         end
-        @consoleLogger.level = loggingLevel
-        @loggers.push(@consoleLogger)
+        @console_logger.level = loggingLevel
+        @loggers.push(@console_logger)
         puts "console logger setup"
       end
     end
