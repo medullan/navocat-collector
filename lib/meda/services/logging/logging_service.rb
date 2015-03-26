@@ -5,15 +5,12 @@ require_relative './email_logging_service.rb'
 module Meda
 
   class LoggingService
-
-    @@file_count = 0
 	
 	  def features
       @features ||= Meda.features
     end
 
    	def initialize(config)
-      @@file_count = @@file_count + 1
       @loggers = []
       @level = config.log_level || Logger::INFO
 
@@ -28,8 +25,8 @@ module Meda
 
     def set_log_level(log_level)
       @level = log_level
+      @loggers.each { |log| log.level log_level if log.respond_to?(:level) }
     end
-
 
     def setup_file_logger(config)
 
@@ -37,7 +34,7 @@ module Meda
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
 
-        filename = config.logs["all_log_path"] + @@file_count.to_s
+        filename = config.logs["all_log_path"]
 
         loggingLevel = config.log_level || Logger::INFO
         @fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
@@ -56,7 +53,7 @@ module Meda
         FileUtils.mkdir_p(File.dirname(config.log_path))
         FileUtils.touch(config.log_path)
 
-        filename = config.logs["error_log_path"] + @@file_count.to_s
+        filename = config.logs["error_log_path"]
 
         loggingLevel = Logger::ERROR
         fileLogger = Logger.new(filename, config.logs["file_history"], config.logs["file_maxsize"])
