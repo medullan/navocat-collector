@@ -11,8 +11,6 @@ The collector is licensed under the open source [Eclipse Public License, Version
 
 The collector application requires jRuby 1.7+ and Java 1.6+.
 
-To store profile data, the collector uses MapDB, a pure-java embedded key-value store database. The jar files for MapDB are included in the collector gem, and are plaform independent.
-
 ## Basic Application Setup
 
 To create your own collector application, create a new git repo that will use the collector gem.
