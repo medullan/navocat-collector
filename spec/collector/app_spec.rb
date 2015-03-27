@@ -114,7 +114,7 @@ describe "Collector Application" do
   end
 
 
-  describe 'delete_profile.json' do
+  xdescribe 'delete_profile.json' do
     it 'delete profile' do
       test_increment += 1
       delete_member_id = Time.now.getutc.to_i + test_increment
@@ -152,7 +152,7 @@ describe "Collector Application" do
   end
 
 
-  describe 'profile_delete.gif' do
+  xdescribe 'profile_delete.gif' do
     it 'delete profile' do
       test_increment += 1
       delete_member_id = Time.now.getutc.to_i + test_increment

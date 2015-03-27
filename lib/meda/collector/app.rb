@@ -446,7 +446,7 @@ module Meda
 
       def set_client_id_cookie(client_id)
         @@logging_meta_data_service.add_to_mdc("new__collector_client_id", client_id)
-        cookies[:'__collector_client_id'] = client_id
+        response.set_cookie :__collector_client_id, {:value => client_id, :max_age => "31536000"}
       end
 
       def get_client_id_from_cookie
