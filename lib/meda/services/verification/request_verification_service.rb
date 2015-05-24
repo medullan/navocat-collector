@@ -16,9 +16,9 @@ module Meda
 
       @config=config
 
+      @@profile_data_store = Meda::ProfileDataStore.new(config)
     end
     ### public ###
-    @@profile_data_store = Meda::ProfileDataStore.new(@config)
     def start_rva_log (type, request, cookies, params = nil)
       rva_id = set_transaction_id()
       # puts "log out request in start: #{request.body}"
@@ -93,8 +93,8 @@ module Meda
     end
 
 
-    def set_transaction_id()
-      uuid = generate_transaction_id()
+    def set_transaction_id(id = nil)
+      uuid = id || generate_transaction_id()
       # puts @config.verification_api
       # Thread.current["#{@config.verification_api['thread_id_key']}" ] = uuid
       Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
