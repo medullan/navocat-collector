@@ -1,7 +1,9 @@
 #!/usr/bin/env puma
 
 #This variable determines what config is selected in meda.yml
-environment 'development'
+meda_env = 'development'
+environment meda_env
+ENV['RACK_ENV'] = meda_env
 
 #daemonize - disabled because it doesn't work on windows
 

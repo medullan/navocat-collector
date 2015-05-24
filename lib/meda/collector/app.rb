@@ -10,6 +10,7 @@ require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
 require 'meda/services/validation/validation_service'
 require 'meda/services/config/dynamic_config_service'
+require 'meda/services/verification/request_verification_service'
 
 module Meda
   module Collector
@@ -22,8 +23,8 @@ module Meda
     class App < Sinatra::Base
 
       set :public_folder, 'static'
-      configure { 
-        set :show_exceptions, false 
+      configure {
+        set :show_exceptions, false
         set :dump_errors, false
       }
 
@@ -32,10 +33,11 @@ module Meda
 
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
-     
+
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@validation_service = Meda::ValidationService.new()
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
+      @@request_verification_service = Meda::RequestVerificationService.new(helperConfig["config"])
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
@@ -97,18 +99,18 @@ module Meda
       # @method post_meda_load
       # @overload post "/meda/load"
       # Testing tool to load data into profile database
-      post '/meda/load' do 
-        if Meda.features.is_enabled("profile_loader", false)       
+      post '/meda/load' do
+        if Meda.features.is_enabled("profile_loader", false)
           params_hash = JSON.parse(request.body.read)
           dataset = Meda.datasets[params_hash['dataset']]
 
           store_config = {}
           store_config['config'] = Meda.configuration
           store_config['name'] = dataset.name
-          
+
           profileLoader = Meda::ProfileLoader.new()
           profileLoader.loadWithSomeProfileData(params_hash['amount'],store_config)
-          
+
           respond_with_ok
         else
           logger.warn("profile loader is disabled.")
@@ -118,15 +120,15 @@ module Meda
       # @method post_meda_load_count
       # @overload post "/meda/load"
       # Testing tool to load data into profile database
-      post '/meda/load/count' do 
-        if Meda.features.is_enabled("profile_loader",false)       
+      post '/meda/load/count' do
+        if Meda.features.is_enabled("profile_loader",false)
           params_hash = JSON.parse(request.body.read)
           dataset = Meda.datasets[params_hash['dataset']]
 
           store_config = {}
           store_config['config'] = Meda.configuration
           store_config['name'] = dataset.name
-          
+
           store = Meda::ProfileDataStore.new(store_config)
           result = store.log_size
            json({'count' => result})
@@ -138,7 +140,7 @@ module Meda
       # @method get_index
       # @overload get "/meda"
       # Says hello and gives version number. Useful only to test if service is installed.
-      get '/meda' do        
+      get '/meda' do
         "Meda version #{Meda::VERSION}"
       end
 
@@ -166,6 +168,7 @@ module Meda
       # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
+        @@request_verification_service.start_rva_log('identify',request, cookies )
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
         if profile
@@ -180,6 +183,7 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
+        @@request_verification_service.start_rva_log('identify',request, cookies )
         profile = settings.connection.identify(params)
         if profile
           set_profile_id_in_cookie(profile['id'])
@@ -194,6 +198,7 @@ module Meda
       # @overload post "/meda/profile.json"
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
+        @@request_verification_service.start_rva_log('profile',request, cookies )
         profile_data = raw_json_from_request
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
@@ -230,6 +235,7 @@ module Meda
       # @method delete_profile_json
       # Deletes a given profile by profileid and dataset
       get '/meda/profile_delete.gif' do
+        @@request_verification_service.start_rva_log('profile',request, cookies )
 
         get_profile_id_from_cookie
         if @@validation_service.valid_request?(get_client_id_from_cookie, params)
@@ -287,6 +293,7 @@ module Meda
       # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
+        @@request_verification_service.start_rva_log('profile',request, cookies )
         get_profile_id_from_cookie
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
@@ -329,6 +336,7 @@ module Meda
       # Record a pageview
       post '/meda/page.json', :provides => :json do
         logger.debug("in page")
+        @@request_verification_service.start_rva_log('page',request, cookies )
         page_data = json_from_request
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
@@ -344,6 +352,7 @@ module Meda
       # @overload get "/meda/page.gif"
       # Record a pageview
       get '/meda/page.gif' do
+        @@request_verification_service.start_rva_log('page',request, cookies )
         get_profile_id_from_cookie
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
@@ -358,6 +367,7 @@ module Meda
       # @overload post "/meda/track.json"
       # Record an event
       post '/meda/track.json', :provides => :json do
+        @@request_verification_service.start_rva_log('track',request, cookies )
         track_data = json_from_request
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
@@ -373,6 +383,7 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         get_profile_id_from_cookie
+        @@request_verification_service.start_rva_log('track',request, cookies )
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel
@@ -385,7 +396,10 @@ module Meda
       # @method get_endsession_gif
       # remove an active identified session with the collector
       get '/meda/endsession.gif' do
+        @@request_verification_service.start_rva_log('endsession',request, cookies )
+        # puts cookies['__collector_client_id']
         cookies.delete("_meda_profile_id")
+        # puts   request.url
         respond_with_pixel
       end
 
@@ -393,7 +407,18 @@ module Meda
       get 'meda/gettest.page' do
 
       end
-     
+
+      #Endpoint to retrieve qa logs
+      get '/meda/verification/logs' do
+        if Meda.features.is_enabled("verification_api", false)
+          json( @@request_verification_service.build_rva_log())
+        else
+          status 404
+          json({:status => 404, :message => 'not found'})
+        end
+
+      end
+
 
       # Config
       configure do

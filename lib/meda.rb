@@ -106,12 +106,14 @@ module Meda
       :logs => [],
       :hash_salt => '',
       :p3p => '',
-      :config_check_interval => 600
+      :config_check_interval => 600,
+      :env => 'development',
+      :verification_api => []
     }
 
     attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool,
                   :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger,
-                  :redis, :h2, :logs, :hash_salt, :p3p, :config_check_interval
+                  :redis, :h2, :logs, :hash_salt, :p3p, :config_check_interval, :env, :verification_api
 
     def initialize
       DEFAULTS.each do |key,val|
@@ -127,7 +129,9 @@ end
 
 Meda.configure do |config|
   begin
-    app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[ENV['RACK_ENV'] || 'development']
+    env_name = ENV['RACK_ENV'] || 'development'
+    app_config = Psych.load(File.open(Meda::MEDA_CONFIG_FILE))[env_name]
+    # app_config.env = env_name
     app_config.each_pair { |key, val| config[key] = val }
   rescue Errno::ENOENT => error
     puts "Warning: Missing meda.yml, please configure manually #{error.message}"

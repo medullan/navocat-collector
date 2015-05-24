@@ -1,11 +1,12 @@
 development:
   config_check_interval: 1 # Intervals in seconds
   disk_pool: 10
+  env: development
   google_analytics_pool: 10
   mapdb_path: db
   data_path: meda_data
   log_path: log/development.log
-  log_level: 3
+  log_level: 0
   hash_salt: b03dac7c42cc49ac805dcbbd0902e660
   p3p: CP=\"DSP\"
   logs:
@@ -22,13 +23,18 @@ development:
     password: nil
     pool: 10
     time_out: 15
+  verification_api:
+    log_size: 100
+    collection_name: rva
+    id_prefix: rva-
+    thread_id_key: meda_rva_id
   h2:
     db_conn_url: jdbc:h2:tcp://localhost/~/fepdb
   features:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: hashdb
+    profile_store: redisdb
     profile_loader: true
     profile_service: onekey
     all_log_file_logger: true
@@ -38,9 +44,13 @@ development:
     google_analytics_debug: false
     p3p: true
     config_check: false
+    google_analytics_debug: true
+    verification_api: true
+
 
 production:
   disk_pool: 4
+  env: production
   google_analytics_pool: 16
   mapdb_path: db
   data_path: meda_data
@@ -59,9 +69,11 @@ production:
     post_request_log: true
     logs_postgres: false
     profile_store: mapdb
+    verification_api: true
 
 performance:
   disk_pool: 4
+  env: performance
   google_analytics_pool: 16
   mapdb_path: db
   data_path: meda_data
@@ -83,6 +95,7 @@ performance:
 
 test:
   disk_pool: 2
+  env: test
   google_analytics_pool: 2
   mapdb_path: db
   data_path: meda_data

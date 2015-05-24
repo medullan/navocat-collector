@@ -2,6 +2,7 @@ require 'json'
 require 'logger'
 require 'meda'
 require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/verification/request_verification_service'
 
 module Meda
 
@@ -11,6 +12,7 @@ module Meda
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@request_verification_service = Meda::RequestVerificationService.new(helperConfig["config"])
     end
 
     def debug_ga_info(debug_ga_response)
@@ -18,6 +20,8 @@ module Meda
         ga_response_json = debug_ga_response[:ga_response_json]
         ga_response_code = debug_ga_response[:ga_response_code]
         params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
+
+        @@request_verification_service.add_ga_data(debug_ga_response)
 
         @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
 
