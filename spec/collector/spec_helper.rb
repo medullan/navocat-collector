@@ -28,12 +28,11 @@ Meda.configure do |config|
   config.env = 'test'
   config.redis = {:host => 'localhost', :port => 6379, :password => nil, :pool => 10, :time_out => 15}
   features = {:verification_api=>true, :profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
-  Meda.configuration.features.merge(features)
-  puts Meda.configuration
+  config.features = (features)
+  puts config.to_json
 end
 
 # Also needs to set up and tear down a redis server for the test
 # Needs to flush keys between every spec
-# ENV['RACK_ENV'] = 'test'
 puts 'Running examples'
 

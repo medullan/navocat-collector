@@ -168,7 +168,10 @@ module Meda
       # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
-        @@request_verification_service.start_rva_log('identify',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('identify',request, cookies )
+        end
+
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
         if profile
@@ -183,7 +186,10 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
-        @@request_verification_service.start_rva_log('identify',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('identify',request, cookies )
+        end
+
         profile = settings.connection.identify(params)
         if profile
           set_profile_id_in_cookie(profile['id'])
@@ -198,7 +204,10 @@ module Meda
       # @overload post "/meda/profile.json"
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
-        @@request_verification_service.start_rva_log('profile',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('profile',request, cookies )
+        end
+
         profile_data = raw_json_from_request
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
@@ -235,7 +244,10 @@ module Meda
       # @method delete_profile_json
       # Deletes a given profile by profileid and dataset
       get '/meda/profile_delete.gif' do
-        @@request_verification_service.start_rva_log('profile',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('profile',request, cookies )
+        end
+
 
         get_profile_id_from_cookie
         if @@validation_service.valid_request?(get_client_id_from_cookie, params)
@@ -293,7 +305,10 @@ module Meda
       # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
-        @@request_verification_service.start_rva_log('profile',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('profile',request, cookies )
+        end
+
         get_profile_id_from_cookie
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
@@ -336,7 +351,10 @@ module Meda
       # Record a pageview
       post '/meda/page.json', :provides => :json do
         logger.debug("in page")
-        @@request_verification_service.start_rva_log('page',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('page',request, cookies )
+        end
+
         page_data = json_from_request
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
@@ -352,7 +370,10 @@ module Meda
       # @overload get "/meda/page.gif"
       # Record a pageview
       get '/meda/page.gif' do
-        @@request_verification_service.start_rva_log('page',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('page',request, cookies )
+        end
+
         get_profile_id_from_cookie
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
@@ -367,7 +388,10 @@ module Meda
       # @overload post "/meda/track.json"
       # Record an event
       post '/meda/track.json', :provides => :json do
-        @@request_verification_service.start_rva_log('track',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('track',request, cookies )
+        end
+
         track_data = json_from_request
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
@@ -383,7 +407,9 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         get_profile_id_from_cookie
-        @@request_verification_service.start_rva_log('track',request, cookies )
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.start_rva_log('track',request, cookies )
+        end
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           respond_with_pixel

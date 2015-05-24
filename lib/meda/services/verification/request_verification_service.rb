@@ -13,14 +13,12 @@ module Meda
     @@thread_key = "meda_rva_id" #key used to store RVA id in the thread
     # @@profile_service= Meda::ProfileService.new(Meda.configuration)
     def initialize(config)
+
       @config=config
 
-      # puts @config
-
-      @@profile_data_store = Meda::ProfileDataStore.new(config)
     end
     ### public ###
-
+    @@profile_data_store = Meda::ProfileDataStore.new(@config)
     def start_rva_log (type, request, cookies, params = nil)
       rva_id = set_transaction_id()
       # puts "log out request in start: #{request.body}"
