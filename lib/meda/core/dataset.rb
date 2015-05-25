@@ -128,7 +128,11 @@ module Meda
         File.open(path, 'a') do |f|
           f.puts(hit.to_json)
         end
-        @@request_verification_service.add_json_ref( hit.id)
+
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.add_json_ref( hit.id)
+        end
+
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
