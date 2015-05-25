@@ -172,7 +172,7 @@ module Meda
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
         profile_id = (profile != nil && profile.key?(:id)) ? profile[:id]: nil
-        data = {:start_time=> start_time, :profile_id=> profile_id }
+        data = {:start_time=> start_time, :profile_id=> profile_id,:request_input => identify_data  }
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
         if profile_id != nil
           response = {'profile_id' => profile_id}
@@ -193,7 +193,7 @@ module Meda
         start_time = Time.now.to_s
         profile = settings.connection.identify(params)
         profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
-        data = {:start_time=> start_time, :profile_id=> profile_id }
+        data = {:start_time=> start_time, :profile_id=> profile_id,:request_input => params }
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
         if  profile_id != nil
           set_profile_id_in_cookie(profile['id'])
@@ -213,7 +213,7 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         start_time = Time.now.to_s
         profile_data = raw_json_from_request
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time , :request_input => profile_data }
         @@request_verification_service.start_rva_log('profile', data,request, cookies )
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
@@ -313,11 +313,11 @@ module Meda
       get '/meda/profile.gif' do
         start_time = Time.now.to_s
         get_profile_id_from_cookie
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time, :request_input => params  }
         @@request_verification_service.start_rva_log('profile', data,request, cookies )
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
-          @@request_verification_service.end_rva_log()
+          @@request_verification_service.end_rva_log({:status => 'ok'})
           respond_with_pixel
         else
           msg = "profile.gif bad request request"
@@ -361,12 +361,12 @@ module Meda
         start_time = Time.now.to_s
         logger.debug("in page")
         page_data = json_from_request
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time, :request_input => page_data }
         @@request_verification_service.start_rva_log('page', data,request, cookies )
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
-          @@request_verification_service.end_rva_log()
+          @@request_verification_service.end_rva_log({:status => 'ok'})
           respond_with_ok
         else
           msg = "post /meda/page.json ==> Invalid hit request"
@@ -383,11 +383,11 @@ module Meda
         start_time = Time.now.to_s
 
         get_profile_id_from_cookie
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time , :request_input => params}
         @@request_verification_service.start_rva_log('page', data,request, cookies )
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
-          @@request_verification_service.end_rva_log()
+          @@request_verification_service.end_rva_log({:status => 'ok'})
           respond_with_pixel
         else
           msg = "get /meda/page.gif ==> Invalid hit request"
@@ -403,12 +403,12 @@ module Meda
       post '/meda/track.json', :provides => :json do
         start_time = Time.now.to_s
         track_data = json_from_request
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time, :request_input => track_data}
         @@request_verification_service.start_rva_log('track',data,request, cookies )
 
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
-          @@request_verification_service.end_rva_log()
+          @@request_verification_service.end_rva_log({:status => 'ok'})
           respond_with_ok
         else
           msg = "post /meda/track.json ==> Invalid hit request"
@@ -424,12 +424,12 @@ module Meda
       get '/meda/track.gif' do
         start_time = Time.now.to_s
         get_profile_id_from_cookie
-        data = {:start_time=> start_time }
+        data = {:start_time=> start_time , :request_input => params}
         @@request_verification_service.start_rva_log('track',data,request, cookies )
 
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
-          @@request_verification_service.end_rva_log()
+          @@request_verification_service.end_rva_log({:status => 'ok'})
           respond_with_pixel
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
