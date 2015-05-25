@@ -37,7 +37,7 @@ module Meda
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@validation_service = Meda::ValidationService.new()
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
-      @@request_verification_service = Meda::RequestVerificationService.new(helperConfig["config"])
+      @@request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)

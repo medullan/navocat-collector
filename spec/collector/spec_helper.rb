@@ -22,14 +22,11 @@ WebMock.disable_net_connect!
 
 Meda.configure do |config|
   config.data_path = 'meda_data'
-  config.log_path = 'log/test.log'
+  config.log_path = 'log/test.log2'
   config.log_level = 3
   config.hash_salt = ""
   config.env = 'test'
   config.redis = {:host => 'localhost', :port => 6379, :password => nil, :pool => 10, :time_out => 15}
-  features = {:verification_api=>true, :profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
-  config.features = (features)
-  puts config.to_json
 end
 
 # Also needs to set up and tear down a redis server for the test

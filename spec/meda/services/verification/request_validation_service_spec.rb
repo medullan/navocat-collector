@@ -17,7 +17,7 @@ describe Meda::RequestVerificationService do
   Meda.configuration.verification_api = {:log_size => 5, :collection_name => 'rva-test', :id_prefix => 'rva-', :thread_id_key => 'meda_rva_id'}
   features = {:verification_api=>true, :profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
   Meda.configuration.features.merge(features)
-  # puts Meda.configuration
+
   describe 'test uuid generation' do
 
     xit 'should start with prefix' do
@@ -40,18 +40,6 @@ describe Meda::RequestVerificationService do
   end
 
   describe 'test storing an rva log' do
-
-    before(:each) do
-
-      # Meda.configuration.features ={}
-      # Meda.configuration.features['profile_store'] = 'redisdb'
-
-    end
-
-    after(:each) do
-      # features = {:profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
-      # Meda.configuration.features = nil
-    end
 
     xit 'should be saved in the data' do
 
