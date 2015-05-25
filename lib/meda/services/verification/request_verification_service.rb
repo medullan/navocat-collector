@@ -13,7 +13,7 @@ module Meda
 
     DATA_OUTPUT_PROP = 'outputs'
     TRANS_IDS_PROP = 'transaction_ids'
-    FEATURE_NAME = "verification_api"
+    FEATURE_NAME = 'verification_api'
 
     def initialize(config)
       @config=config
