@@ -1,5 +1,5 @@
 require_relative '../profile/profile_service.rb'
-require_relative '../datastore/profile_data_store.rb'
+require_relative '../datastore/redisdb/redisdb_store.rb'
 require 'uuidtools'
 require 'logger'
 require 'meda'
@@ -17,7 +17,7 @@ module Meda
 
     def initialize(config)
       @config=config
-      @@profile_data_store = Meda::ProfileDataStore.new(config)
+      @@log_data_store = Meda::RedisDbStore.new(config)
     end
 
 
@@ -38,40 +38,40 @@ module Meda
                 :method => request.request_method, :request_input => input, :response=>nil
             }
         }
-        @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+        @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
       end
     end
 
     def end_rva_log (response=nil)
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
-        rva_data = @@profile_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
+        rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
         rva_data[:http][:end_time] = Time.now.to_s
         rva_data[:http][:response] = response
-        @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+        @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
       end
     end
 
     def add_json_ref(ref)
       rva_id = get_rva_id()
-      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
       data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
                              ref)
-      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
       return data
     end
 
     def add_ga_data(ref)
 
       rva_id = get_rva_id()
-      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
       data = add_data_source(DATA_OUTPUT_PROP,
                              rva_data,
                              'ga',
                              ref)
-      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
       return data
     end
 
@@ -95,7 +95,7 @@ module Meda
     def build_rva_log
       built_list = []
       all_json = get_all_json_data(@config.data_path)
-      all_rva_data =  @@profile_data_store.decode_collection(@config.verification_api['collection_name'])
+      all_rva_data =  @@log_data_store.decode_collection(@config.verification_api['collection_name'])
 
       all_rva_data.each { |rva_data|
         json = get_related_json_data(all_json, rva_data, 'json')
@@ -109,7 +109,7 @@ module Meda
     end
 
     def clear_rva_log
-      @@profile_data_store.delete(@config.verification_api['collection_name'])
+      @@log_data_store.delete(@config.verification_api['collection_name'])
       return true
     end
 

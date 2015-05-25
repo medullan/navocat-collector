@@ -1,6 +1,5 @@
 require_relative '../../../../lib/meda/services/verification/request_verification_service.rb'
-require_relative '../../../../lib/meda/services/profile/profile_service.rb'
-require_relative '../../../../lib/meda/services/datastore/profile_data_store.rb'
+require_relative '../../../../lib/meda/services/datastore/redisdb/redisdb_store.rb'
 
 require 'json'
 
@@ -47,7 +46,7 @@ describe Meda::RequestVerificationService do
       # test_config.features = {}
 
       test_id = "#{Meda.configuration.verification_api[:id_prefix]}87238723-323232332"
-      profile_service= Meda::ProfileDataStore.new(Meda.configuration)
+      log_data_store= Meda::RedisDbStore.new(Meda.configuration)
 
       uuid = UUIDTools::UUID.random_create.to_s
       uuid = "#{Meda.configuration.verification_api[:id_prefix]}#{uuid}"
@@ -55,11 +54,11 @@ describe Meda::RequestVerificationService do
       # profile_service.encode("rva:#{test_id}5", {:id => test_id})
       # puts result
 
-      profile_service.encode_collection('rva', uuid, {:id => uuid})
-      list = profile_service.decode_collection('rva')
-      filter = profile_service.decode_collection_filter_by_key('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
-      exists = profile_service.key_in_collection?('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
-      deleted = profile_service.delete_key_within_collection('rva', 'rva-a46ddda3-38e9-4eb2-9569-4cdef8a5f883')
+      log_data_store.encode_collection('rva', uuid, {:id => uuid})
+      list = log_data_store.decode_collection('rva')
+      filter = log_data_store.decode_collection_filter_by_key('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
+      exists = log_data_store.key_in_collection?('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
+      deleted = log_data_store.delete_key_within_collection('rva', 'rva-a46ddda3-38e9-4eb2-9569-4cdef8a5f883')
 
       puts list
       puts filter
