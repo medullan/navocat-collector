@@ -30,7 +30,7 @@ module Meda
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
             :http => {
-                :start_time=> data[:start_time], :end_time=> nil,:url => request.url,
+                :start_time=> data[:start_time].to_s, :end_time=> nil,:url => request.url,
                 :method => request.request_method, :request_input => input, :response=>nil
             }
         }
@@ -110,7 +110,7 @@ module Meda
     def add_data_source(operation_key, rva_data, type, ref)
       # puts "saving source with: #{operation_key} , #{type}, #{ref}"
 
-      if rva_data != nil
+      if rva_data != nil && ref != nil
         temp = {}
         if rva_data.has_key?(operation_key.to_sym)
           temp = temp.merge(rva_data[operation_key.to_sym])

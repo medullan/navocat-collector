@@ -17,19 +17,19 @@ describe Meda::RequestVerificationService do
   Meda.configuration.verification_api = {:log_size => 5, :collection_name => 'rva-test', :id_prefix => 'rva-', :thread_id_key => 'meda_rva_id'}
   features = {:verification_api=>true, :profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
   Meda.configuration.features.merge(features)
-  puts Meda.configuration
+  # puts Meda.configuration
   describe 'test uuid generation' do
 
     xit 'should start with prefix' do
 
-      request_validation_service = Meda::RequestVerificationService.new()
+      request_validation_service = Meda::RequestVerificationService.new(Meda.configuration)
       uuid = request_validation_service.generate_transaction_id()
       expect(uuid.to_s).to start_with(Meda.configuration.verification_api[:id_prefix])
       # Meda.configuration.verification_api.collection_name
     end
 
     xit 'should be saved in the thread' do
-      request_validation_service = Meda::RequestVerificationService.new()
+      request_validation_service = Meda::RequestVerificationService.new(Meda.configuration)
       uuid = request_validation_service.set_transaction_id()
 
       expect(Thread.current[Meda.configuration.verification_api[:thread_id_key]]).to equal(uuid)

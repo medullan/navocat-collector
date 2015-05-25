@@ -168,7 +168,7 @@ module Meda
       # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
-        start_time = Time.now.to_s
+        start_time = Time.now
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
         profile_id = (profile != nil && profile.key?(:id)) ? profile[:id]: nil
@@ -190,7 +190,7 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
-        start_time = Time.now.to_s
+        start_time = Time.now
         profile = settings.connection.identify(params)
         profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
         data = {:start_time=> start_time, :profile_id=> profile_id,:request_input => params }
@@ -211,7 +211,7 @@ module Meda
       # @overload post "/meda/profile.json"
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
-        start_time = Time.now.to_s
+        start_time = Time.now
         profile_data = raw_json_from_request
         data = {:start_time=> start_time , :request_input => profile_data }
         @@request_verification_service.start_rva_log('profile', data,request, cookies )
@@ -311,7 +311,7 @@ module Meda
       # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
-        start_time = Time.now.to_s
+        start_time = Time.now
         get_profile_id_from_cookie
         data = {:start_time=> start_time, :request_input => params  }
         @@request_verification_service.start_rva_log('profile', data,request, cookies )
@@ -358,7 +358,7 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
-        start_time = Time.now.to_s
+        start_time = Time.now
         logger.debug("in page")
         page_data = json_from_request
         data = {:start_time=> start_time, :request_input => page_data }
@@ -380,7 +380,7 @@ module Meda
       # @overload get "/meda/page.gif"
       # Record a pageview
       get '/meda/page.gif' do
-        start_time = Time.now.to_s
+        start_time = Time.now
 
         get_profile_id_from_cookie
         data = {:start_time=> start_time , :request_input => params}
@@ -401,7 +401,7 @@ module Meda
       # @overload post "/meda/track.json"
       # Record an event
       post '/meda/track.json', :provides => :json do
-        start_time = Time.now.to_s
+        start_time = Time.now
         track_data = json_from_request
         data = {:start_time=> start_time, :request_input => track_data}
         @@request_verification_service.start_rva_log('track',data,request, cookies )
@@ -422,7 +422,7 @@ module Meda
       # @overload get "/meda/track.gif"
       # Record an event
       get '/meda/track.gif' do
-        start_time = Time.now.to_s
+        start_time = Time.now
         get_profile_id_from_cookie
         data = {:start_time=> start_time , :request_input => params}
         @@request_verification_service.start_rva_log('track',data,request, cookies )
@@ -442,7 +442,7 @@ module Meda
       # @method get_endsession_gif
       # remove an active identified session with the collector
       get '/meda/endsession.gif' do
-        start_time = Time.now.to_s
+        start_time = Time.now
         data = {:start_time=> start_time }
         @@request_verification_service.start_rva_log('endsession',data,request, cookies )
         result = cookies.delete("_meda_profile_id")
