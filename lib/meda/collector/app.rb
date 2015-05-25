@@ -168,14 +168,16 @@ module Meda
       # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
       post '/meda/identify.json', :provides => :json do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('identify',request, cookies )
-        end
-
+        start_time = Time.now.to_s
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
-        if profile
-          json({'profile_id' => profile[:id]})
+        profile_id = (profile != nil && profile.key?(:id)) ? profile[:id]: nil
+        data = {:start_time=> start_time, :profile_id=> profile_id }
+        @@request_verification_service.start_rva_log('identify', data,request, cookies )
+        if profile_id != nil
+          response = {'profile_id' => profile_id}
+          @@request_verification_service.end_rva_log(response)
+          json(response)
         else
           logger.error("post /meda/identify.json ==> Unable to find profile")
           respond_with_bad_request
@@ -186,13 +188,14 @@ module Meda
       # @overload get "/meda/identify.gif"
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('identify',request, cookies )
-        end
-
+        start_time = Time.now.to_s
         profile = settings.connection.identify(params)
-        if profile
+        profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
+        data = {:start_time=> start_time, :profile_id=> profile_id }
+        @@request_verification_service.start_rva_log('identify', data,request, cookies )
+        if  profile_id != nil
           set_profile_id_in_cookie(profile['id'])
+          @@request_verification_service.end_rva_log(profile_id)
           respond_with_pixel
         else
           logger.error("get /meda/identify.gif ==> Unable to find profile")
@@ -204,14 +207,14 @@ module Meda
       # @overload post "/meda/profile.json"
       # Sets attributes on the given profile
       post '/meda/profile.json', :provides => :json do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('profile',request, cookies )
-        end
-
+        start_time = Time.now.to_s
         profile_data = raw_json_from_request
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('profile', data,request, cookies )
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
+            @@request_verification_service.end_rva_log()
             respond_with_ok
           else
             logger.error("post /meda/profile.json ==> Invalid result")
@@ -245,7 +248,7 @@ module Meda
       # Deletes a given profile by profileid and dataset
       get '/meda/profile_delete.gif' do
         if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('profile',request, cookies )
+          # @@request_verification_service.start_rva_log('profile',request, cookies )
         end
 
 
@@ -305,13 +308,13 @@ module Meda
       # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('profile',request, cookies )
-        end
-
+        start_time = Time.now.to_s
         get_profile_id_from_cookie
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('profile', data,request, cookies )
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
+          @@request_verification_service.end_rva_log()
           respond_with_pixel
         else
           logger.error("profile.gif bad request request")
@@ -350,15 +353,15 @@ module Meda
       # @overload post "/meda/page.json"
       # Record a pageview
       post '/meda/page.json', :provides => :json do
+        start_time = Time.now.to_s
         logger.debug("in page")
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('page',request, cookies )
-        end
-
         page_data = json_from_request
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('page', data,request, cookies )
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
+          @@request_verification_service.end_rva_log()
           respond_with_ok
         else
           logger.error("post /meda/page.json ==> Invalid hit request")
@@ -370,13 +373,14 @@ module Meda
       # @overload get "/meda/page.gif"
       # Record a pageview
       get '/meda/page.gif' do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('page',request, cookies )
-        end
+        start_time = Time.now.to_s
 
         get_profile_id_from_cookie
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('page', data,request, cookies )
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
+          @@request_verification_service.end_rva_log()
           respond_with_pixel
         else
           logger.error("get /meda/page.gif ==> Invalid hit request")
@@ -388,13 +392,14 @@ module Meda
       # @overload post "/meda/track.json"
       # Record an event
       post '/meda/track.json', :provides => :json do
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('track',request, cookies )
-        end
-
+        start_time = Time.now.to_s
         track_data = json_from_request
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('track',data,request, cookies )
+
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
+          @@request_verification_service.end_rva_log()
           respond_with_ok
         else
           logger.error("post /meda/track.json ==> Invalid hit request")
@@ -406,12 +411,14 @@ module Meda
       # @overload get "/meda/track.gif"
       # Record an event
       get '/meda/track.gif' do
+        start_time = Time.now.to_s
         get_profile_id_from_cookie
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.start_rva_log('track',request, cookies )
-        end
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('track',data,request, cookies )
+
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
+          @@request_verification_service.end_rva_log()
           respond_with_pixel
         else
           logger.error("get /meda/track.gif ==> Invalid hit request")
@@ -422,10 +429,11 @@ module Meda
       # @method get_endsession_gif
       # remove an active identified session with the collector
       get '/meda/endsession.gif' do
-        @@request_verification_service.start_rva_log('endsession',request, cookies )
-        # puts cookies['__collector_client_id']
+        start_time = Time.now.to_s
+        data = {:start_time=> start_time }
+        @@request_verification_service.start_rva_log('endsession',data,request, cookies )
         cookies.delete("_meda_profile_id")
-        # puts   request.url
+        @@request_verification_service.end_rva_log()
         respond_with_pixel
       end
 

@@ -19,15 +19,30 @@ module Meda
       @@profile_data_store = Meda::ProfileDataStore.new(config)
     end
     ### public ###
-    def start_rva_log (type, request, cookies, params = nil)
-      rva_id = set_transaction_id()
-      # puts "log out request in start: #{request.body}"
-      rva_data = {
-          :id => rva_id,
-          :type => type,
-          :http => {:start_time=> Time.now.to_s, :url => request.url, :method => request.request_method, :request_input => nil || params}
-      }
-      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+    def start_rva_log (type, data, request, cookies, params = nil)
+      if Meda.features.is_enabled("verification_api", false)
+        rva_id = set_transaction_id()
+        profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies["_meda_profile_id"]
+        client_id = cookies['__collector_client_id']
+        # start_time
+        rva_data = {
+            :id => rva_id,
+            :profile_id => profile_id, :client_id => client_id,
+            :type => type,
+            :http => {:start_time=> data[:start_time], :end_time=> nil,:url => request.url, :method => request.request_method, :request_input => nil || params, :response=>nil}
+        }
+        @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+      end
+    end
+
+    def end_rva_log (response=nil)
+      if Meda.features.is_enabled("verification_api", false)
+        rva_id = get_rva_id()
+        rva_data = @@profile_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
+        rva_data[:http][:end_time] = Time.now.to_s
+        rva_data[:http][:response] = response
+        @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+      end
     end
 
 
@@ -95,10 +110,7 @@ module Meda
 
     def set_transaction_id(id = nil)
       uuid = id || generate_transaction_id()
-      # puts @config.verification_api
-      # Thread.current["#{@config.verification_api['thread_id_key']}" ] = uuid
       Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
-      puts "log out thread in set: #{Thread.current.to_json}"
       return uuid
     end
 

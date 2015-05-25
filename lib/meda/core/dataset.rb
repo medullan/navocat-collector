@@ -113,7 +113,6 @@ module Meda
 
 
     def stream_hit_to_disk(hit)
-      # puts "log out thread disk: #{Thread.current.to_json}"
       begin
         Logging.mdc["meta_logs"] = hit.meta_logs
         logger.info("Starting to write hit to DISK")
@@ -130,7 +129,6 @@ module Meda
           f.puts(hit.to_json)
         end
         @@request_verification_service.add_json_ref( hit.id)
-        # puts "log out hit: #{hit.to_json}"
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
