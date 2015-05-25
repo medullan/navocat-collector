@@ -104,6 +104,11 @@ module Meda
       return built_list
     end
 
+    def clear_rva_log
+      @@profile_data_store.delete(@config.verification_api['collection_name'])
+      return true
+    end
+
     #################
     ### private ###
 

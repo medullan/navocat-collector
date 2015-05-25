@@ -90,7 +90,7 @@ module Meda
       error do |e|
         logger.error(e)
         'Internal Error'
-        data = {:message => e.message, :status=> 500, :status_text=> 'Internal Error'}
+        data = {:message => e.message, :status_code=> 500, :status_text=> 'Internal Error'}
         @@request_verification_service.end_rva_log(data)
       end
 
@@ -466,7 +466,16 @@ module Meda
           status 404
           json({:status => 404, :message => 'not found'})
         end
-
+      end
+      #Endpoint to delete qa logs
+      delete '/meda/verification/logs' do
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.clear_rva_log()
+          respond_with_ok
+        else
+          status 404
+          json({:status => 404, :message => 'not found'})
+        end
       end
 
 

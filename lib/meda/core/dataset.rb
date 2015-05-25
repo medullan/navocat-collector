@@ -144,7 +144,7 @@ module Meda
         msg = "Failure writing hit #{hit.id} to #{path}"
         logger.error(msg)
         logger.error(e)
-        data = {:message => e.message, :status=> 500, :status_text=> 'Internal Error', :log_msg => msg}
+        data = {:message => e.message, :status_code=> 500, :status_text=> 'Internal Error', :log_msg => msg}
         @@request_verification_service.end_rva_log(data)
       end
       true

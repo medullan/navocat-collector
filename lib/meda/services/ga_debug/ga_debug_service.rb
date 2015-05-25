@@ -43,7 +43,7 @@ module Meda
         msg = "Failure logging ga debug information"
         Meda.logger.error(msg)
         Meda.logger.error(e)
-        data = {:message => e.message, :status=> 500, :status_text=> 'Internal Error', :log_msg => msg}
+        data = {:message => e.message, :status_code=> 500, :status_text=> 'Internal Error', :log_msg => msg}
         @@request_verification_service.end_rva_log(data)
       end
     end
