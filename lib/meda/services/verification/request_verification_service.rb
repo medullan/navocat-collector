@@ -9,15 +9,13 @@ module Meda
 
   #RequestVerificationService used for the Request Verification API (RVA)
   class RequestVerificationService
-    @@prefix = "rva-" #used to differentiate qa logs from profile ids
-    @@thread_key = "meda_rva_id" #key used to store RVA id in the thread
-    # @@profile_service= Meda::ProfileService.new(Meda.configuration)
+
     def initialize(config)
-
       @config=config
-
       @@profile_data_store = Meda::ProfileDataStore.new(config)
     end
+
+
     ### public ###
     def start_rva_log (type, data, request, cookies)
       if Meda.features.is_enabled("verification_api", false)
@@ -109,8 +107,10 @@ module Meda
       return true
     end
 
+
     #################
     ### private ###
+
 
     def add_data_source(operation_key, rva_data, type, ref)
       # puts "saving source with: #{operation_key} , #{type}, #{ref}"
