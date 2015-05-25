@@ -22,14 +22,17 @@ module Meda
         params_sent_to_ga = debug_ga_response[:params_sent_to_ga]
 
         @logging_meta_data_service.add_to_mdc("ga_debug_response_code", ga_response_code)
-        if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.add_ga_data(ga_response_json)
-        end
+
         if !ga_response_json.blank?
           ga_response_json = parse_ga_response(ga_response_json)
           @logging_meta_data_service.add_to_mdc_hash("ga_debug_raw_json", ga_response_json)
+
           if !params_sent_to_ga.blank? && ga_response_code == "200"
             ga_response = construct_ga_debug_object(ga_response_json)
+            if Meda.features.is_enabled("verification_api", false)
+              ga_data = ga_response_json.merge(ga_response).merge({:response_code => ga_response_code}).merge(params_sent_to_ga)
+              @@request_verification_service.add_ga_data(ga_data)
+            end
             @logging_meta_data_service.add_to_mdc("ga_debug_validity", ga_response[:validity])
             @logging_meta_data_service.add_to_mdc("ga_debug_message", ga_response[:parser_message])
             @logging_meta_data_service.add_to_mdc_hash("ga_debug", params_sent_to_ga)
