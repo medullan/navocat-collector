@@ -87,7 +87,7 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              @@request_verification_service.set_transaction_id(rva_id)
+              @@request_verification_service.set_rva_id(rva_id)
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -95,7 +95,7 @@ module Meda
           if Meda.features.is_enabled("google_analytics_store",true)
             if dataset.stream_to_ga?
               ga_pool.submit do
-                @@request_verification_service.set_transaction_id(rva_id)
+                @@request_verification_service.set_rva_id(rva_id)
                 dataset.stream_hit_to_ga(hit)
               end
             else
@@ -120,7 +120,7 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              @@request_verification_service.set_transaction_id(rva_id)
+              @@request_verification_service.set_rva_id(rva_id)
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -130,7 +130,7 @@ module Meda
           
             if dataset.stream_to_ga?
               ga_pool.submit do
-                @@request_verification_service.set_transaction_id(rva_id)
+                @@request_verification_service.set_rva_id(rva_id)
                 dataset.stream_hit_to_ga(hit)
               end
             else

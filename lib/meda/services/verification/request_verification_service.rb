@@ -10,6 +10,10 @@ module Meda
   #RequestVerificationService used for the Request Verification API (RVA)
   class RequestVerificationService
 
+
+    DATA_OUTPUT_PROP = 'outputs'
+    TRANS_IDS_PROP = 'transaction_ids'
+
     def initialize(config)
       @config=config
       @@profile_data_store = Meda::ProfileDataStore.new(config)
@@ -19,7 +23,7 @@ module Meda
     ### public ###
     def start_rva_log (type, data, request, cookies)
       if Meda.features.is_enabled("verification_api", false)
-        rva_id = set_transaction_id()
+        rva_id = set_rva_id()
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies["_meda_profile_id"]
         client_id = cookies['__collector_client_id']
         input = data.key?(:request_input) ? data[:request_input] : nil
@@ -46,11 +50,10 @@ module Meda
       end
     end
 
-
     def add_json_ref(ref)
       rva_id = get_rva_id()
       rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
-      data = add_data_source('transaction_ids',
+      data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
                              ref)
@@ -59,9 +62,10 @@ module Meda
     end
 
     def add_ga_data(ref)
+
       rva_id = get_rva_id()
       rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
-      data = add_data_source('data',
+      data = add_data_source(DATA_OUTPUT_PROP,
                              rva_data,
                              'ga',
                              ref)
@@ -77,10 +81,10 @@ module Meda
       return id
     end
 
-    def set_transaction_id(id = nil)
+    def set_rva_id(id = nil)
       uuid = nil
       if Meda.features.is_enabled("verification_api", false)
-        uuid = id || generate_transaction_id()
+        uuid = id || generate_rva_id()
         Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
       end
       return uuid
@@ -93,7 +97,7 @@ module Meda
 
       all_rva_data.each { |rva_data|
         json = get_related_json_data(all_json, rva_data, 'json')
-        rva_data = add_data_source('data',
+        rva_data = add_data_source(DATA_OUTPUT_PROP,
                                rva_data,
                                'json',
                                json)
@@ -128,7 +132,7 @@ module Meda
     end
 
 
-    def generate_transaction_id()
+    def generate_rva_id()
       uuid = UUIDTools::UUID.random_create.to_s #timestamp_create.hexdigest
       uuid = "#{@config.verification_api['id_prefix']}#{uuid}"
       return uuid
