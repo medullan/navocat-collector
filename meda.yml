@@ -69,7 +69,7 @@ production:
     post_request_log: true
     logs_postgres: false
     profile_store: mapdb
-    verification_api: true
+    verification_api: false
 
 performance:
   disk_pool: 4
