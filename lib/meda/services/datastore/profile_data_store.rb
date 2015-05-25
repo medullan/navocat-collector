@@ -25,23 +25,6 @@ module Meda
       end 
     end
 
-    def encode_collection(list, key, value)
-      @store.encode_collection(list, key, value)
-    end
-
-    def decode_collection(list)
-      @store.decode_collection(list)
-    end
-    def decode_collection_filter_by_key(list, key)
-      @store.decode_collection_filter_by_key(list, key)
-    end
-    def delete_key_within_collection(list, key)
-      @store.delete_key_within_collection(list, key)
-    end
-    def key_in_collection?(list, key)
-      @store.key_in_collection?(list, key)
-    end
-
     def encode(key,value)
       Meda.logger.debug("starting encode")
       startBenchmark = Time.now.to_f
@@ -60,7 +43,7 @@ module Meda
       return result
     end
 
-    def decode(key, list=false)
+    def decode(key)
       Meda.logger.debug("starting decode")
       startBenchmark = Time.now.to_f
       result = @store.decode(key)
@@ -88,7 +71,25 @@ module Meda
       @store.key_size
     end
 
-
+    # Collection APIs
+    def encode_collection(list, key, value)
+      @store.encode_collection(list, key, value)
+    end
+    def decode_collection(list)
+      @store.decode_collection(list)
+    end
+    def decode_collection_filter_by_key(list, key)
+      @store.decode_collection_filter_by_key(list, key)
+    end
+    def delete_key_within_collection(list, key)
+      @store.delete_key_within_collection(list, key)
+    end
+    def key_in_collection?(list, key)
+      @store.key_in_collection?(list, key)
+    end
+    def collection_size(list)
+      @store.collection_size(list)
+    end
 
   end
 end

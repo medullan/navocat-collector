@@ -40,52 +40,6 @@ module Meda
       end
     end
 
-    def key_in_collection?(list, key)
-      redis do |r|
-        return r.hexists(list, key)
-      end
-    end
-    def encode_collection(list, key, value)
-      redis do |r|
-        result = nil
-        if list != nil && key != nil
-          result = r.hset( list, key, value)
-        end
-        return result
-      end
-    end
-
-    def decode_collection_filter_by_key(list, key)
-      redis do |r|
-        result = nil
-        if list != nil && key != nil
-          result = eval(r.hget( list, key))
-        end
-        return result
-
-      end
-    end
-
-    def delete_key_within_collection(list, key)
-      redis do |r|
-        return !!r.hdel( list, key)
-
-      end
-    end
-
-    def decode_collection(list)
-      redis do |r|
-        returnVal = []
-        if list != nil
-          result = r.hgetall(list)
-          result.each { |key, val|
-            returnVal.push(eval(val))
-          }
-        end
-        return returnVal
-
-      end
-    end
 
     def decode(key)
        returnVal = nil
@@ -134,6 +88,61 @@ module Meda
         yield(conn) if block_given?
       end
     end
+
+
+    #Collection APIs
+    def key_in_collection?(list, key)
+      redis do |r|
+        return r.hexists(list, key)
+      end
+    end
+    def collection_size(list)
+      redis do |r|
+        return r.hlen(list)
+      end
+    end
+    def encode_collection(list, key, value)
+      redis do |r|
+        result = nil
+        if list != nil && key != nil
+          result = r.hset( list, key, value)
+        end
+        return result
+      end
+    end
+
+    def decode_collection_filter_by_key(list, key)
+      redis do |r|
+        result = nil
+        if list != nil && key != nil
+          result = eval(r.hget( list, key))
+        end
+        return result
+
+      end
+    end
+
+    def delete_key_within_collection(list, key)
+      redis do |r|
+        return !!r.hdel( list, key)
+
+      end
+    end
+
+    def decode_collection(list)
+      redis do |r|
+        returnVal = []
+        if list != nil
+          result = r.hgetall(list)
+          result.each { |key, val|
+            returnVal.push(eval(val))
+          }
+        end
+        return returnVal
+
+      end
+    end
+
   end
 end
 
