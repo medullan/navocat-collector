@@ -26,7 +26,7 @@ module Meda
     def start_rva_log (type, data, request, cookies)
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = set_rva_id()
-        profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies["_meda_profile_id"]
+        profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies['_meda_profile_id']
         client_id = cookies['__collector_client_id']
         input = data.key?(:request_input) ? data[:request_input] : nil
         rva_data = {
