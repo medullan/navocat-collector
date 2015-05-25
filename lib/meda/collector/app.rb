@@ -247,11 +247,6 @@ module Meda
       # @method delete_profile_json
       # Deletes a given profile by profileid and dataset
       get '/meda/profile_delete.gif' do
-        if Meda.features.is_enabled("verification_api", false)
-          # @@request_verification_service.start_rva_log('profile',request, cookies )
-        end
-
-
         get_profile_id_from_cookie
         if @@validation_service.valid_request?(get_client_id_from_cookie, params)
           result = settings.connection.delete_profile(params)
