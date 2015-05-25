@@ -114,30 +114,6 @@ describe Meda::RequestVerificationService do
       expect(rva_data[:transaction_ids][:json]).to eq(json_data[:id])
     end
 
-    # it 'should be saved in the data' do
-    #   test_config = Meda.configuration.clone
-    #   test_config.features = {}
-    #   features = {:profile_store=> 'redisdb', :profile_loader=> true, :profile_service => 'onekey'}
-    #   test_config.features.merge(features)
-    #   test_id = 'rva-87238723-323232332'
-    #   profile_service= Meda::ProfileDataStore.new(test_config)
-    #   profile_service.encode(test_id, {:id => test_id})
-    #
-    #   # ret_hash = profile_service.decode(test_id)
-    #   # expect(ret_hash['id']).to eq(test_id)
-    #   expect(true).to be_truthy
-    # end
-
-
-    # it 'should merge and build a RVA log' do
-    #   json_data = {:id=> '28917570f42b11e49336003ee1fffe52'}
-    #   ga_data = {:id => '28917570f42b11e49336003ee1fffe52'}
-    #   profile_data = [{:id => '3e23e223e23323323233'}, {:id => 'tguyg766t8y7877t89y98'}]
-    #   page_rva_data = {:id=> 'rva-232323232', :type=> 'page', :transaction_id => {:json => '28917570f42b11e49336003ee1fffe52'}}
-    #   json_folder_prefix = {:page => 'pageviews', :track => 'events'}
-    #
-    # end
-
   end
 
   end
