@@ -13,6 +13,7 @@ module Meda
 
     DATA_OUTPUT_PROP = 'outputs'
     TRANS_IDS_PROP = 'transaction_ids'
+    FEATURE_NAME = "verification_api"
 
     def initialize(config)
       @config=config
@@ -21,8 +22,9 @@ module Meda
 
 
     ### public ###
+
     def start_rva_log (type, data, request, cookies)
-      if Meda.features.is_enabled("verification_api", false)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = set_rva_id()
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies["_meda_profile_id"]
         client_id = cookies['__collector_client_id']
@@ -41,7 +43,7 @@ module Meda
     end
 
     def end_rva_log (response=nil)
-      if Meda.features.is_enabled("verification_api", false)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
         rva_data = @@profile_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
         rva_data[:http][:end_time] = Time.now.to_s
@@ -75,7 +77,7 @@ module Meda
 
     def get_rva_id()
       id = nil
-      if Meda.features.is_enabled("verification_api", false)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
         id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
       end
       return id
@@ -83,7 +85,7 @@ module Meda
 
     def set_rva_id(id = nil)
       uuid = nil
-      if Meda.features.is_enabled("verification_api", false)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
         uuid = id || generate_rva_id()
         Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
       end
