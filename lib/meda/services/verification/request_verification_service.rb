@@ -19,17 +19,20 @@ module Meda
       @@profile_data_store = Meda::ProfileDataStore.new(config)
     end
     ### public ###
-    def start_rva_log (type, data, request, cookies, params = nil)
+    def start_rva_log (type, data, request, cookies)
       if Meda.features.is_enabled("verification_api", false)
         rva_id = set_transaction_id()
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies["_meda_profile_id"]
         client_id = cookies['__collector_client_id']
-        # start_time
+        input = data.key?(:request_input) ? data[:request_input] : nil
         rva_data = {
             :id => rva_id,
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
-            :http => {:start_time=> data[:start_time], :end_time=> nil,:url => request.url, :method => request.request_method, :request_input => nil || params, :response=>nil}
+            :http => {
+                :start_time=> data[:start_time], :end_time=> nil,:url => request.url,
+                :method => request.request_method, :request_input => input, :response=>nil
+            }
         }
         @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
       end
@@ -47,30 +50,42 @@ module Meda
 
 
     def add_json_ref(ref)
-      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], get_rva_id() )
+      rva_id = get_rva_id()
+      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
       data = add_data_source('transaction_ids',
                              rva_data,
                              'json',
                              ref)
-      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], get_rva_id(), data )
+      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
       return data
     end
 
     def add_ga_data(ref)
-      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], get_rva_id() )
+      rva_id = get_rva_id()
+      rva_data =  @@profile_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
       data = add_data_source('data',
                              rva_data,
                              'ga',
                              ref)
-      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], get_rva_id(), data )
+      @@profile_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
       return data
     end
 
     def get_rva_id()
-      id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
-          #Thread.current["#{@config.verification_api['thread_id_key']}" ]
-      # puts "the rva id: #{id} , #{@config.verification_api['thread_id_key']},  #{Thread.current.to_json}"
+      id = nil
+      if Meda.features.is_enabled("verification_api", false)
+        id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
+      end
       return id
+    end
+
+    def set_transaction_id(id = nil)
+      uuid = nil
+      if Meda.features.is_enabled("verification_api", false)
+        uuid = id || generate_transaction_id()
+        Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
+      end
+      return uuid
     end
 
     def build_rva_log
@@ -106,14 +121,6 @@ module Meda
       end
       return rva_data
     end
-
-
-    def set_transaction_id(id = nil)
-      uuid = id || generate_transaction_id()
-      Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
-      return uuid
-    end
-
 
 
     def generate_transaction_id()

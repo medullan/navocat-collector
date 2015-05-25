@@ -1,4 +1,5 @@
 require 'logger'
+require 'meda/services/verification/request_verification_service'
 
 module Meda
   module Collector
@@ -28,6 +29,7 @@ module Meda
 
         Meda.datasets # pre-fetch
         @config = Meda.configuration
+        @@request_verification_service = Meda::RequestVerificationService.new(@config)
         at_exit do
           @disk_pool.shutdown
           @ga_pool.shutdown
@@ -75,7 +77,7 @@ module Meda
       end
 
       def track(params)
-        rva_id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
+        rva_id = @@request_verification_service.get_rva_id()
         process_request(params) do |dataset, track_params|
           hit = dataset.add_event(track_params)
           if(hit.is_invalid)
@@ -85,7 +87,7 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], rva_id)
+              @@request_verification_service.set_transaction_id(rva_id)
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -93,7 +95,7 @@ module Meda
           if Meda.features.is_enabled("google_analytics_store",true)
             if dataset.stream_to_ga?
               ga_pool.submit do
-                Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], rva_id)
+                @@request_verification_service.set_transaction_id(rva_id)
                 dataset.stream_hit_to_ga(hit)
               end
             else
@@ -107,7 +109,7 @@ module Meda
 
       def page(params)
         logger.debug("in page")
-        rva_id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
+        rva_id = @@request_verification_service.get_rva_id()
         process_request(params) do |dataset, page_params|
           hit = dataset.add_pageview(page_params)
 
@@ -118,7 +120,7 @@ module Meda
 
           if Meda.features.is_enabled("file_store",true)
             disk_pool.submit do
-              Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], rva_id)
+              @@request_verification_service.set_transaction_id(rva_id)
               dataset.stream_hit_to_disk(hit)
             end
           end
@@ -128,7 +130,7 @@ module Meda
           
             if dataset.stream_to_ga?
               ga_pool.submit do
-                Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], rva_id)
+                @@request_verification_service.set_transaction_id(rva_id)
                 dataset.stream_hit_to_ga(hit)
               end
             else
