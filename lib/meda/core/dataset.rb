@@ -141,8 +141,11 @@ module Meda
         @logging_meta_data_service.add_to_mdc("disk_hit_path", path)
         logger.info("wrote hit to disk")
       rescue StandardError => e
-        logger.error("Failure writing hit #{hit.id} to #{path}")
+        msg = "Failure writing hit #{hit.id} to #{path}"
+        logger.error(msg)
         logger.error(e)
+        data = {:message => e.message, :status=> 500, :status_text=> 'Internal Error', :log_msg => msg}
+        @@request_verification_service.end_rva_log(data)
       end
       true
     end

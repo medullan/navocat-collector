@@ -90,6 +90,8 @@ module Meda
       error do |e|
         logger.error(e)
         'Internal Error'
+        data = {:message => e.message, :status=> 500, :status_text=> 'Internal Error'}
+        @@request_verification_service.end_rva_log(data)
       end
 
       not_found do
@@ -192,6 +194,7 @@ module Meda
       get '/meda/identify.gif' do
         start_time = Time.now
         profile = settings.connection.identify(params)
+        puts "this is a test string"
         profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
         data = {:start_time=> start_time, :profile_id=> profile_id,:request_input => params }
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
