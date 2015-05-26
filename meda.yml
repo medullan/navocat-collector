@@ -13,7 +13,7 @@ development:
     error_log_path: log/error.log
     file_history: 10
     file_maxsize: 10000
-    error_email_from_account: collector@gmail.com
+    error_email_from_account: x@gmail.com
     error_email_from_account_password: update
     error_email_to_account: [x@medullan.com,x@medullan.com]
   redis:
@@ -22,8 +22,6 @@ development:
     password: nil
     pool: 10
     time_out: 15
-  h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb
   features:
     pre_request_log: true
     post_request_log: true
@@ -52,8 +50,6 @@ production:
     password: nil
     pool: 10
     time_out: 15
-  h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
@@ -73,8 +69,6 @@ performance:
     password: nil
     pool: 10
     time_out: 15
-  h2:
-    db_conn_url: jdbc:h2:tcp://localhost/~/fepdb;USER=sa;PASSWORD=
   features:
     pre_request_log: true
     post_request_log: true
@@ -88,4 +82,4 @@ test:
   data_path: meda_data
   log_path: log/test.log
   log_level: 0
-  db_url: jdbc:postgresql://localhost:5433/collector-logs?user=wesleyboland&password=p@ssw0rd
+  db_url: jdbc:postgresql://localhost:5433/collector-logs
