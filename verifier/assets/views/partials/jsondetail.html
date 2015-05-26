@@ -1,0 +1,57 @@
+<div class="tab-info">
+    <div class="styled-props">
+        <table>
+            <tr>
+                <td class="detail-title"><span >ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.id"></span></td>
+
+                <td class="detail-title"><span >Hit Time</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.ht"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Profile ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.pi"></span></td>
+
+                <td class="detail-title"><span >Client ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.ci"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Profile Data?</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.pp | exists"></span></td>
+
+                <td class="detail-title"><span >HTTP Data?</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.hp | exists"></span></td>
+            </tr>
+
+            <tr>
+                <td class="detail-title"><span >Browser</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).browser.name"></span></td>
+
+                <td class="detail-title"><span >Browser Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).browser.version"></span></td>
+            </tr>
+
+            <tr>
+                <td class="detail-title"><span >User OS</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).os.name"></span></td>
+
+                <td class="detail-title"><span >User OS Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).os.version"></span></td>
+            </tr>
+
+        </table>
+    </div>
+
+
+    <div class="raw-object">
+        <accordion class="inner-accordion" close-others="true">
+            <accordion-group  is-open="jsonStatus.open" >
+                <accordion-heading>
+                    <span>RAW Data: JSON</span>
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': jsonStatus.open, 'glyphicon-chevron-right': !jsonStatus.open}"></i>
+                </accordion-heading>
+                <div data-json-human log="log.outputs.json" omit=" '$$hashKey' "></div>
+            </accordion-group>
+        </accordion>
+    </div>
+</div>

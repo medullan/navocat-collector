@@ -6,6 +6,12 @@ require 'newrelic_rpm'
 
 use Rack::Deflater
 
+map "/meda/verifier/assets" do
+  if Meda.features.is_enabled("verification_api", false)
+    run Rack::Directory.new("./verifier/assets")
+  end
+end
+
 Meda.configure do |config|
   config.disk_pool = 4
   config.google_analytics_pool = 16
@@ -17,6 +23,10 @@ Meda.configure do |config|
 
   if not config.verification_api.empty?
     config.verification_api['collection_name'] = "#{config.verification_api['collection_name']}-#{config.env}"
+
+    config.verification_api['private_keys'].each_with_index do |value , index|
+      config.verification_api['private_keys'][index] = (value != nil)? value.to_s: nil
+    end
   end
 
 end

@@ -1,0 +1,36 @@
+{
+  asi: false,
+  bitwise: true,
+  browser: true,
+  camelcase: true,
+  curly: true,
+  forin: true,
+  immed: true,
+  latedef: "nofunc",
+  maxlen: 80,
+  newcap: true,
+  noarg: true,
+  noempty: true,
+  nonew: true,
+  predef: [
+    "$",
+    "angular",
+    "_",
+    "renderjson",
+    "UAParser",
+    "Enumerable",
+
+    "jQuery",
+    "jasmine",
+    "beforeEach",
+    "describe",
+    "expect",
+    "it",
+    "inject",
+    "module"
+  ],
+  quotmark: true,
+  trailing: true,
+  undef: true,
+  unused: true
+}

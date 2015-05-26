@@ -108,12 +108,20 @@ module Meda
       :p3p => '',
       :config_check_interval => 600,
       :env => 'development',
-      :verification_api => {:collection_name => 'rva', :id_prefix => 'rva-', :thread_id_key => 'meda_rva_id'}
+      :verification_api => {
+          :private_keys => [],
+          :collection_name => 'rva',
+          :id_prefix => 'rva-',
+          :thread_id_key => 'meda_rva_id'
+      }
     }
 
-    attr_accessor :name, :mapdb_path, :data_path, :log_path, :log_level, :disk_pool, :google_analytics_pool,
-                  :features, :db_url, :loggly_url, :loggly_pool, :postgres_thread_pool, :postgres_logger,
-                  :redis, :h2, :logs, :hash_salt, :p3p, :config_check_interval, :env, :verification_api
+    attr_accessor :name, :mapdb_path, :data_path, :log_path,
+                  :log_level, :disk_pool, :google_analytics_pool,
+                  :features, :db_url, :loggly_url, :loggly_pool,
+                  :postgres_thread_pool, :postgres_logger,
+                  :redis, :h2, :logs, :hash_salt, :p3p,
+                  :config_check_interval, :env, :verification_api
 
     def initialize
       DEFAULTS.each do |key,val|

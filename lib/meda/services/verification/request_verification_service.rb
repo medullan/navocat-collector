@@ -18,6 +18,7 @@ module Meda
     def initialize(config)
       @config=config
       @@log_data_store = Meda::RedisDbStore.new(config)
+
     end
 
 
@@ -29,14 +30,19 @@ module Meda
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies['_meda_profile_id']
         client_id = cookies['__collector_client_id']
         input = data.key?(:request_input) ? data[:request_input] : nil
+
+        if profile_id == nil
+          profile_id =  input.key?(:profile_id) ? input[:profile_id] : profile_id
+        end
+
         end_point_type = data.key?(:end_point_type) ? data[:end_point_type] : nil
         rva_data = {
             :id => rva_id,
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
             :http => {
-                :start_time=> data[:start_time].to_s, :end_time=> nil,:url => request.url,
-                :method => request.request_method, :request_input => input, :response=>nil, :end_point_type =>end_point_type
+                :start_time => data[:start_time].to_s, :end_time => nil,:url => request.url,
+                :method => request.request_method, :request_input => input, :response => nil, :end_point_type => end_point_type
             }
         }
         @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
@@ -46,33 +52,62 @@ module Meda
     def end_rva_log (response=nil)
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
-        rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
-        rva_data[:http][:end_time] = Time.now.to_s
-        rva_data[:http][:response] = response
-        @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+        if rva_id != nil
+          rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
+          if rva_data != nil
+            rva_data[:http][:end_time] = Time.now.to_s
+            rva_data[:http][:response] = response
+            @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+          end
+        end
+
       end
+    end
+
+    def private_key_present? (key)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
+        if key != nil && @config.verification_api['private_keys'].include?(key)
+          return true
+        end
+      end
+      return false
     end
 
     def add_json_ref(ref)
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key(
+          @config.verification_api['collection_name'],
+          rva_id )
+
       data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
                              ref)
-      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+      @@log_data_store.encode_collection(
+          @config.verification_api['collection_name'],
+          rva_id,
+          data )
+
       return data
     end
 
     def add_ga_data(ref)
 
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key(
+          @config.verification_api['collection_name'],
+          rva_id)
+
       data = add_data_source(DATA_OUTPUT_PROP,
                              rva_data,
                              'ga',
                              ref)
-      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+
+      @@log_data_store.encode_collection(
+          @config.verification_api['collection_name'],
+          rva_id,
+          data )
+
       return data
     end
 
@@ -96,7 +131,8 @@ module Meda
     def build_rva_log
       built_list = []
       all_json = get_all_json_data(@config.data_path)
-      all_rva_data =  @@log_data_store.decode_collection(@config.verification_api['collection_name'])
+      all_rva_data =  @@log_data_store.decode_collection(
+          @config.verification_api['collection_name'] )
 
       all_rva_data.each { |rva_data|
         json = get_related_json_data(all_json, rva_data, 'json')
@@ -127,7 +163,7 @@ module Meda
         if rva_data.has_key?(operation_key.to_sym)
           temp = temp.merge(rva_data[operation_key.to_sym])
         end
-        ref_hash = {type.to_sym => ref}
+        ref_hash = { type.to_sym => ref }
         temp = temp.merge(ref_hash)
         rva_data = rva_data.merge!(operation_key.to_sym => temp)
       end
