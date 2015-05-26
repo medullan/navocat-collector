@@ -3,9 +3,6 @@ require_relative '../../../../lib/meda/services/datastore/redisdb/redisdb_store.
 
 require 'json'
 
-
-
-
 describe Meda::RequestVerificationService do
 
   @@thread_key = "meda_rva_id"

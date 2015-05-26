@@ -24,7 +24,6 @@ development:
     pool: 10
     time_out: 15
   verification_api:
-    log_size: 100
     collection_name: rva
     id_prefix: rva-
     thread_id_key: meda_rva_id
@@ -117,7 +116,6 @@ test:
     pool: 10
     time_out: 15
   verification_api:
-    log_size: 100
     collection_name: rva
     id_prefix: rva-
     thread_id_key: meda_rva_id
