@@ -14,9 +14,6 @@ The collector application requires jRuby 1.7+ and Java 1.6+.
 ## How to get started?
 All documenation is located on the github wiki at https://github.com/medullan/navocat-collector/wiki
 
-
-```
-
 ## Contributing
 
 Add specs for all new functionality. Run unit tests with RSpec.
