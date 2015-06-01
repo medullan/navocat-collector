@@ -76,6 +76,7 @@ pre{
 }
 .form-control.filter-input{
     height:22px;
+    min-width: 400px;
 }
 
 /*custom json human css*/

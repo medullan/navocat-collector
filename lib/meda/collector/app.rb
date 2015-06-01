@@ -11,6 +11,7 @@ require 'meda/services/logging/logging_meta_data_service'
 require 'meda/services/validation/validation_service'
 require 'meda/services/config/dynamic_config_service'
 require 'meda/services/verification/request_verification_service'
+require 'meda/services/profile/one_key/profile_id_service'
 
 module Meda
   module Collector
@@ -41,6 +42,7 @@ module Meda
       @@validation_service = Meda::ValidationService.new()
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
       @@request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
+      @@profile_id_service = Meda::ProfileIdService.new(helperConfig)
 
       before do
         @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
@@ -480,6 +482,21 @@ module Meda
         if Meda.features.is_enabled("verification_api", false)
           @@request_verification_service.clear_rva_log()
           respond_with_ok
+        else
+          status 404
+          json({:status => 404, :message => 'not found'})
+        end
+      end
+      #Endpoint to get hashed member id for verification
+      post '/meda/verification/memberid' do
+        if Meda.features.is_enabled("verification_api", false)
+          body = json_from_request
+          if body.key?('member_id') && body['member_id'] != nil
+            result = @@profile_id_service.stringToHash(body['member_id'])
+            json({ :hash => result})
+          else
+            respond_with_bad_request
+          end
         else
           status 404
           json({:status => 404, :message => 'not found'})

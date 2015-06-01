@@ -44,8 +44,9 @@ angular.module('core').controller('LogCtrl', [
     '$scope',
     '$http',
     '$log',
-    '$location',
-    function($scope, $http, $log, $location) {
+    'VerifyMemberId',
+    '$q',
+    function($scope, $http, $log, VerifyMemberId, $q) {
         $scope.settings = {
             onlyOne: true
         };
@@ -73,7 +74,7 @@ angular.module('core').controller('LogCtrl', [
 
         $scope.searchOptions = [
             {id:1, val:'Client ID', prop:'client_id'},
-            //{id:2, val:'Profile ID', prop:'profile_id'},
+            {id:2, val:'Member ID', prop:'member_id'},
             {id:3, val:'RVA ID' , prop:'id'},
             {id:4, val:'Hit Type', prop:'type'},
             {id:4, val:'Endpoint Type', prop:'end_point_type'},
@@ -83,26 +84,29 @@ angular.module('core').controller('LogCtrl', [
         var customFilter = {
             'end_point_type':function(item, crit, val){
                 return _.contains(item.http[crit].toLowerCase(), val.toLowerCase());
+            },
+            'member_id': function(item, crit, val){
+                var result =  false;
+                var result = VerifyMemberId.verify(val);
+
+                console.log(result);
+                return result;
             }
         };
 
         $scope.filter= function(criteria, value){
-            var custom = ['end_point_type']
-            var query = Enumerable.From($scope.fullList)
-                .Where(function(item){
-                    var result = false;
-                    if(_.contains(custom, criteria)){
-                        result = customFilter[criteria](item,criteria, value);
-                    }else{
-                        result = _.contains(item[criteria].toLowerCase(), value.toLowerCase());
-                    }
-                   return result;
-                })
-                .ToArray();
-            $scope.logs = query;
+            if(value && value.length >0){
+                VerifyMemberId.filter($scope.fullList, criteria, value).then(function(data){
+                    $scope.logs = data;
+                });
+            }else{
+                $scope.logs = $scope.fullList;
+            }
+
+
         };
 
-        var host =  'http://' + 'localhost:8000';
+
         $http.get(  '/meda/verification/logs').
             success(function(data, status, headers, config) {
                 // this callback will be called asynchronously
