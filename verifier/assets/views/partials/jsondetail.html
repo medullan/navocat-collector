@@ -1,0 +1,41 @@
+<div class="tab-info">
+    <div class="styled-props">
+        <table>
+            <tr>
+                <td class="detail-title"><span >ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.id"></span></td>
+
+                <td class="detail-title"><span >Hit Time</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.ht"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Profile ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.pi"></span></td>
+
+                <td class="detail-title"><span >Client ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.ci"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Profile Data?</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.pp | exists"></span></td>
+
+                <td class="detail-title"><span >HTTP Data?</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.json.hp | exists"></span></td>
+            </tr>
+
+        </table>
+    </div>
+
+
+    <div class="raw-object">
+        <accordion class="inner-accordion" close-others="true">
+            <accordion-group  is-open="innerstatus.open" >
+                <accordion-heading>
+                    RAW
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                </accordion-heading>
+                <div data-json-human log="log.outputs.json" omit=" '$$hashKey' "></div>
+            </accordion-group>
+        </accordion>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="tab-info">
+
+    <div class="styled-props">
+
+        <table>
+            <tr>
+                <td class="detail-title"><span >Start Time</span></td>
+                <td class="detail-val"><span  ng-bind="log.http.start_time"></span></td>
+
+                <td class="detail-title"><span >HTTP Method</span></td>
+                <td class="detail-val"><span  ng-bind="log.http.method"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >End Time</span></td>
+                <td class="detail-val"><span  ng-bind="log.http.end_time"></span></td>
+
+                <td class="detail-title"><span >Endpoint</span></td>
+                <td class="detail-val"><span  ng-bind="log.http.url"></span></td>
+            </tr>
+
+            <tr>
+                <td class="detail-title"><span >Response Status</span></td>
+                <td class="detail-val text-uppercase"><span  ng-bind="log.http.response.status"></span></td>
+
+                <td class="detail-title"><span >Input Available?</span></td>
+                <td class="detail-val"><span  ng-bind="log.http.request_input | exists"></span></td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div class="raw-object">
+        <accordion class="inner-accordion" close-others="true">
+            <accordion-group  is-open="innerstatus.open" >
+                <accordion-heading>
+                    RAW
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                </accordion-heading>
+                <div data-json-human log="log.http" omit=" '$$hashKey' "></div>
+            </accordion-group>
+        </accordion>
+    </div>
+</div>

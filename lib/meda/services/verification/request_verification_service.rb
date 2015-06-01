@@ -46,10 +46,15 @@ module Meda
     def end_rva_log (response=nil)
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
-        rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
-        rva_data[:http][:end_time] = Time.now.to_s
-        rva_data[:http][:response] = response
-        @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+        if rva_id != nil
+          rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
+          if rva_data != nil
+            rva_data[:http][:end_time] = Time.now.to_s
+            rva_data[:http][:response] = response
+            @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+          end
+        end
+
       end
     end
 

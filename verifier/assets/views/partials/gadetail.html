@@ -1,0 +1,56 @@
+<div class="tab-info">
+    <div class="styled-props">
+        <table>
+            <tr>
+                <td class="detail-title"><span >Hit Type</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.t"></span></td>
+
+                <td class="detail-title"><span >Document Path</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.dp"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Document Title</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.dt"></span></td>
+
+                <td class="detail-title"><span >Document Home</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.dh"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Response Code</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.response_code"></span></td>
+
+                <td class="detail-title"><span >Client ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.cid"></span></td>
+            </tr>
+            <tr>
+                <td class="detail-title"><span >Tracking ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.tid"></span></td>
+
+                <td class="detail-title"><span >User ID</span></td>
+                <td class="detail-val"><span  ng-bind="log.outputs.ga.uid"></span></td>
+            </tr>
+
+        </table>
+    </div>
+
+
+    <div class="ga raw-object">
+        <accordion class="inner-accordion" close-others="true">
+            <accordion-group heading="RAW" is-open="innerstatus.open" >
+                <accordion-heading>
+                    RAW
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                </accordion-heading>
+                <div class="more-info">
+                    Click
+                    <a href="https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters" target="_blank">here</a>
+                    for detailed Documentation on GA Properties
+                </div>
+
+
+                <div data-json-human log="log.outputs.ga" omit=" '$$hashKey' "></div>
+
+                 </accordion-group>
+        </accordion>
+    </div>
+</div>

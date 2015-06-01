@@ -1,0 +1,27 @@
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <h1>Welcome to the Collector Verifier</h1>
+            <p class="lead">Enter your collector base address and private key to continue</p>
+            <form name="login" novalidate>
+                <!--<input type="text" >-->
+
+                <div class="form-group">
+                    <label for="collectorAddress">Collector Address</label>
+                    <p class="help-block">Example: http://localhost:8000/meda</p>
+                    <input type="text" class="form-control" id="collectorAddress" placeholder="" ng-model="loginModel.address" name="address">
+                </div>
+                <div class="form-group">
+                    <label for="collectorkey">Collector Private Key</label>
+                    <input type="text" id="collectorkey" ng-model="loginModel.key" class="form-control" name="key">
+                    <!--<p class="help-block">Example:  </p>-->
+                </div>
+
+                <input value="Continue" type="submit"  class="btn btn-info" ui-sref="logs"  ng-disabled="validator.isURL(loginModel.address) && isValidString(loginModel.key)">
+
+                <!--</input>-->
+
+            </form>
+        </div>
+    </div>
+</div>

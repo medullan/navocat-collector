@@ -34,6 +34,9 @@ module Meda
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
 
+      JSON_ENDPOINT = 'JSON'
+      GIF_ENDPOINT = 'GIF'
+
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@validation_service = Meda::ValidationService.new()
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
@@ -166,9 +169,15 @@ module Meda
         send_file(path)
       end
 
-
-      JSON_ENDPOINT = 'JSON'
-      GIF_ENDPOINT = 'GIF'
+      get '/meda/verifier' do
+        if Meda.features.is_enabled("verification_api", false)
+          file = 'index.html'
+          path = File.join('verifier', file)
+          send_file(path)
+        else
+          status 404
+        end
+      end
 
       # @method post_identify_json
       # @overload post "/meda/identify.json"
@@ -181,7 +190,7 @@ module Meda
         data = {:start_time=> start_time, :profile_id=> profile_id,:request_input => identify_data, :end_point_type=> JSON_ENDPOINT}
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
         if profile_id != nil
-          response = {'profile_id' => profile_id}
+          response = {'profile_id' => profile_id ,:status => 'ok'}
           @@request_verification_service.end_rva_log(response)
           json(response)
         else
@@ -203,7 +212,8 @@ module Meda
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
         if  profile_id != nil
           set_profile_id_in_cookie(profile['id'])
-          @@request_verification_service.end_rva_log(profile_id)
+          response = {'profile_id' => profile_id ,:status => 'ok'}
+          @@request_verification_service.end_rva_log(response)
           respond_with_pixel
         else
           msg ="get /meda/identify.gif ==> Unable to find profile"
@@ -452,7 +462,8 @@ module Meda
         data = {:start_time=> start_time, :end_point_type=> GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('endsession',data,request, cookies )
         result = cookies.delete("_meda_profile_id")
-        @@request_verification_service.end_rva_log(result)
+        response = {:result => result, :status => 'ok'}
+        @@request_verification_service.end_rva_log(response)
         respond_with_pixel
       end
 

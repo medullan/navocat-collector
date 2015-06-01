@@ -1,0 +1,77 @@
+body {
+    padding-top: 70px;
+}
+
+
+.pointer{
+    cursor: pointer;
+}
+
+.panel-heading {
+    padding: 0;
+}
+
+.panel-title a{
+    display: block;
+    text-decoration: none;
+    outline:0;
+}
+.inner-accordion .panel-body{
+    padding:0;
+
+}
+.inner-accordion pre.json{
+    margin:0;
+    border-radius: 0;
+}
+.inner-accordion .panel-title a {
+    padding: 0.2em;
+}
+.log-heading-info,
+.log-heading {
+    display: inline-block;
+}
+
+.log-etype,
+.log-type,
+.log-outs{
+    width:150px
+}
+.heading.table,
+.panel-title table{
+    margin-bottom: 0px;
+}
+
+.tab-info{
+    margin-top:10px;
+}
+
+.detail-val,
+.detail-title{
+    padding:5px;
+    border: 1px solid black;
+}
+.detail-title{
+    color: black;
+    background-color: #31b0d5;
+}
+.detail-val{
+    color: #31b0d5;
+}
+.styled-props{
+    margin-bottom:10px;
+}
+.search-cont,
+.more-info{
+    margin:10px 0;
+}
+.form-control.filter-input{
+    height:22px;
+}
+/*custom json human css*/
+pre.json {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
+.string { color: green; }
+.number { color: darkorange; }
+.boolean { color: blue; }
+.null { color: magenta; }
+.key { color: red; }
