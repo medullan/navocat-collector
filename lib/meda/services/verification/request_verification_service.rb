@@ -29,6 +29,11 @@ module Meda
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies['_meda_profile_id']
         client_id = cookies['__collector_client_id']
         input = data.key?(:request_input) ? data[:request_input] : nil
+
+        if profile_id == nil
+          profile_id =  input.key?(:profile_id) ? input[:profile_id] : profile_id
+        end
+
         end_point_type = data.key?(:end_point_type) ? data[:end_point_type] : nil
         rva_data = {
             :id => rva_id,
