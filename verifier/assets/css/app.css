@@ -1,6 +1,9 @@
 body {
     padding-top: 70px;
 }
+body .logs{
+    font-size:12px;
+}
 
 
 .pointer{
@@ -10,7 +13,12 @@ body {
 .panel-heading {
     padding: 0;
 }
-
+.panel-title {
+    font-size: 13px;
+}
+pre{
+    font-size:11px;
+}
 .panel-title a{
     display: block;
     text-decoration: none;
@@ -69,15 +77,8 @@ body {
 .form-control.filter-input{
     height:22px;
 }
+
 /*custom json human css*/
-pre.json {outline: 1px solid #ccc; padding: 5px; margin: 5px; }
-.string { color: green; }
-.number { color: darkorange; }
-.boolean { color: blue; }
-.null { color: magenta; }
-.key { color: red; }
-
-
 .renderjson a { text-decoration: none; }
 .renderjson .disclosure { color: crimson;
     font-size: 150%; }

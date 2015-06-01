@@ -169,16 +169,6 @@ module Meda
         send_file(path)
       end
 
-      get '/meda/verifier' do
-        if Meda.features.is_enabled("verification_api", false)
-          file = 'index.html'
-          path = File.join('verifier', file)
-          send_file(path)
-        else
-          status 404
-        end
-      end
-
       # @method post_identify_json
       # @overload post "/meda/identify.json"
       # Identifies the user, and returns a meda profile_id
@@ -472,6 +462,10 @@ module Meda
 
       end
 
+      ############################################
+      # Request Verification API (RVA) Endpoints
+      ############################################
+
       #Endpoint to retrieve qa logs
       get '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
@@ -491,6 +485,19 @@ module Meda
           json({:status => 404, :message => 'not found'})
         end
       end
+
+
+      ###
+      get '/meda/verifier' do
+        if Meda.features.is_enabled("verification_api", false)
+          file = 'index.html'
+          path = File.join('verifier', file)
+          send_file(path)
+        else
+          status 404
+        end
+      end
+      ############################################
 
 
       # Config
