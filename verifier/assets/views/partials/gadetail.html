@@ -30,6 +30,22 @@
                 <td class="detail-val"><span  ng-bind="log.outputs.ga.uid"></span></td>
             </tr>
 
+            <tr>
+                <td class="detail-title"><span >Browser</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.ga.ua).browser.name"></span></td>
+
+                <td class="detail-title"><span >Browser Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.ga.ua).browser.version"></span></td>
+            </tr>
+
+            <tr>
+                <td class="detail-title"><span >User OS</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.ga.ua).os.name"></span></td>
+
+                <td class="detail-title"><span >User OS Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.ga.ua).os.version"></span></td>
+            </tr>
+
         </table>
     </div>
 

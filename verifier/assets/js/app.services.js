@@ -50,8 +50,14 @@ angular.module('core').directive('jsonHuman', [
         }
         function link(scope, element, attrs) {
             var input = omit(scope.log, scope.omit);
-            var node = syntaxHighlight(input);
-            element.find('#output').html(node);
+            //var node = syntaxHighlight(input);
+            var node =renderjson
+                //.set_show_by_default(true)
+                .set_show_to_level(1)
+                //.set_sort_objects(true)
+                .set_icons('+', '-')
+                .set_max_string_length(50)(input)
+            element.html(node);
         }
         var directive = {
             restrict: 'EA',
@@ -59,9 +65,7 @@ angular.module('core').directive('jsonHuman', [
                 log: '=log',
                 omit: '=omit'
             },
-            template: '<pre class="json" id="output"> </pre>',
-            link: link,
-            transclude:true
+            link: link
         };
         return directive;
 }]);

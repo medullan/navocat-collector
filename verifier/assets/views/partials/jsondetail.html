@@ -23,6 +23,22 @@
                 <td class="detail-val"><span  ng-bind="log.outputs.json.hp | exists"></span></td>
             </tr>
 
+            <tr>
+                <td class="detail-title"><span >Browser</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).browser.name"></span></td>
+
+                <td class="detail-title"><span >Browser Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).browser.version"></span></td>
+            </tr>
+
+            <tr>
+                <td class="detail-title"><span >User OS</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).os.name"></span></td>
+
+                <td class="detail-title"><span >User OS Version</span></td>
+                <td class="detail-val"><span  ng-bind="UAParser(log.outputs.json.hp.user_agent).os.version"></span></td>
+            </tr>
+
         </table>
     </div>
 

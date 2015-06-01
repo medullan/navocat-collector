@@ -20,8 +20,8 @@
         <div>
 
             <div ng-switch="logs.length > 0">
-                <div ng-switch-when="false">
-                    no logs were found. Send some hits to the collector!
+                <div class="logs-zero-state" ng-switch-when="false">
+                    No logs were found. Send some hits to the collector!
                 </div>
 
                 <div ng-switch-when="true">

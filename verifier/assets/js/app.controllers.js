@@ -50,7 +50,7 @@ angular.module('core').controller('LogCtrl', [
             onlyOne: true
         };
         $scope.innerstatus= {open:true}
-
+        $scope.UAParser=UAParser;
         $scope.logfilter = '';
         $scope.logs = $scope.fullList = [];
         $scope.outputPresent =function(log, val){
