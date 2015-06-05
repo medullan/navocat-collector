@@ -7,7 +7,8 @@ angular.module('core').controller('HomeCtrl', [
     'UserService',
     '$state',
     '$log',
-    function($scope, UserService, $state, $log) {
+    'toastr',
+    function($scope, UserService, $state, $log,toastr) {
         $scope.loginModel = {key: null};
         $scope.UserService = UserService;
         if(UserService.tokenExists()){
@@ -20,8 +21,7 @@ angular.module('core').controller('HomeCtrl', [
                     $state.go('logs');
             },
             function(data){
-                $scope.hasError = true;
-                $scope.status = data.status;
+                toastr.error('There was an error verifying your key: ' + data.status.toUpperCase());
             });
         };
 

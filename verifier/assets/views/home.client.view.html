@@ -19,9 +19,8 @@
                 <form name="login" novalidate>
                     <div class="form-group">
                         <label for="collectorkey">Collector Private Key</label>
-                        <div class="error" ng-show="hasError"><span>There was an error verifying your key: </span> <span ng-bind="status"></span></div>
                         <input type="text" id="collectorkey" ng-model="loginModel.key" class="form-control" name="key">
-                        <!--<p class="help-block">Example:  </p>-->
+                        <p class="help-block">If you do not have a private key, please contact your system administrator.  </p>
                     </div>
 
                     <input value="Continue" type="submit"  class="btn btn-info"  ng-click="auth(loginModel.key)">
