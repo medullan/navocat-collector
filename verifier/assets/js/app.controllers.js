@@ -10,6 +10,9 @@ angular.module('core').controller('HomeCtrl', [
     function($scope, UserService, $state, $log) {
         $scope.loginModel = {key: null};
         $scope.UserService = UserService;
+        if(UserService.tokenExists()){
+            $state.go('logs');
+        }
 
         $scope.auth = function(key){
             UserService.verifyPrivateKey(key).then(function(data){
@@ -34,20 +37,14 @@ angular.module('core').controller('DoneCtrl', [
     'CoreConstants',
     'toastr',
     function($scope, UserService, $state, $log, LogStoreService, CoreConstants, toastr) {
-        $scope.loginModel = {key: null};
         $scope.UserService = UserService;
-
-
-        $scope.archivedLogs = LogStoreService.deleteActiveLogs();
-
-
-        //LogStoreService.deleteRemoteLogs().then(function(data){
-        //
-        //    //cleanup
-        //    UserService.deleteStores();
-        //    LogStoreService.deleteStores();
-        //    $log.log('logs deleted?', data);
-        //});
+        LogStoreService.deleteRemoteLogs().then(function(data){
+            //cleanup
+            $scope.archivedLogs = LogStoreService.deleteActiveLogs();
+            UserService.deleteStores();
+            LogStoreService.deleteStores();
+            $log.log('logs deleted?', data);
+        });
 
         $scope.jsonToString = function(val){
             return JSON.stringify(val);
@@ -56,9 +53,6 @@ angular.module('core').controller('DoneCtrl', [
         $scope.copyDone = function(){
             toastr.info('JSON copied to clipboard!', 'Information');
         };
-
-
-
     }
 ]);
 

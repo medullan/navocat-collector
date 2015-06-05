@@ -47,7 +47,7 @@ angular.module('core').service('UserService', [
             return token;
         };
 
-        self.tokenExists = function(token){
+        self.tokenExists = function(){
             var token = self.getToken();
             if(angular.isString(token) && token.length > 0){
                 return true;
