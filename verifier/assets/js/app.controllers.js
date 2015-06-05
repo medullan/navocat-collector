@@ -137,8 +137,9 @@ angular.module('core').controller('ImportModalCtrl', [
                     logs = JSON.parse(json);
                     if(angular.isArray(logs)){
                         if(logs.length > 0){
-                            LogStoreService.archiveLogs(logs);
-                            toastr.success('Logs imported!');
+                            var archive = LogStoreService.getArchivedLogs() || [];
+                            var logs = LogStoreService.archiveLogs(logs) || [];
+                            toastr.success((logs.length-archive.length || 0) + ' Log(s) Imported!');
                             return true;
                         }else{
                             toastr.warning('No logs were imported!');
@@ -180,8 +181,8 @@ angular.module('core').controller('LogCtrl', [
     function($scope, $log, CoreService, LogStoreService, CoreConstants, $modal, toastr, cfpLoadingBar) {
         $scope.pageStatus = 'loading';
         var toggleText = {
-            include: 'Include Archived Logs',
-            remove: 'Remove Archived Logs'
+            include: 'Show Archived Logs',
+            remove: 'Hide Archived Logs'
         };
         var setToggleText = function(){
             $scope.toggleIncludeText = ($scope.includeArchive)? toggleText.remove: toggleText.include;
@@ -189,6 +190,7 @@ angular.module('core').controller('LogCtrl', [
         var updateLogs = function(){
             var logs = [];
             $scope.activeLogs = LogStoreService.getActiveLogs() || [];
+            $scope.archivedLogs = LogStoreService.getArchivedLogs() || [];
             if($scope.includeArchive){
                 logs = LogStoreService.getAllLogs() || [];
             }else{
@@ -196,8 +198,9 @@ angular.module('core').controller('LogCtrl', [
             }
             return logs;
         };
+        $scope.sortType     = 'http.start_time'; // set the default sort type
+        $scope.sortReverse  = true;
         $scope.logs = updateLogs();
-        $scope.archivedLogs = LogStoreService.getArchivedLogs() || [];
         $scope.includeArchive = LogStoreService.includeArchive();
         setToggleText();
         $scope.UAParser=UAParser;
@@ -235,7 +238,7 @@ angular.module('core').controller('LogCtrl', [
             });
 
             modalInstance.result.then(function (data) {
-
+                $scope.logs = updateLogs();
             }, function () {
                 $log.info('ConfirmClear Modal dismissed at: ' + new Date());
             });

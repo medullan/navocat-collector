@@ -41,17 +41,38 @@
 
                             <accordion class="clearfix" close-others="settings.onlyOne">
                                 <div class="">
-                                    <table class="heading table">
+                                    <table class="log-table-headers heading table">
                                         <tr>
-                                            <th class=" log-type  ">Collector Hit Type</th>
-                                            <th class=" log-etype ">EndPoint Type</th>
-                                            <th class=" log-outs  ">Outputs</th>
-                                            <th class=" log-date  ">Date</th>
+                                            <th class=" log-type  ">
+                                                <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
+                                                    <span>Collector Hit Type</span>
+                                                    <span ng-show="sortType == 'type' && !sortReverse" class="fa fa-caret-down"></span>
+                                                    <span ng-show="sortType == 'type' && sortReverse" class="fa fa-caret-up"></span>
+                                                </a>
+                                            </th>
+                                            <th class=" log-etype ">
+                                                <a href="" ng-click="sortType = 'http.end_point_type'; sortReverse = !sortReverse">
+                                                    <span>EndPoint Type</span>
+                                                    <span ng-show="sortType == 'http.end_point_type' && !sortReverse" class="fa fa-caret-down"></span>
+                                                    <span ng-show="sortType == 'http.end_point_type' && sortReverse" class="fa fa-caret-up"></span>
+                                                </a>
+                                            </th>
+                                            <th class=" log-outs  ">
+                                                <span>Outputs</span>
+                                            </th>
+                                            <th class=" log-date  ">
+                                                <a href="" ng-click="sortType = 'http.start_time'; sortReverse = !sortReverse">
+                                                    <span>Date</span>
+                                                    <span ng-show="sortType == 'http.start_time' && !sortReverse" class="fa fa-caret-down"></span>
+                                                    <span ng-show="sortType == 'http.start_time' && sortReverse" class="fa fa-caret-up"></span>
+                                                </a>
+                                            </th>
                                         </tr>
 
                                     </table>
                                 </div>
-                                <accordion-group is-open="status.open" ng-class="{'accord-active': status.open}" ng-repeat="log in logs | orderBy:'-http.start_time'">
+
+                                <accordion-group is-open="status.open" ng-class="{'accord-active': status.open}" ng-repeat="log in logs | orderBy:sortType:sortReverse">
                                     <accordion-heading >
                                         <table class="table">
                                             <tr>
@@ -74,6 +95,7 @@
                                     </tabset>
                                 </accordion-group>
                             </accordion>
+
                         </div>
                     </div>
                 </div>

@@ -32,6 +32,10 @@ a{
     margin-right:15px;
     outline:0
 }
+.log-table-headers a{
+    text-decoration: none;
+    color:black;
+}
 
 .panel-heading {
     padding: 0;

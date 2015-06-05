@@ -130,9 +130,11 @@ angular.module('core').service('LogStoreService', [
 
         self.archiveLogs = function(logs){
             var arch = store.get(CoreConstants.storeKeys.archivedLogs);
-            var _arch =  _.uniq(_.union(logs,arch), 'id');
-            store.set(CoreConstants.storeKeys.archivedLogs, _arch);
-            return _arch;
+            arch =  _.union(logs,arch);
+            var archLogs = self.removeDuplicates(self.getLogIds(self.getActiveLogs()), arch);
+            arch =  _.uniq(archLogs, 'id');
+            store.set(CoreConstants.storeKeys.archivedLogs, arch);
+            return arch;
         };
         self.getArchivedLogs = function(){
             var arch = store.get(CoreConstants.storeKeys.archivedLogs);
@@ -142,15 +144,14 @@ angular.module('core').service('LogStoreService', [
         self.getAllLogs = function(){
             var arch = store.get(CoreConstants.storeKeys.archivedLogs);
             var logs = store.get(CoreConstants.storeKeys.logs);
-            //var archLogs = self.removeDuplicates(self.getLogIds(logs), arch);
             var all = _.uniq(_.union(logs,arch), 'id');
             return all;
         };
 
         self.deleteActiveLogs = function(){
             var all = self.getAllLogs();
+            self.storeLogs([]); // must set to empty before archiving
             self.archiveLogs(all);
-            self.storeLogs([]);
             return all;
         };
 
