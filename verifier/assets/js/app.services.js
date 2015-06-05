@@ -56,8 +56,13 @@ angular.module('core').service('UserService', [
         };
 
         self.deleteStores = function(){
-            store.remove(CoreConstants.storeKeys.token);
-            store.remove(CoreConstants.storeKeys.recentLogOut);
+            var keys = [
+                CoreConstants.storeKeys.token,
+                CoreConstants.storeKeys.recentLogOut
+            ];
+            angular.forEach(keys, function(val){
+                store.remove(val);
+            });
         };
 
         self.verifyPrivateKey = function(key){

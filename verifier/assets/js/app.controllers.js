@@ -182,7 +182,8 @@ angular.module('core').controller('LogCtrl', [
     'CoreConstants',
     '$modal',
     'toastr',
-    function($scope, $log, CoreService, LogStoreService, CoreConstants, $modal, toastr) {
+    'cfpLoadingBar',
+    function($scope, $log, CoreService, LogStoreService, CoreConstants, $modal, toastr, cfpLoadingBar) {
         $scope.pageStatus = 'loading';
         var toggleText = {
             include: 'Include Archived Logs',
@@ -192,15 +193,16 @@ angular.module('core').controller('LogCtrl', [
             $scope.toggleIncludeText = ($scope.includeArchive)? toggleText.remove: toggleText.include;
         };
         var updateLogs = function(){
+            var logs = [];
             $scope.activeLogs = LogStoreService.getActiveLogs() || [];
             if($scope.includeArchive){
-                $scope.logs = LogStoreService.getAllLogs() || [];
+                logs = LogStoreService.getAllLogs() || [];
             }else{
-                $scope.logs = $scope.activeLogs;
+                logs = $scope.activeLogs;
             }
-            return $scope.logs;
+            return logs;
         };
-        updateLogs();
+        $scope.logs = updateLogs();
         $scope.archivedLogs = LogStoreService.getArchivedLogs() || [];
         $scope.includeArchive = LogStoreService.includeArchive();
         setToggleText();
@@ -213,7 +215,7 @@ angular.module('core').controller('LogCtrl', [
         LogStoreService.getRemoteLogs().then(function(data){
                 $scope.pageStatus = 'done';
                 LogStoreService.storeLogs(data);
-                updateLogs();
+                $scope.logs = updateLogs();
             },
             function(data){
                 $log.log('err: ', data);
@@ -283,6 +285,17 @@ angular.module('core').controller('LogCtrl', [
             });
         };
 
+        $scope.refreshLogs = function(){
+            LogStoreService.getRemoteLogs().then(function(data){
+                    LogStoreService.storeLogs(data);
+                    $scope.logs = updateLogs();
+                    toastr.success('logs refreshed!');
+                },
+                function(data){
+                    toastr.error('error refreshing logs!');
+                });
+        };
+
         $scope.toggleIncludeArchive = function(){
             if(typeof $scope.includeArchive !== 'boolean'){
                 $scope.includeArchive = true;
@@ -292,7 +305,7 @@ angular.module('core').controller('LogCtrl', [
             }
             setToggleText();
             LogStoreService.setIncludeArchive($scope.includeArchive);
-            updateLogs();
+            $scope.logs = updateLogs();
         };
 
 
@@ -327,8 +340,13 @@ angular.module('core').controller('LogCtrl', [
 
         $scope.filter= function(criteria, value){
             if( value.length >0){
+                cfpLoadingBar.start();
+                cfpLoadingBar.inc();
                 CoreService.filter(updateLogs(), criteria, value).then(function(data){
                     $scope.logs = data;
+                    cfpLoadingBar.complete();
+                },function(){
+                    cfpLoadingBar.complete();
                 });
             }else{
                 $scope.clearFilter();

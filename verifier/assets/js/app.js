@@ -5,7 +5,7 @@ var ApplicationConfiguration = (function() {
     // Init module configuration options
     var applicationModuleName = 'collector';
     var applicationModuleVendorDependencies = [
-         'ui.router', 'ui.bootstrap', 'angular-storage',
+         'ui.router', 'ui.bootstrap', 'angular-storage', 'angular-loading-bar', 'cfp.loadingBar',
         'duScroll', 'permission', 'ngClipboard','ngAnimate', 'toastr'
     ];
 
