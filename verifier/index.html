@@ -5,6 +5,7 @@
     <title>Collector Verifier</title>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="verifier/assets/lib/angular-toastr/angular-toastr.min.css" rel="stylesheet">
 
     <link href="verifier/assets/css/app.css" rel="stylesheet">
     <style>
@@ -29,11 +30,11 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
+                    <!--<li>-->
+                        <!-- -->
+                    <!--</li>-->
                     <li>
-                        <a href="" ng-click="clearLogs()">Clear Logs</a>
-                    </li>
-                    <li>
-                        <a href="#">End Session</a>
+                        <a href="" ng-show="UserService.tokenExists()" ng-click="confirmEndSession()">End Session</a>
                     </li>
 
                 </ul>
@@ -54,16 +55,24 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
     <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.Core.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.min.js"></script>
     <script src="verifier/assets/lib/caldwell-renderjson/renderjson.js"></script>
-    <script src="http://cdn.bootcss.com/UAParser.js/0.7.7/ua-parser.min.js"></script>
+    <script src="//cdn.bootcss.com/UAParser.js/0.7.7/ua-parser.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/linq.js/2.2.0.2/linq.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/validator/3.12.0/validator.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.0/ui-bootstrap-tpls.min.js"></script>
+    <script src="https://cdn.rawgit.com/auth0/angular-storage/master/dist/angular-storage.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-scroll/0.7.0/angular-scroll.min.js"></script>
+    <script src="verifier/assets/lib/angular-permission/angular-permission.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ng-clip/0.2.6/ng-clip.min.js"></script>
+    <script src="verifier/assets/lib/angular-toastr/angular-toastr.tpls.min.js"></script>
     <script src="verifier/assets/js/app.js"></script>
     <script src="verifier/assets/js/app.services.js"></script>
     <script src="verifier/assets/js/app.controllers.js"></script>
+    <script src="verifier/assets/js/app.directives.js"></script>
 </body>
 </html>

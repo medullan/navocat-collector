@@ -1,0 +1,21 @@
+<form novalidate name="form">
+    <div class="modal-header">
+        <h3 class="modal-title">Import Logs</h3>
+    </div>
+
+    <div class="modal-body confirm">
+        <div>
+            <div class="text-bold">
+                The imported list of logs will be archived
+            </div>
+            <textarea class="ta-json" ng-model="importedJson" name="importedJson" ></textarea>
+
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <!--<button class="btn btn-primary" ng-click="parse()">Import</button>-->
+        <button class="btn btn-primary" ng-click="cancel()">Close</button>
+        <button class="btn btn-success" type="submit" ng-click="ok(importedJson)" >Import</button>
+    </div>
+</form>

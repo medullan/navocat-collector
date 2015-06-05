@@ -471,35 +471,69 @@ module Meda
       #Endpoint to retrieve qa logs
       get '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
-          json(@@request_verification_service.build_rva_log())
+          token = get_http_header_from_env('Authorization')
+          result = @@request_verification_service.private_key_present?(token)
+          if result
+            json(@@request_verification_service.build_rva_log())
+          else
+            respond_with_unauthorized
+          end
         else
-          status 404
-          json({:status => 404, :message => 'not found'})
+          respond_with_not_found
         end
       end
       #Endpoint to delete qa logs
       delete '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
-          @@request_verification_service.clear_rva_log()
-          respond_with_ok
+          token = get_http_header_from_env('Authorization')
+          result = @@request_verification_service.private_key_present?(token)
+          if result
+            @@request_verification_service.clear_rva_log()
+            respond_with_ok
+          else
+            respond_with_unauthorized
+          end
+
         else
-          status 404
-          json({:status => 404, :message => 'not found'})
+          respond_with_not_found
         end
       end
       #Endpoint to get hashed member id for verification
       post '/meda/verification/memberid' do
         if Meda.features.is_enabled("verification_api", false)
+          token = get_http_header_from_env('Authorization')
+          result = @@request_verification_service.private_key_present?(token)
+          if result
+            body = json_from_request
+            if body.key?('member_id') && body['member_id'] != nil
+              result = @@profile_id_service.stringToHash(body['member_id'])
+              json({ :hash => result})
+            else
+              respond_with_bad_request
+            end
+          else
+            respond_with_unauthorized
+          end
+        else
+          respond_with_not_found
+        end
+      end
+
+      post '/meda/verification/key' do
+        if Meda.features.is_enabled("verification_api", false)
           body = json_from_request
-          if body.key?('member_id') && body['member_id'] != nil
-            result = @@profile_id_service.stringToHash(body['member_id'])
-            json({ :hash => result})
+          if body.key?('key') && body['key'] != nil
+            result = @@request_verification_service.private_key_present?(body['key'])
+            if result
+              json({ :key => body['key']})
+            else
+              respond_with_unauthorized
+            end
           else
             respond_with_bad_request
           end
         else
-          status 404
-          json({:status => 404, :message => 'not found'})
+          respond_with_not_found
         end
       end
 
@@ -538,10 +572,28 @@ module Meda
         end
       end
 
+      def get_http_header_from_env(header)
+        result = nil
+        if header != nil
+          prefix = "HTTP_"
+          key = "#{prefix}#{header.upcase}"
+          result = env[key]
+        end
+        return result
+      end
 
 
       def respond_with_ok
         json({"status" => "ok"})
+      end
+      def respond_with_unauthorized
+        status 401
+        json(:status_code => 401, :status => "unauthorized")
+      end
+
+      def respond_with_not_found
+        status 404
+        json({:status_code => 404, :status => "not_found"})
       end
 
       def print_out_params(params)

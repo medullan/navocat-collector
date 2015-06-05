@@ -1,6 +1,12 @@
 <div class="container">
-    <div class="logs">
-        <h1>Logs</h1>
+    <di id="logs-container" class="logs">
+        <h1 class="page-heading">Logs <span class="log-count">(<span ng-bind="activeLogs.length"></span>)</span></h1>
+        <div class="log-toolbelt" >
+            <a href="" ng-click="openImport('lg')">Import Logs</a>
+            <a href="" ng-click="toggleIncludeArchive()" ng-show="archivedLogs.length>0" ><span ng-bind="toggleIncludeText"></span> (<span ng-bind="archivedLogs.length"></span>)</a>
+            <a href="" ng-click="refreshLogs()">Refresh Logs</a>
+            <a href="" ng-click="confirmClear()">Clear Logs</a>
+        </div>
         <div class="search-cont">
 
             <form class="form-inline" name="form">
@@ -12,58 +18,75 @@
                 </div>
                 <div class="form-group">
                     <!--<label for="logfilter">Email</label>-->
-                    <input type="text" class="form-control filter-input" ng-model="logfilter" id="logfilter" placeholder="type filter here...." >
+                    <input type="text" class="form-control filter-input" ng-model="logfilter" id="logfilter" placeholder="type filter here...." ng-keyup="clearFilter(logfilter)">
                 </div>
-                <button type="submit" class="btn btn-info" ng-click="filter(selected.val.prop, logfilter)">Filter</button>
+                <button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.val.prop, logfilter)">Filter</button>
             </form>
         </div>
         <div>
-
-            <div ng-switch="logs.length > 0">
-                <div class="logs-zero-state" ng-switch-when="false">
-                    No logs were found. Send some hits to the collector!
+            <div ng-switch="pageStatus">
+                <div ng-switch-when="loading">
+                    loading.....
                 </div>
-
-                <div ng-switch-when="true">
-
-                    <accordion class="clearfix" close-others="settings.onlyOne">
-                        <div class="">
-                            <table class="heading table">
-                                <tr>
-                                    <th class="text-uppercase log-type  ">Type</th>
-                                    <th class="text-uppercase log-etype ">End Point Type</th>
-                                    <th class="text-uppercase log-outs  ">Outputs</th>
-                                    <th class="text-uppercase log-date  ">Date</th>
-                                </tr>
-
-                            </table>
+                <div ng-switch-when="error">
+                    There was an error retrieving the logs
+                </div>
+                <div ng-switch-when="done">
+                    <div ng-switch="logs.length > 0">
+                        <div class="logs-zero-state" ng-switch-when="false">
+                            No logs were found. Send some hits to the collector!
                         </div>
-                        <accordion-group is-open="status.open" ng-repeat="log in logs | orderBy:'-http.start_time'">
-                            <accordion-heading>
-                                <table class="table">
-                                    <tr>
-                                        <th class="text-uppercase log-type " ng-bind="log.type">Type</th>
-                                        <th class="text-uppercase log-etype" ng-bind="log.http.end_point_type">End Point Type</th>
-                                        <th class="text-uppercase log-outs " ng-bind="getOutputKeys(log)"></th>
-                                        <th class=" log-date" ng-bind="log.http.start_time">Date</th>
-                                    </tr>
 
-                                </table>
+                        <div ng-switch-when="true">
 
-                            </accordion-heading>
-                            <tabset >
-                                <tab heading="Details" ><div ng-include=" 'verifier/assets/views/partials/logdetail.html' "></div></tab>
-                                <tab heading="HTTP" ><div ng-include=" 'verifier/assets/views/partials/httpdetail.html' "></div></tab>
-                                <tab heading="JSON" ng-show="outputPresent(log, 'json')"><div ng-include=" 'verifier/assets/views/partials/jsondetail.html' "></div></tab>
-                                <tab heading="GA" ng-show="outputPresent(log, 'ga')"><div ng-include=" 'verifier/assets/views/partials/gadetail.html' "></div></tab>
-                                <tab heading="Raw" ><div ng-include=" 'verifier/assets/views/partials/rawdetail.html' "></div></tab>
-                            </tabset>
-                        </accordion-group>
-                    </accordion>
+                            <accordion class="clearfix" close-others="settings.onlyOne">
+                                <div class="">
+                                    <table class="heading table">
+                                        <tr>
+                                            <th class=" log-type  ">Collector Hit Type</th>
+                                            <th class=" log-etype ">EndPoint Type</th>
+                                            <th class=" log-outs  ">Outputs</th>
+                                            <th class=" log-date  ">Date</th>
+                                        </tr>
+
+                                    </table>
+                                </div>
+                                <accordion-group is-open="status.open" ng-class="{'accord-active': status.open}" ng-repeat="log in logs | orderBy:'-http.start_time'">
+                                    <accordion-heading >
+                                        <table class="table">
+                                            <tr>
+                                                <th class="text-uppercase log-type " ng-bind="log.type">Type</th>
+                                                <th class="text-uppercase log-etype" ng-bind="log.http.end_point_type">End Point Type</th>
+                                                <th class="text-uppercase log-outs " ng-bind="getOutputKeys(log)"></th>
+                                                <th class=" log-date" ng-bind="log.http.start_time">Date</th>
+                                            </tr>
+
+                                        </table>
+                                        <!--<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>-->
+
+                                    </accordion-heading>
+                                    <tabset class="">
+                                        <tab class="tab" heading="Details" ><div ng-include=" 'verifier/assets/views/partials/logdetail.html' "></div></tab>
+                                        <tab class="tab" heading="HTTP" ><div ng-include=" 'verifier/assets/views/partials/httpdetail.html' "></div></tab>
+                                        <tab class="tab" heading="JSON Data" ng-show="outputPresent(log, 'json')"><div ng-include=" 'verifier/assets/views/partials/jsondetail.html' "></div></tab>
+                                        <tab class="tab" heading="GA Data" ng-show="outputPresent(log, 'ga')"><div ng-include=" 'verifier/assets/views/partials/gadetail.html' "></div></tab>
+                                        <tab class="tab" heading="Raw Data" ><div ng-include=" 'verifier/assets/views/partials/rawdetail.html' "></div></tab>
+                                    </tabset>
+                                </accordion-group>
+                            </accordion>
+                        </div>
+                    </div>
                 </div>
+
+
             </div>
+
 
         </div>
 
     </div>
+
+    <a href="#logs-container" offset="80" du-smooth-scroll="logs" class="back-to-top" style="display: inline;">
+        <i class="fa fa-arrow-circle-up"></i>
+    </a>
 </div>

@@ -5,7 +5,8 @@ var ApplicationConfiguration = (function() {
     // Init module configuration options
     var applicationModuleName = 'collector';
     var applicationModuleVendorDependencies = [
-         'ui.router', 'ui.bootstrap'
+         'ui.router', 'ui.bootstrap', 'angular-storage',
+        'duScroll', 'permission', 'ngClipboard','ngAnimate', 'toastr'
     ];
 
     // Add a new vertical module
@@ -25,7 +26,7 @@ var ApplicationConfiguration = (function() {
 })();
 
 //Start by defining the main module and adding the module dependencies
-angular.module(ApplicationConfiguration.applicationModuleName, ApplicationConfiguration.applicationModuleVendorDependencies);
+var mainApp = angular.module(ApplicationConfiguration.applicationModuleName, ApplicationConfiguration.applicationModuleVendorDependencies);
 
 // Setting HTML5 Location Mode
 angular.module(ApplicationConfiguration.applicationModuleName).config(['$locationProvider',
@@ -33,6 +34,12 @@ angular.module(ApplicationConfiguration.applicationModuleName).config(['$locatio
         $locationProvider.hashPrefix('!');
     }
 ]);
+angular.module(ApplicationConfiguration.applicationModuleName).config(function ($httpProvider) {
+    //$httpProvider.responseInterceptors.push('httpInterceptor');
+    $httpProvider.interceptors.push('myHttpInterceptor');
+
+});
+
 
 //Then define the init function for starting up the application
 angular.element(document).ready(function() {
@@ -45,12 +52,44 @@ angular.element(document).ready(function() {
 
 ApplicationConfiguration.registerModule('core');
 
+angular.module('core').run([
+    'Permission',
+    'UserService',
+    function (Permission, UserService) {
+        // Define anonymous role
+        Permission.defineRole('anonymous', function (stateParams) {
+            // If the returned value is *truthy* then the user has the role, otherwise they don't
+            if (!UserService.tokenExists()) {
+                return true; // Is anonymous
+            }
+            return false;
+        });
+
+        Permission.defineRole('user', function (stateParams) {
+            // If the returned value is *truthy* then the user has the role, otherwise they don't
+            if (UserService.tokenExists()) {
+                return true; // Is user
+            }
+            return false;
+        });
+        Permission.defineRole('recentLogOut', function (stateParams) {
+            // If the returned value is *truthy* then the user has the role, otherwise they don't
+            if (UserService.recentLogOut()) {
+                return true; // Is recentLogOut
+            }
+            return false;
+        });
+
+
+
+    }]);
 // Setting up route
 angular.module('core').config([
     '$stateProvider',
     '$urlRouterProvider',
     'CoreConstants',
-    function($stateProvider, $urlRouterProvider, CoreConstants) {
+    'ngClipProvider',
+    function($stateProvider, $urlRouterProvider, CoreConstants, ngClipProvider) {
         // Redirect to home view when route not found
         $urlRouterProvider.otherwise('/');
 
@@ -60,13 +99,32 @@ angular.module('core').config([
                 url: '/',
                 templateUrl: CoreConstants.assetBaseUrl + '/views/home.client.view.html',
                 controller: 'HomeCtrl'
-            });
-
-        $stateProvider.state('logs',{
-            url: '/logs',
-            templateUrl: CoreConstants.assetBaseUrl + '/views/logs.client.view.html',
-            controller: 'LogCtrl'
+            })
+            .state('done',{
+                url: '/done',
+                templateUrl: CoreConstants.assetBaseUrl + '/views/done.client.view.html',
+                controller: 'DoneCtrl',
+                data: {
+                    permissions: {
+                        only: ['recentLogOut'],
+                        redirectTo: 'home'
+                    }
+                }
+            })
+            .state('logs',{
+                url: '/logs',
+                templateUrl: CoreConstants.assetBaseUrl + '/views/logs.client.view.html',
+                controller: 'LogCtrl',
+                data: {
+                    permissions: {
+                        except: ['anonymous'],
+                        redirectTo: 'home'
+                    }
+                }
         });
+
+        ngClipProvider.setPath( CoreConstants.assetBaseUrl + "/lib/zeroclipboard/ZeroClipboard.swf");
+
     }
 ]);
 
@@ -76,7 +134,14 @@ angular.module('core').constant('CoreConstants', (function(){
     //Default values for CoreConstants
     var constant = {
         assetBaseUrl: 'verifier/assets',
-        appName: appName
+        appName: appName,
+        storeKeys: {
+            logs: 'logs',
+            archivedLogs: 'archivedLogs',
+            includeArchive: 'includeArchive',
+            token: 'token',
+            recentLogOut: 'recentLogOut'
+        }
     };
     return constant;
 })());

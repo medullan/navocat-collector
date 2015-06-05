@@ -4,15 +4,56 @@ body {
 body .logs{
     font-size:12px;
 }
-
-
+.navbar-inverse .navbar-nav>li>a:focus,
+.navbar-inverse .navbar-nav>li>a:hover,
+a{
+    outline:0
+}
+.done-page .toolbelt{
+    margin-bottom:10px;
+}
+.done-page .toolbelt a{
+    margin-right:10px;
+}
+.ta-json{
+    width:100%;
+    height:400px;
+}
+.page-heading{
+    margin-top:0;
+}
+.text-bold{
+    font-weight:bolder;
+}
 .pointer{
     cursor: pointer;
+}
+.log-toolbelt a{
+    margin-right:15px;
+    outline:0
 }
 
 .panel-heading {
     padding: 0;
 }
+.panel-default>.panel-heading:hover{
+    background-color: #f5f5f5;
+}
+.accord-active.panel-default>.panel-heading {
+    background-color: #dcd7d1;
+}
+.panel-default>.panel-heading {
+    background-color: #ebebeb;
+}
+
+.inner-accordion .panel-default>.panel-heading  {
+    background-color: #dcd7d1;
+}
+.nav-tabs>li.active>a,{
+    /*background: #31b0d5;*/
+    color: black;
+}
+
 .panel-title {
     font-size: 13px;
 }
@@ -49,6 +90,9 @@ pre{
 .panel-title table{
     margin-bottom: 0px;
 }
+.panel-body{
+    background:#f5f5f5;
+}
 
 .tab-info{
     margin-top:10px;
@@ -62,9 +106,10 @@ pre{
 .detail-title{
     color: black;
     background-color: #31b0d5;
+    font-weight:bolder;
 }
 .detail-val{
-    color: #31b0d5;
+    color: #000;
 }
 .styled-props{
     margin-bottom:10px;
@@ -78,11 +123,35 @@ pre{
     height:22px;
     min-width: 400px;
 }
+.btn.filter-btn {
+    padding: 2px 12px;
+}
+
+li.tab.active {
+    font-weight: bold;
+}
+.back-to-top {
+    margin: 0;
+    position: fixed;
+    bottom: 0;
+    right: 2px;
+    padding:2px;
+    z-index: 100;
+    display: none;
+    text-decoration: none;
+    color: #ffffff;
+    background-color: #31b0d5;
+}
+
+.back-to-top i {
+    font-size: 60px;
+}
+.error{color:crimson}
 
 /*custom json human css*/
+pre.renderjson{background: #eeeeee; margin:0;border: 0; border-radius:0;}
 .renderjson a { text-decoration: none; }
-.renderjson .disclosure { color: crimson;
-    font-size: 150%; }
+.renderjson .disclosure { color: crimson;font-size: 150%; }
 .renderjson .syntax { color: grey; }
 .renderjson .string { color: darkred; }
 .renderjson .number { color: darkcyan; }
@@ -91,3 +160,15 @@ pre{
 .renderjson .keyword { color: blue; }
 .renderjson .object.syntax { color: lightseagreen; }
 .renderjson .array.syntax  { color: orange; }
+
+/*dark theme*/
+.rj-dark .renderjson a              { text-decoration: none; }
+.rj-dark .renderjson .disclosure    { color: crimson;font-size: 150%; }
+.rj-dark .renderjson .syntax        { color: grey; }
+.rj-dark .renderjson .string        { color: red; }
+.rj-dark .renderjson .number        { color: cyan; }
+.rj-dark .renderjson .boolean       { color: plum; }
+.rj-dark .renderjson .key           { color: lightblue; }
+.rj-dark .renderjson .keyword       { color: lightgoldenrodyellow; }
+.rj-dark .renderjson .object.syntax { color: lightseagreen; }
+.rj-dark .renderjson .array.syntax  { color: lightsalmon; }

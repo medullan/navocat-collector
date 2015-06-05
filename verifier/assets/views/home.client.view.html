@@ -1,30 +1,35 @@
 <div class="container">
     <div class="row">
-        <div class="col-lg-12 text-center">
-            <h1>Welcome to the Collector Verifier</h1>
-            <p class="lead">Enter your collector base address and private key to continue</p>
 
-            </form>
-        </div>
-        <div class="col-md-6 col-md-offset-3 text-center">
-            <form name="login" novalidate>
-                <!--<input type="text" >-->
+        <div ng-switch="UserService.tokenExists()">
 
-                <!--<div class="form-group">-->
-                <!--<label for="collectorAddress">Collector Address</label>-->
-                <!--<p class="help-block">Example: http://localhost:8000/meda</p>-->
-                <!--<input type="text" class="form-control" id="collectorAddress" placeholder="" ng-model="loginModel.address" name="address">-->
-                <!--</div>-->
-                <div class="form-group">
-                    <label for="collectorkey">Collector Private Key</label>
-                    <input type="text" id="collectorkey" ng-model="loginModel.key" class="form-control" name="key">
-                    <!--<p class="help-block">Example:  </p>-->
+            <div ng-switch-when="true" class="col-md-6 col-md-offset-3 text-center">
+                <div>
+                    <h1 class="page-heading">You are already logged in</h1>
                 </div>
+                <div>
+                    See <a ui-sref="logs">logs</a> or <a ui-sref="logs">end your session</a>
+                </div>
+            </div>
 
-                <input value="Continue" type="submit"  class="btn btn-info" ui-sref="logs"  ng-disabled="validator.isURL(loginModel.address) && isValidString(loginModel.key)">
+            <div ng-switch-when="false" class="col-md-6 col-md-offset-3 text-center">
+                <div class="col-lg-12 text-center">
+                    <h1 class="page-heading">Welcome to the Collector Verifier</h1>
+                    <p class="lead">Enter your collector private key to continue</p>
+                </div>
+                <form name="login" novalidate>
+                    <div class="form-group">
+                        <label for="collectorkey">Collector Private Key</label>
+                        <div class="error" ng-show="hasError"><span>There was an error verifying your key: </span> <span ng-bind="status"></span></div>
+                        <input type="text" id="collectorkey" ng-model="loginModel.key" class="form-control" name="key">
+                        <!--<p class="help-block">Example:  </p>-->
+                    </div>
 
-                <!--</input>-->
+                    <input value="Continue" type="submit"  class="btn btn-info"  ng-click="auth(loginModel.key)">
+                </form>
+            </div>
 
         </div>
+
     </div>
 </div>

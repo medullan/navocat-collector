@@ -52,10 +52,10 @@
 
     <div class="ga raw-object">
         <accordion class="inner-accordion" close-others="true">
-            <accordion-group heading="RAW" is-open="innerstatus.open" >
+            <accordion-group heading="RAW" is-open="gaStatus.open" >
                 <accordion-heading>
-                    RAW
-                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                   <span>RAW Data: GA</span>
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': gaStatus.open, 'glyphicon-chevron-right': !gaStatus.open}"></i>
                 </accordion-heading>
                 <div class="more-info">
                     Click
@@ -63,10 +63,9 @@
                     for detailed Documentation on GA Properties
                 </div>
 
-
                 <div data-json-human log="log.outputs.ga" omit=" '$$hashKey' "></div>
 
-                 </accordion-group>
+            </accordion-group>
         </accordion>
     </div>
 </div>

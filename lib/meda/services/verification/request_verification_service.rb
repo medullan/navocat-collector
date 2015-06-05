@@ -18,6 +18,7 @@ module Meda
     def initialize(config)
       @config=config
       @@log_data_store = Meda::RedisDbStore.new(config)
+
     end
 
 
@@ -61,6 +62,15 @@ module Meda
         end
 
       end
+    end
+
+    def private_key_present? (key)
+      if Meda.features.is_enabled(FEATURE_NAME, false)
+        if key != nil && @config.verification_api['private_keys'].include?(key)
+          return true
+        end
+      end
+      return false
     end
 
     def add_json_ref(ref)

@@ -31,10 +31,10 @@
 
     <div class="raw-object">
         <accordion class="inner-accordion" close-others="true">
-            <accordion-group  is-open="innerstatus.open" >
+            <accordion-group  is-open="httpStatus.open" >
                 <accordion-heading>
-                    RAW
-                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                    <span>RAW Data: HTTP</span>
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': httpStatus.open, 'glyphicon-chevron-right': !httpStatus.open}"></i>
                 </accordion-heading>
                 <div data-json-human log="log.http" omit=" '$$hashKey' "></div>
             </accordion-group>

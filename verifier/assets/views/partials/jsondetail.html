@@ -45,10 +45,10 @@
 
     <div class="raw-object">
         <accordion class="inner-accordion" close-others="true">
-            <accordion-group  is-open="innerstatus.open" >
+            <accordion-group  is-open="jsonStatus.open" >
                 <accordion-heading>
-                    RAW
-                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': innerstatus.open, 'glyphicon-chevron-right': !innerstatus.open}"></i>
+                    <span>RAW Data: JSON</span>
+                    <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': jsonStatus.open, 'glyphicon-chevron-right': !jsonStatus.open}"></i>
                 </accordion-heading>
                 <div data-json-human log="log.outputs.json" omit=" '$$hashKey' "></div>
             </accordion-group>

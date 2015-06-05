@@ -24,6 +24,9 @@ development:
     pool: 10
     time_out: 15
   verification_api:
+    private_keys:
+      - 23232ddafsa500
+      - 200ok
     collection_name: rva
     id_prefix: rva-
     thread_id_key: meda_rva_id
