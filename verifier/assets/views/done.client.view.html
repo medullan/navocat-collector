@@ -2,11 +2,14 @@
 
     <div class="row  text-center">
         <div class="toolbelt">
-            <a class="btn btn-info" href="" clip-copy="jsonToString(archivedLogs)" clip-click="copyDone()">Copy</a>
+            <a class="btn btn-info" href="" clip-copy="getJsonString()" clip-click="copyDone()">Copy JSON</a>
             <a class="btn btn-danger" href="" ui-sref="home" >Done</a>
         </div>
 
         <div class="text-bold">
+            <p>
+                You have successfully ended your session.
+            </p>
             <p>
                 Once you select <span class="error">Done</span> or navigate away from this page, the logs will be gone.
             </p>
@@ -34,5 +37,6 @@
     <a href="#logs-container" offset="80" du-smooth-scroll="logs" class="back-to-top" style="display: inline;">
         <i class="fa fa-arrow-circle-up"></i>
     </a>
+    <span id="hidden-elem" ng-bind="jsonToString(archivedLogs)" class="fa fa-arrow-circle-up hidden"></span>
 
 </div>

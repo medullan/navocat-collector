@@ -4,15 +4,15 @@
         <div class="log-toolbelt" >
             <a href="" ng-click="openImport('lg')">Import Logs</a>
             <a href="" ng-click="toggleIncludeArchive()" ng-show="archivedLogs.length>0" ><span ng-bind="toggleIncludeText"></span> (<span ng-bind="archivedLogs.length"></span>)</a>
-            <a href="" ng-click="refreshLogs()">Refresh Logs</a>
-            <a href="" ng-click="confirmClear()">Clear Logs</a>
+            <a href="" ng-click="refreshLogs()">Reload Logs</a>
+            <a href="" ng-click="confirmClear()"  ng-show="activeLogs.length>0">Clear Logs</a>
         </div>
-        <div class="search-cont">
+        <div class="search-cont" ng-show="activeLogs.length >0 || archivedLogs.length>0">
 
             <form class="form-inline" name="form">
                 <div class="form-group">
                     <!--<label for="filterOpts">Filter</label>-->
-                    <select id="filterOpts" ng-model="selected.val"
+                    <select id="filterOpts" ng-model="selected"
                             ng-options="option.val for option in searchOptions"></select>
 
                 </div>
@@ -20,7 +20,57 @@
                     <!--<label for="logfilter">Email</label>-->
                     <input type="text" class="form-control filter-input" ng-model="logfilter" id="logfilter" placeholder="type filter here...." ng-keyup="clearFilter(logfilter)">
                 </div>
-                <button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.val.prop, logfilter)">Filter</button>
+                <button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter)" >Filter</button>
+
+
+                <div class="">
+                    <div class="checkbox">
+                        <label>
+                            <input ng-model="advancedFilter" type="checkbox"> Date Filtering
+                        </label>
+                    </div>
+                </div>
+
+
+
+                <div class="ad-filter" ng-show="advancedFilter">
+                    <div class="form-group item">
+                        <select id="dateOpts" ng-model="selectedDatePred"
+                                ng-options="option.val for option in datePredOptions"></select>
+
+
+                    </div>
+                    <div class="form-group item">
+                        <div class="row dpickers">
+                            <div class="col-md-6 item">
+                                <p class="input-group">
+                                    <input type="date" class="form-control date-input" datepicker-popup ng-model="dt" is-open="datepickers.one.opened"
+                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
+                                  <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'one')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                  </span>
+                                </p>
+                            </div>
+                            <span class="date-conjunc" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
+                                    AND
+                                </span>
+
+                            <div class="col-md-6 item" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
+
+                                <p class="input-group">
+                                    <input type="date" class="form-control date-input" datepicker-popup ng-model="secondDate" is-open="datepickers.two.opened" min-date="dt"
+                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
+                                      <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'two')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                      </span>
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--<button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter)" ng-show="advancedFilter">Filter</button>-->
+
+                </div>
             </form>
         </div>
         <div>

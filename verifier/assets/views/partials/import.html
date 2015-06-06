@@ -4,11 +4,22 @@
     </div>
 
     <div class="modal-body confirm">
-        <div>
-            <div class="text-bold">
-                The imported list of logs will be archived
+        <div class="text-center">
+            <div>
+                <div class="text-bold">
+                    The imported list of logs will be archived
+                </div>
+                <div class="error" ng-show="hasErrors">
+                    For more detailed validation, please use <a target="_blank" href="http://jsonformatter.curiousconcept.com/">jsonformatter</a>
+                </div>
             </div>
-            <textarea class="ta-json" ng-model="importedJson" name="importedJson" ></textarea>
+            <div class="text-bold">
+                Copy & Paste JSON
+            </div>
+
+            <div>
+                <textarea class="ta-json" ng-model="importedJson" name="importedJson" ></textarea>
+            </div>
 
         </div>
     </div>

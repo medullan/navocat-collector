@@ -1,15 +1,21 @@
 <div class="modal-header">
-    <h3 class="modal-title">Are you sure?</h3>
+    <h3 class="modal-title" ng-bind="info.title">Are you sure?</h3>
 </div>
 
 <div class="modal-body confirm">
-    <p class="text-bold">PLEASE NOTE:</p>
-    <div class="messages">
-        <p class="message" ng-repeat="message in info.messages"  ng-bind="message"></p>
-    </div>
     <p class="text-bold">
-        Are you sure you want to continue?
+        PLEASE NOTE:
+        <div class="lead-message" ng-bind="info.leadMessage"></div>
     </p>
+    <div class="messages">
+        <ul class="message" >
+            <li ng-repeat="message in info.messages"  ng-bind="message"></li>
+        </ul>
+    </div>
+    <!--<p class="text-bold">-->
+        <!--Are you sure you want to continue?-->
+    <!--</p>-->
+    <div class="close-message" ng-bind="info.closingMessage"></div>
 </div>
 
 <div class="modal-footer">
