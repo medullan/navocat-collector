@@ -41,8 +41,8 @@ module Meda
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
             :http => {
-                :start_time=> data[:start_time].to_s, :end_time=> nil,:url => request.url,
-                :method => request.request_method, :request_input => input, :response=>nil, :end_point_type =>end_point_type
+                :start_time => data[:start_time].to_s, :end_time => nil,:url => request.url,
+                :method => request.request_method, :request_input => input, :response => nil, :end_point_type => end_point_type
             }
         }
         @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
@@ -75,24 +75,39 @@ module Meda
 
     def add_json_ref(ref)
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key(
+          @config.verification_api['collection_name'],
+          rva_id )
+
       data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
                              ref)
-      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+      @@log_data_store.encode_collection(
+          @config.verification_api['collection_name'],
+          rva_id,
+          data )
+
       return data
     end
 
     def add_ga_data(ref)
 
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key( @config.verification_api['collection_name'], rva_id)
+      rva_data =  @@log_data_store.decode_collection_filter_by_key(
+          @config.verification_api['collection_name'],
+          rva_id)
+
       data = add_data_source(DATA_OUTPUT_PROP,
                              rva_data,
                              'ga',
                              ref)
-      @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, data )
+
+      @@log_data_store.encode_collection(
+          @config.verification_api['collection_name'],
+          rva_id,
+          data )
+
       return data
     end
 
@@ -116,7 +131,8 @@ module Meda
     def build_rva_log
       built_list = []
       all_json = get_all_json_data(@config.data_path)
-      all_rva_data =  @@log_data_store.decode_collection(@config.verification_api['collection_name'])
+      all_rva_data =  @@log_data_store.decode_collection(
+          @config.verification_api['collection_name'] )
 
       all_rva_data.each { |rva_data|
         json = get_related_json_data(all_json, rva_data, 'json')
@@ -147,7 +163,7 @@ module Meda
         if rva_data.has_key?(operation_key.to_sym)
           temp = temp.merge(rva_data[operation_key.to_sym])
         end
-        ref_hash = {type.to_sym => ref}
+        ref_hash = { type.to_sym => ref }
         temp = temp.merge(ref_hash)
         rva_data = rva_data.merge!(operation_key.to_sym => temp)
       end

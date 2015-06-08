@@ -1,2 +1,7 @@
 ruby:
-  enabled: false
+  enabled: true
+  config_file: .ruby-style.yml
+javascript:
+  enabled: true
+  config_file: .jshint.json
+  ignore_file: .jshintignore
