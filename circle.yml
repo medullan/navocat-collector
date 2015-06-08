@@ -3,7 +3,7 @@ general:
     - "spec/tmp"
 dependencies:
   pre:
-    -  gem install rubocop
+#    -  gem install rubocop
 test:
   post:
-    - rubocop -c '.ruby-style.yml' --format html -o spec/tmp/rubocop.html lib
+#    - rubocop -c '.ruby-style.yml' --format html -o spec/tmp/rubocop.html lib
