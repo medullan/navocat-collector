@@ -590,6 +590,7 @@ module Meda
       def respond_with_ok
         json({"status" => "ok"})
       end
+
       def respond_with_unauthorized
         status 401
         json(:status_code => 401, :status => 'unauthorized')
