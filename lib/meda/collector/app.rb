@@ -446,7 +446,7 @@ module Meda
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message=> msg })
+          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
           respond_with_bad_request
         end
       end
@@ -529,7 +529,7 @@ module Meda
           if body.key?('key') && body['key'] != nil
             result = @@request_verification_service.private_key_present?(body['key'])
             if result
-              json({ :key => body['key']})
+              json({ :key => body['key'] })
             else
               respond_with_unauthorized
             end
@@ -592,12 +592,12 @@ module Meda
       end
       def respond_with_unauthorized
         status 401
-        json(:status_code => 401, :status => "unauthorized")
+        json(:status_code => 401, :status => 'unauthorized')
       end
 
       def respond_with_not_found
         status 404
-        json({:status_code => 404, :status => "not_found"})
+        json({:status_code => 404, :status => 'not_found'})
       end
 
       def print_out_params(params)

@@ -215,7 +215,7 @@ Style/IfUnlessModifier:
 Style/IndentationWidth:
   Description: Use 2 spaces for indentation.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#spaces-indentation
-  Enabled: true
+  Enabled: false
   Width: 2
 Style/IndentHash:
   Description: Checks the indentation of the first key in a hash literal.
@@ -647,7 +647,7 @@ Style/Blocks:
   Description: Avoid using {...} for multi-line blocks (multiline chaining is always
     ugly). Prefer {...} over do...end for single-line blocks.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#single-line-blocks
-  Enabled: true
+  Enabled: false
 Style/CaseEquality:
   Description: Avoid explicit use of the case equality operator(===).
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#no-case-equality
@@ -820,7 +820,7 @@ Style/Proc:
 Style/RedundantBegin:
   Description: Don't use begin blocks when they are not needed.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#begin-implicit
-  Enabled: true
+  Enabled: false
 Style/RedundantException:
   Description: Checks for an obsolete RuntimeException argument in raise/fail.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#no-explicit-runtimeerror
