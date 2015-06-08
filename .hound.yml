@@ -3,5 +3,5 @@ ruby:
   config_file: .ruby-style.yml
 javascript:
   enabled: true
-  config_file: .jshint.json
-  ignore_file: .jshintignore
+  config_file: .javascript-style.json
+  ignore_file: .javascript_ignore
