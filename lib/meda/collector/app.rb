@@ -185,8 +185,8 @@ module Meda
         profile_id = (profile != nil && profile.key?(:id)) ? profile[:id]: nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => identify_data, :end_point_type => JSON_ENDPOINT }
         @@request_verification_service.start_rva_log('identify', data,request, cookies )
-        if profile_id != nil
-          response = { 'profile_id' => profile_id ,:status => 'ok' }
+        if !profile_id.nil?
+          response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
           json(response)
         else
@@ -206,9 +206,9 @@ module Meda
         profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('identify', data, request, cookies )
-        if  profile_id != nil
+        if  !profile_id.nil?
           set_profile_id_in_cookie(profile['id'])
-          response = { 'profile_id' => profile_id ,:status => 'ok' }
+          response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
           respond_with_pixel
         else
