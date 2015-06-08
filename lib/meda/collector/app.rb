@@ -32,20 +32,20 @@ module Meda
       helpers Sinatra::Cookies
       helpers Sinatra::JSON
 
-      helperConfig = {}
-      helperConfig["config"] = Meda.configuration
+      helper_config = {}
+      helper_config["config"] = Meda.configuration
 
       JSON_ENDPOINT = 'JSON'
       GIF_ENDPOINT = 'GIF'
 
-      @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
-      @@validation_service = Meda::ValidationService.new()
+      @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helper_config)
+      @@validation_service = Meda::ValidationService.new
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
       @@request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
-      @@profile_id_service = Meda::ProfileIdService.new(helperConfig)
+      @@profile_id_service = Meda::ProfileIdService.new(helper_config)
 
       before do
-        @@logging_meta_data_service.setup_meta_logs(request,headers,cookies,request_environment)
+        @@logging_meta_data_service.setup_meta_logs(request, headers, cookies, request_environment)
       end
 
       before do
@@ -62,7 +62,7 @@ module Meda
       end
 
       before do
-        if Meda.features.is_enabled("pre_request_log",false)
+        if Meda.features.is_enabled("pre_request_log", false)
           logger.info("Starting request... ")
         end
       end
@@ -86,8 +86,8 @@ module Meda
       end
 
       after do
-        if Meda.features.is_enabled("post_request_log",false)
-          @@logging_meta_data_service.add_to_mdc("status_code",response.status)
+        if Meda.features.is_enabled("post_request_log", false)
+          @@logging_meta_data_service.add_to_mdc("status_code", response.status)
           logger.info("Ending request... status code #{response.status}")
         end
       end
@@ -119,8 +119,8 @@ module Meda
           store_config['config'] = Meda.configuration
           store_config['name'] = dataset.name
 
-          profileLoader = Meda::ProfileLoader.new()
-          profileLoader.loadWithSomeProfileData(params_hash['amount'],store_config)
+          profile_loader = Meda::ProfileLoader.new
+          profile_loader.loadWithSomeProfileData(params_hash['amount'], store_config)
 
           respond_with_ok
         else
@@ -132,7 +132,7 @@ module Meda
       # @overload post "/meda/load"
       # Testing tool to load data into profile database
       post '/meda/load/count' do
-        if Meda.features.is_enabled("profile_loader",false)
+        if Meda.features.is_enabled("profile_loader", false)
           params_hash = JSON.parse(request.body.read)
           dataset = Meda.datasets[params_hash['dataset']]
 
@@ -142,7 +142,7 @@ module Meda
 
           store = Meda::ProfileDataStore.new(store_config)
           result = store.log_size
-           json({'count' => result})
+          json('count' => result)
         else
           logger.warn("profile loader is disabled.")
         end
@@ -159,7 +159,6 @@ module Meda
       # @overload get "/meda/debug"
       # Thread pool data.
       get '/meda/log' do
-
         logger.debug("debug")
         logger.info("info")
         logger.warn("warn")
@@ -182,9 +181,9 @@ module Meda
         start_time = Time.now
         identify_data = raw_json_from_request
         profile = settings.connection.identify(identify_data)
-        profile_id = (profile != nil && profile.key?(:id)) ? profile[:id]: nil
+        profile_id = (!profile.nil? && profile.key?(:id)) ? profile[:id] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => identify_data, :end_point_type => JSON_ENDPOINT }
-        @@request_verification_service.start_rva_log('identify', data,request, cookies )
+        @@request_verification_service.start_rva_log('identify', data, request, cookies)
         if !profile_id.nil?
           response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
@@ -192,7 +191,7 @@ module Meda
         else
           msg = "post /meda/identify.json ==> Unable to find profile"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -203,18 +202,18 @@ module Meda
       get '/meda/identify.gif' do
         start_time = Time.now
         profile = settings.connection.identify(params)
-        profile_id = (profile != nil && profile.key?(:id)) ? profile['id']: nil
+        profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('identify', data, request, cookies )
+        @@request_verification_service.start_rva_log('identify', data, request, cookies)
         if  !profile_id.nil?
           set_profile_id_in_cookie(profile['id'])
           response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
           respond_with_pixel
         else
-          msg ="get /meda/identify.gif ==> Unable to find profile"
+          msg = "get /meda/identify.gif ==> Unable to find profile"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -225,23 +224,23 @@ module Meda
       post '/meda/profile.json', :provides => :json do
         start_time = Time.now
         profile_data = raw_json_from_request
-        data = { :start_time => start_time , :request_input => profile_data, :end_point_type => JSON_ENDPOINT }
-        @@request_verification_service.start_rva_log('profile', data,request, cookies )
+        data = { :start_time => start_time, :request_input => profile_data, :end_point_type => JSON_ENDPOINT }
+        @@request_verification_service.start_rva_log('profile', data, request, cookies)
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, profile_data)
           result = settings.connection.profile(profile_data)
           if result
-            @@request_verification_service.end_rva_log({ :status => 'ok' })
+            @@request_verification_service.end_rva_log(:status => 'ok')
             respond_with_ok
           else
             msg = "post /meda/profile.json ==> Invalid result"
             logger.error(msg)
-            @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+            @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
             respond_with_bad_request
           end
         else
           msg = "post /meda/profile.json ==> Invalid request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -318,7 +317,6 @@ module Meda
         end
       end
 
-
       # @method get_profile_gif
       # @overload get "/meda/profile.gif"
       # Sets attributes on the given profile
@@ -326,15 +324,15 @@ module Meda
         start_time = Time.now
         get_profile_id_from_cookie
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
-        @@request_verification_service.start_rva_log('profile', data,request, cookies )
+        @@request_verification_service.start_rva_log('profile', data, request, cookies)
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
-          @@request_verification_service.end_rva_log({ :status => 'ok' })
+          @@request_verification_service.end_rva_log(:status => 'ok')
           respond_with_pixel
         else
           msg = "profile.gif bad request request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -374,16 +372,16 @@ module Meda
         logger.debug("in page")
         page_data = json_from_request
         data = { :start_time => start_time, :request_input => page_data, :end_point_type => JSON_ENDPOINT }
-        @@request_verification_service.start_rva_log('page', data,request, cookies )
+        @@request_verification_service.start_rva_log('page', data, request, cookies)
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, page_data)
           logger.debug("in page, hit validated")
           settings.connection.page(request_environment.merge(page_data))
-          @@request_verification_service.end_rva_log({:status => 'ok'})
+          @@request_verification_service.end_rva_log(:status => 'ok')
           respond_with_ok
         else
           msg = "post /meda/page.json ==> Invalid hit request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -395,16 +393,16 @@ module Meda
         start_time = Time.now
 
         get_profile_id_from_cookie
-        data = { :start_time => start_time , :request_input => params, :end_point_type => GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('page', data,request, cookies )
+        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
+        @@request_verification_service.start_rva_log('page', data, request, cookies)
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
-          @@request_verification_service.end_rva_log({ :status => 'ok' })
+          @@request_verification_service.end_rva_log(:status => 'ok')
           respond_with_pixel
         else
           msg = "get /meda/page.gif ==> Invalid hit request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -416,16 +414,16 @@ module Meda
         start_time = Time.now
         track_data = json_from_request
         data = { :start_time => start_time, :request_input => track_data, :end_point_type => JSON_ENDPOINT }
-        @@request_verification_service.start_rva_log('track',data,request, cookies )
+        @@request_verification_service.start_rva_log('track', data, request, cookies)
 
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, track_data)
           settings.connection.track(request_environment.merge(track_data))
-          @@request_verification_service.end_rva_log({:status => 'ok'})
+          @@request_verification_service.end_rva_log(:status => 'ok')
           respond_with_ok
         else
           msg = "post /meda/track.json ==> Invalid hit request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -436,17 +434,17 @@ module Meda
       get '/meda/track.gif' do
         start_time = Time.now
         get_profile_id_from_cookie
-        data = { :start_time => start_time , :request_input => params, :end_point_type => GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('track',data,request, cookies )
+        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
+        @@request_verification_service.start_rva_log('track', data, request, cookies)
 
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
-          @@request_verification_service.end_rva_log({ :status => 'ok' })
+          @@request_verification_service.end_rva_log(:status => 'ok')
           respond_with_pixel
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
           logger.error(msg)
-          @@request_verification_service.end_rva_log({ :status => 'bad_request', :message => msg })
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
         end
       end
@@ -455,30 +453,28 @@ module Meda
       # remove an active identified session with the collector
       get '/meda/endsession.gif' do
         start_time = Time.now
-        data = { :start_time=> start_time, :end_point_type=> GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('endsession',data,request, cookies )
+        data = { :start_time => start_time, :end_point_type => GIF_ENDPOINT }
+        @@request_verification_service.start_rva_log('endsession', data, request, cookies)
         result = cookies.delete("_meda_profile_id")
         response = { :result => result, :status => 'ok' }
         @@request_verification_service.end_rva_log(response)
         respond_with_pixel
       end
 
-
       get 'meda/gettest.page' do
-
       end
 
       ############################################
       # Request Verification API (RVA) Endpoints
       ############################################
 
-      #Endpoint to retrieve qa logs
+      # Endpoint to retrieve qa logs
       get '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            json(@@request_verification_service.build_rva_log())
+            json(@@request_verification_service.build_rva_log)
           else
             respond_with_unauthorized
           end
@@ -486,13 +482,13 @@ module Meda
           respond_with_not_found
         end
       end
-      #Endpoint to delete qa logs
+      # Endpoint to delete qa logs
       delete '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            @@request_verification_service.clear_rva_log()
+            @@request_verification_service.clear_rva_log
             respond_with_ok
           else
             respond_with_unauthorized
@@ -502,16 +498,16 @@ module Meda
           respond_with_not_found
         end
       end
-      #Endpoint to get hashed member id for verification
+      # Endpoint to get hashed member id for verification
       post '/meda/verification/memberid' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
             body = json_from_request
-            if body.key?('member_id') && body['member_id'] != nil
+            if body.key?('member_id') && !body['member_id'].nil?
               result = @@profile_id_service.stringToHash(body['member_id'])
-              json({ :hash => result })
+              json(:hash => result)
             else
               respond_with_bad_request
             end
@@ -526,10 +522,10 @@ module Meda
       post '/meda/verification/key' do
         if Meda.features.is_enabled("verification_api", false)
           body = json_from_request
-          if body.key?('key') && body['key'] != nil
+          if body.key?('key') && !body['key'].nil?
             result = @@request_verification_service.private_key_present?(body['key'])
             if result
-              json({ :key => body['key'] })
+              json(:key => body['key'])
             else
               respond_with_unauthorized
             end
@@ -553,7 +549,6 @@ module Meda
       end
       ############################################
 
-
       # Config
       configure do
         set :connection, Meda::Collector::Connection.new
@@ -571,23 +566,23 @@ module Meda
           ActiveSupport::HashWithIndifferentAccess.new(params_hash)
         rescue JSON::ParserError => e
           status 422
-          json({'error' => 'Request body is invalid'})
+          json('error' => 'Request body is invalid')
         end
       end
 
       def get_http_header_from_env(header)
         result = nil
-        if header != nil
+        if !header.nil?
           prefix = "HTTP_"
           key = "#{prefix}#{header.upcase}"
           result = env[key]
         end
-        return result
+        result
       end
 
 
       def respond_with_ok
-        json({"status" => "ok"})
+        json("status" => "ok")
       end
 
       def respond_with_unauthorized
@@ -606,7 +601,7 @@ module Meda
 
       def respond_with_bad_request
         status 400
-        json({"status"=>"bad request"})
+        json("status"=>"bad request")
       end
 
       def respond_with_pixel

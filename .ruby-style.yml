@@ -219,7 +219,7 @@ Style/IndentationWidth:
   Width: 2
 Style/IndentHash:
   Description: Checks the indentation of the first key in a hash literal.
-  Enabled: true
+  Enabled: false
   EnforcedStyle: special_inside_parentheses
   SupportedStyles:
   - special_inside_parentheses
@@ -363,7 +363,7 @@ Style/SingleLineMethods:
 Style/StringLiterals:
   Description: Checks if uses of quotes match the configured preference.
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#consistent-string-literals
-  Enabled: true
+  Enabled: false
   EnforcedStyle: single_quotes
   SupportedStyles:
   - single_quotes
