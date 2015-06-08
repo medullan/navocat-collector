@@ -541,7 +541,6 @@ module Meda
         end
       end
 
-
       ###
       get '/meda/verifier' do
         if Meda.features.is_enabled("verification_api", false)
@@ -598,7 +597,7 @@ module Meda
 
       def respond_with_not_found
         status 404
-        json({:status_code => 404, :status => 'not_found'})
+        json(:status_code => 404, :status => 'not_found')
       end
 
       def print_out_params(params)
