@@ -1,0 +1,9 @@
+general:
+  artifacts:
+    - "spec/tmp"
+dependencies:
+  pre:
+    -  gem install rubocop
+test:
+  post:
+    - rubocop -c '.ruby-style.yml' --format html -o spec/tmp/rubocop.html lib
