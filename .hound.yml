@@ -1,2 +1,4 @@
 ruby:
   enabled: false
+javascript:
+  enabled: false
