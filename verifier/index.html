@@ -31,10 +31,10 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <!--<li>-->
-                        <!-- -->
-                    <!--</li>-->
                     <li>
+                       <a href="" ng-show=""> Update Filter </a>
+                    </li>
+                    <li class="pull-right">
                         <a href="" ng-show="UserService.tokenExists()" ng-click="confirmEndSession()">End Session</a>
                     </li>
 
@@ -54,6 +54,7 @@
 
     </div>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.9.3/lodash.min.js"></script>
     <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/zeroclipboard/2.2.0/ZeroClipboard.Core.min.js"></script>

@@ -25,9 +25,9 @@ development:
     time_out: 15
   verification_api:
     private_keys:
-      - 23232ddafsa500
       - 200ok
     collection_name: rva
+    limit: 100
     id_prefix: rva-
     thread_id_key: meda_rva_id
   h2:
@@ -99,6 +99,9 @@ test:
   data_path: meda_data
   log_path: log/test.log
   log_level: 0
+  hash_salt: b03dac7c42cc49ac805dcbbd0902e660
+  config_check_interval: 1 # Intervals in seconds
+  p3p: CP=\"DSP\"
   db_url: jdbc:postgresql://localhost:5433/collector-logs
   logs:
     all_log_path: log/app.log

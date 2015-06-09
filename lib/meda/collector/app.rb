@@ -474,7 +474,11 @@ module Meda
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            json(@@request_verification_service.build_rva_log)
+            filter = parse_param_for_rva_logs(params)
+            logs_pattern = @@request_verification_service.get_pattern(filter)
+            logs = @@request_verification_service.build_rva_log(logs_pattern)
+            puts "# of logs: #{logs.length}"
+            json(logs)
           else
             respond_with_unauthorized
           end
@@ -482,18 +486,20 @@ module Meda
           respond_with_not_found
         end
       end
+
       # Endpoint to delete qa logs
       delete '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            @@request_verification_service.clear_rva_log
+            filter = parse_param_for_rva_logs(params)
+            logs_pattern = @@request_verification_service.get_pattern(filter)
+            @@request_verification_service.clear_rva_log(logs_pattern)
             respond_with_ok
           else
             respond_with_unauthorized
           end
-
         else
           respond_with_not_found
         end
@@ -506,6 +512,7 @@ module Meda
           if result
             body = json_from_request
             if body.key?('member_id') && !body['member_id'].nil?
+    
               result = @@profile_id_service.stringToHash(body['member_id'])
               json(:hash => result)
             else
@@ -537,7 +544,6 @@ module Meda
         end
       end
 
-      ###
       get '/meda/verifier' do
         if Meda.features.is_enabled("verification_api", false)
           file = 'index.html'
@@ -546,6 +552,60 @@ module Meda
         else
           status 404
         end
+      end
+        
+    
+      ### Helper Methods
+
+      # Endpoint to add qa logs
+      post '/meda/verification/logs/add' do
+        if Meda.features.is_enabled("verification_api", false)
+          start_time = Time.now
+          body = json_from_request
+          body_data = body.to_hash
+          body_data['ga'] = nil
+          data = { :start_time => start_time, :request_input => body_data, :end_point_type => JSON_ENDPOINT }
+          token = get_http_header_from_env('Authorization')
+          if body.key?('amount') && !body['amount'].nil?
+            result = @@request_verification_service.private_key_present?(token)
+            if result
+              value = nil
+              body['amount'].times{
+                value = @@request_verification_service.start_rva_log('page', data, request, cookies)
+                @@request_verification_service.add_json_ref(body['jsonKey'])
+                @@request_verification_service.add_ga_data(body['ga'])
+                @@request_verification_service.end_rva_log
+              }
+              json(value)
+            else
+              respond_with_unauthorized
+            end
+          else
+            respond_with_bad_request
+          end
+        else
+          respond_with_not_found
+        end
+      end
+        
+      def parse_param_for_rva_logs(filter)
+        if !filter.nil?
+          if !filter['filter_key'].nil? &&
+              !filter['filter_key'].empty? &&
+              !filter['filter_value'].nil? &&
+              !filter['filter_value'].empty?
+
+            if filter['filter_key'] == 'mid'
+#                if filter['filter_value'].downcase != 'none'
+#                    filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
+#                end
+              filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
+              filter['filter_key'] = 'pid'
+            end
+            return filter
+          end
+        end
+        filter
       end
       ############################################
 

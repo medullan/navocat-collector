@@ -1,4 +1,5 @@
 require 'redis'
+require 'json'
 require "connection_pool"
 
 module Meda
@@ -115,10 +116,12 @@ module Meda
       redis do |r|
         result = nil
         if list != nil && key != nil
-          result = eval(r.hget( list, key))
+          result = r.hget(list, key)
+          if !result.nil?
+            result = eval(result)
+          end
         end
         return result
-
       end
     end
 
@@ -131,15 +134,63 @@ module Meda
 
     def decode_collection(list)
       redis do |r|
-        returnVal = []
+        result = []
         if list != nil
-          result = r.hgetall(list)
-          result.each { |key, val|
-            returnVal.push(eval(val))
-          }
+          result = r.hvals(list)
+          # result.each { |key, val|
+          #   returnVal.push(eval(val))
+          # }
         end
-        return returnVal
+        return result
+      end
+    end
 
+    def scan_keys(pattern, cursor=0, count=1000)
+      redis do |r|
+        keys = []
+        if !pattern.nil?
+          cursor = cursor || 0
+          count = count || 100
+          count = (count + 10)
+          keys = r.scan(cursor, :match => pattern, :count => count )[1]
+        end
+        return keys
+      end
+    end
+
+    def multi_decode(keys)
+      redis do |r|
+        result = []
+        if !keys.nil? && !keys.empty?
+          result = r.mget(keys)
+          # result.each { |key, val|
+          #   returnVal.push(JSON.parse(key))
+          # }
+        end
+        return result
+      end
+    end
+
+    def set(key,value)
+      redis do |r|
+        r.set(key, value)
+      end
+    end
+
+    def get(key)
+      returnVal = nil
+      redis do |r|
+       result = r.get(key)
+        if !result.nil? && !result.empty?
+          return JSON.parse(result)
+        end
+       returnVal
+      end
+    end
+
+    def increment(key)
+      redis do |r|
+        r.incr(key)
       end
     end
 

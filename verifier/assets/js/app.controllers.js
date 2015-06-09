@@ -8,9 +8,11 @@ angular.module('core').controller('HomeCtrl', [
     '$state',
     '$log',
     'toastr',
-    function($scope, UserService, $state, $log,toastr) {
+    'LogStoreService',
+    function($scope, UserService, $state, $log, toastr, LogStoreService) {
         $scope.loginModel = {key: null};
         $scope.UserService = UserService;
+        $scope.LogStoreService = LogStoreService;
         if(UserService.tokenExists()){
             $state.go('logs');
         }
@@ -18,6 +20,7 @@ angular.module('core').controller('HomeCtrl', [
         $scope.auth = function(key){
             UserService.verifyPrivateKey(key).then(function(data){
                     UserService.storeToken(data.key);
+                    LogStoreService.setFilterToggle(false);
                     $state.go('logs');
             },
             function(data){
@@ -38,13 +41,14 @@ angular.module('core').controller('DoneCtrl', [
     'toastr',
     function($scope, UserService, $state, $log, LogStoreService, CoreConstants, toastr) {
         $scope.UserService = UserService;
-        $scope.archivedLogs = LogStoreService.deleteActiveLogs();
-        LogStoreService.deleteRemoteLogs().then(function(data){
-            //cleanup
-            UserService.deleteStores();
-            LogStoreService.deleteStores();
-            $log.log('logs deleted?', data);
-        });
+        $scope.archivedLogs = _.uniq(LogStoreService.deleteActiveLogs(), 'id');
+        UserService.deleteStores();
+        LogStoreService.deleteStores();
+        //LogStoreService.deleteRemoteLogs().then(function(data){
+        //    //cleanup
+        //
+        //    $log.log('logs deleted?', data);
+        //});
 
         $scope.jsonToString = function(val){
             return JSON.stringify(val);
@@ -82,10 +86,10 @@ angular.module('core').controller('SiteCtrl', [
                         var info = {
                             title: 'Are you sure you want to end the session?',
                             leadMessage: 'By ending the session and selecting \'Continue\':' ,
-                            closingMessage: 'To save the logs, use the \'Copy JSON\' feature on the next screen before you close your browser window. This JSON will include your recent log activity and all logs that were imported.',
+                            closingMessage: 'To save a copy of the logs, use the \'Copy JSON\' feature on the next screen before you close your browser window. This JSON will include your recent log activity and all logs that were imported.',
                             messages: [
                                 'You will be logged out of the Collector Verifier',
-                                'Your logs will be deleted from the server and cannot be recovered'
+                                //'Your logs will be deleted from the server and cannot be recovered'
                             ]
                         };
                         return info;
@@ -118,6 +122,45 @@ angular.module('core').controller('ConfirmModalCtrl', [
         $scope.info.title = $scope.info.title || 'Are you sure?';
         $scope.ok = function () {
             $modalInstance.close(true);
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+    }
+]);
+
+angular.module('core').controller('MainFilterModalCtrl', [
+    '$scope',
+    '$modalInstance',
+    'info',
+    'toastr',
+    'LogStoreService',
+    function ($scope, $modalInstance, info, toastr, LogStoreService) {
+        $scope.info = info;
+        $scope.info.continueBtnTxt = $scope.info.continueBtnTxt || 'Continue';
+        $scope.info.title = $scope.info.title || 'Are you sure?';
+        $scope.filterOptions = [
+            {val:'Member ID', prop:'member_id', serverId:'mid'},
+            {val:'Client ID', prop:'client_id', serverId:'cid'},
+            {val:'Profile ID',prop:'profile_id', serverId:'pid'}
+        ];
+        $scope.filterOpt = LogStoreService.getFilterOptions() || {key: null, value: null};
+        var index = _.findIndex($scope.filterOptions, function(chr) {
+            return chr.serverId == $scope.filterOpt.key;
+        });
+        var selected = null;
+        if(index != -1) selected = $scope.filterOptions[index];
+        $scope.selectedOpt = selected || $scope.filterOptions[0];
+
+        $scope.ok = function (value) {
+            if(angular.isString(value) && value.length > 0){
+                var filterOpts = {key:$scope.selectedOpt.serverId, value: value };
+                console.log($scope.selectedOpt.prop, value, filterOpts);
+                $modalInstance.close(filterOpts);
+            }else{
+                toastr.warning('Please enter a value to continue!');
+            }
         };
 
         $scope.cancel = function () {
@@ -190,15 +233,18 @@ angular.module('core').controller('LogCtrl', [
             include: 'Show Archived Logs',
             remove: 'Hide Archived Logs'
         };
+        $scope.LogStoreService = LogStoreService;
         var setToggleText = function(){
             $scope.toggleIncludeText = ($scope.includeArchive)? toggleText.remove: toggleText.include;
         };
         var updateLogs = function(){
             var logs = [];
             $scope.activeLogs = LogStoreService.getActiveLogs() || [];
-            $scope.archivedLogs = LogStoreService.getArchivedLogs() || [];
+            var archivedLogs = LogStoreService.getArchivedLogs() || [];
+            //$scope.archivedLogs = LogStoreService.removeDuplicates(LogStoreService.getLogIds(LogStoreService.getActiveLogs()), archivedLogs);
+            $scope.archivedLogs = (archivedLogs);
             if($scope.includeArchive){
-                logs = LogStoreService.getAllLogs() || [];
+                logs = _.uniq(LogStoreService.getAllLogs(), 'id') || [];
             }else{
                 logs = $scope.activeLogs;
             }
@@ -215,16 +261,6 @@ angular.module('core').controller('LogCtrl', [
             onlyOne: true
         };
 
-        LogStoreService.getRemoteLogs().then(function(data){
-                $scope.pageStatus = 'done';
-                LogStoreService.storeLogs(data);
-                $scope.logs = updateLogs();
-            },
-            function(data){
-                $log.log('err: ', data);
-                $scope.pageStatus = 'error';
-            });
-
         $scope.openImport = function(size){
             var modalInstance = $modal.open({
                 animation: true,
@@ -240,8 +276,52 @@ angular.module('core').controller('LogCtrl', [
                 }
             });
 
+
+
             modalInstance.result.then(function (data) {
                 $scope.logs = updateLogs();
+            }, function () {
+                $log.info('ConfirmClear Modal dismissed at: ' + new Date());
+            });
+        };
+
+        var getLogs = function(){
+            LogStoreService.getRemoteLogs().then(function(data){
+                    LogStoreService.deleteActiveLogs();
+                    LogStoreService.storeLogs(data);
+                    $scope.logs = updateLogs();
+                    $scope.pageStatus = 'done';
+                },
+                function(data){
+                    $log.log('err: ', data);
+                    $scope.pageStatus = 'error';
+                });
+        };
+        if(LogStoreService.getFilterToggle()){
+            getLogs();
+        }
+
+        $scope.openMainFilterModal = function(size){
+            var modalInstance = $modal.open({
+                animation: true,
+                templateUrl: CoreConstants.assetBaseUrl + '/views/partials/mainfilter.html',
+                controller: 'MainFilterModalCtrl',
+                size: size,
+                resolve: {
+                    info: function () {
+                        var info = {
+                        };
+                        return info;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (data) {
+                LogStoreService.setFilterToggle(true);
+                LogStoreService.storeFilterOptions(data.key, data.value);
+                getLogs();
+
+
             }, function () {
                 $log.info('ConfirmClear Modal dismissed at: ' + new Date());
             });
@@ -292,11 +372,10 @@ angular.module('core').controller('LogCtrl', [
 
         $scope.refreshLogs = function(){
             LogStoreService.getRemoteLogs().then(function(data){
+                    LogStoreService.deleteActiveLogs();
                     LogStoreService.storeLogs(data);
-                    var orgLength = $scope.logs.length;
                     $scope.logs = updateLogs();
-                    var num = $scope.logs.length - orgLength;
-                    toastr.success(num+ ' Log(s) Retrieved');
+                    toastr.success('Log(s) Refreshed!');
                 },
                 function(data){
                     toastr.error('error refreshing logs!');
@@ -330,13 +409,14 @@ angular.module('core').controller('LogCtrl', [
         $scope.getOutputKeys= CoreService.getOutputKeys;
 
         $scope.searchOptions = [
-            {id:1, val:'Member ID', prop:'member_id'},
-            {id:2, val:'Collector Hit Type', prop:'type'},
-            {id:3, val:'Endpoint Type', prop:'end_point_type'},
-            {id:4, val:'Client ID', prop:'client_id'},
-            {id:5, val:'Outputs' , prop:'outputs'},
-            {id:6, val:'Date' , prop:'start_time'},
-            {id:7, val:'RVA ID' , prop:'id'},
+            {val:'Contain', prop:'contain'},
+            //{val:'Member ID', prop:'member_id'},
+            {val:'Collector Hit Type', prop:'type'},
+            {val:'Client ID', prop:'client_id'},
+            {val:'Endpoint Type', prop:'end_point_type'},
+            {val:'Outputs' , prop:'outputs'},
+            //{val:'Date' , prop:'start_time'},
+            {val:'RVA ID' , prop:'id'},
         ];
         $scope.selected =  $scope.searchOptions[0] ;
 
@@ -353,13 +433,28 @@ angular.module('core').controller('LogCtrl', [
             }
         };
 
-        $scope.filter= function(criteria, value){
+        $scope.filter= function(criteria, value, form){
+            $scope.searchValue = null;
             if( value.length >0){
                 cfpLoadingBar.start();
                 cfpLoadingBar.inc();
-                CoreService.filter(updateLogs(), criteria, value).then(function(data){
-                    $scope.logs = data;
+                var pred = {
+                    type: 'date',
+                    advancedFilterToggle: form.advancedFilterToggle.$viewValue,
+                    firstValue: (form.firstDate.$viewValue),
+                    secondValue: (form.secondDate.$viewValue),
+                    criteria: form.selectedDatePred.$viewValue.prop
+                };
+
+                CoreService.filter(updateLogs(), criteria, value, pred).then(function(data){
+                    $scope.pageStatus = 'loading';
+                    $scope.logs = [];
+                    $scope.logs = data.results;
                     cfpLoadingBar.complete();
+                    $scope.pageStatus = 'done';
+                    if(criteria.toLowerCase() === 'contain'){
+                        $scope.searchValue = value;
+                    }
                 },function(){
                     cfpLoadingBar.complete();
                 });
@@ -368,8 +463,6 @@ angular.module('core').controller('LogCtrl', [
             }
         };
 
-
-//datepicker
         $scope.advancedFilter = false;
 
         $scope.datepickers = {
