@@ -53,7 +53,8 @@ module Meda
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
         if rva_id != nil
-          rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id )
+          rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id)
+          rva_data = parse_log(rva_data)
           if rva_data != nil
             rva_data[:http][:end_time] = Time.now.to_s
             rva_data[:http][:response] = response
@@ -78,7 +79,7 @@ module Meda
       rva_data =  @@log_data_store.decode_collection_filter_by_key(
           @config.verification_api['collection_name'],
           rva_id )
-
+      rva_data = parse_log(rva_data)
       data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
@@ -97,6 +98,7 @@ module Meda
       rva_data =  @@log_data_store.decode_collection_filter_by_key(
           @config.verification_api['collection_name'],
           rva_id)
+      rva_data = parse_log(rva_data)
 
       data = add_data_source(DATA_OUTPUT_PROP,
                              rva_data,
@@ -106,7 +108,7 @@ module Meda
       @@log_data_store.encode_collection(
           @config.verification_api['collection_name'],
           rva_id,
-          data )
+          data)
 
       return data
     end
@@ -135,6 +137,7 @@ module Meda
           @config.verification_api['collection_name'] )
 
       all_rva_data.each { |rva_data|
+        rva_data = parse_log(rva_data)
         json = get_related_json_data(all_json, rva_data, 'json')
         rva_data = add_data_source(DATA_OUTPUT_PROP,
                                rva_data,
@@ -142,7 +145,7 @@ module Meda
                                json)
         built_list.push(rva_data)
       }
-      return built_list
+      built_list
     end
 
     def clear_rva_log
@@ -154,6 +157,12 @@ module Meda
     #################
     ### private ###
 
+    def parse_log(log)
+      if !log.nil? && log.is_a?(String)
+        return eval(log)
+      end
+      log
+    end
 
     def add_data_source(operation_key, rva_data, type, ref)
       # puts "saving source with: #{operation_key} , #{type}, #{ref}"

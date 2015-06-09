@@ -1,4 +1,5 @@
 require 'redis'
+require 'json'
 require "connection_pool"
 
 module Meda
@@ -133,12 +134,12 @@ module Meda
       redis do |r|
         returnVal = []
         if list != nil
-          result = r.hgetall(list)
-          result.each { |key, val|
-            returnVal.push(eval(val))
-          }
+          result = r.hvals(list)
+          # result.each { |key, val|
+          #   returnVal.push(eval(val))
+          # }
         end
-        return returnVal
+        return result
 
       end
     end
