@@ -132,8 +132,8 @@ module Meda
 
     def decode_collection(list)
       redis do |r|
-        returnVal = []
-        if list != nil
+        result = []
+        if !list.nil?
           result = r.hvals(list)
           # result.each { |key, val|
           #   returnVal.push(eval(val))
