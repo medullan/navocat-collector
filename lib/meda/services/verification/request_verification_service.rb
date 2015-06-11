@@ -14,30 +14,33 @@ module Meda
     DATA_OUTPUT_PROP = 'outputs'
     TRANS_IDS_PROP = 'transaction_ids'
     FEATURE_NAME = 'verification_api'
+    LOG_KEY_IDS = { :cid => 'cid', :rid => 'rid', :pid => 'pid', :sort => 'sort' }
+    LOG_KEY_COUNTER = 'log_key_counter'
 
     def initialize(config)
       @config=config
       @@log_data_store = Meda::RedisDbStore.new(config)
-
+      @ALL_LOGS_PATTERN = get_all_logs_pattern
     end
-
 
     ### public ###
 
     def start_rva_log (type, data, request, cookies)
       if Meda.features.is_enabled(FEATURE_NAME, false)
-        rva_id = set_rva_id()
+        rva_id = generate_rva_id
         profile_id = data.key?(:profile_id) ? data[:profile_id] : cookies['_meda_profile_id']
         client_id = cookies['__collector_client_id']
         input = data.key?(:request_input) ? data[:request_input] : nil
+        sort_key = @@log_data_store.increment(LOG_KEY_COUNTER)
 
         if profile_id == nil
-          profile_id =  input.key?(:profile_id) ? input[:profile_id] : profile_id
+          profile_id = get_profile_id_from_request(input)
         end
 
         end_point_type = data.key?(:end_point_type) ? data[:end_point_type] : nil
         rva_data = {
             :id => rva_id,
+            :sort_key => sort_key,
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
             :http => {
@@ -45,7 +48,16 @@ module Meda
                 :method => request.request_method, :request_input => input, :response => nil, :end_point_type => end_point_type
             }
         }
-        @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+        log_key = create_log_key(
+            @config.verification_api['collection_name'],
+            profile_id,
+            client_id,
+            rva_id,
+            sort_key.to_s)
+        # puts log_key
+        set_rva_id(log_key)
+        delete_logs_outside_limit
+        save_log(log_key, rva_data)
       end
     end
 
@@ -53,12 +65,13 @@ module Meda
       if Meda.features.is_enabled(FEATURE_NAME, false)
         rva_id = get_rva_id()
         if rva_id != nil
-          rva_data = @@log_data_store.decode_collection_filter_by_key(@config.verification_api['collection_name'], rva_id)
+          rva_data = get_log(rva_id)
           rva_data = parse_log(rva_data)
+          puts rva_data
           if rva_data != nil
-            rva_data[:http][:end_time] = Time.now.to_s
-            rva_data[:http][:response] = response
-            @@log_data_store.encode_collection(@config.verification_api['collection_name'], rva_id, rva_data )
+            rva_data['http']['end_time'] = Time.now.to_s
+            rva_data['http']['response'] = response
+            save_log(rva_id, rva_data)
           end
         end
 
@@ -76,18 +89,13 @@ module Meda
 
     def add_json_ref(ref)
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key(
-          @config.verification_api['collection_name'],
-          rva_id )
+      rva_data = get_log(rva_id)
       rva_data = parse_log(rva_data)
       data = add_data_source(TRANS_IDS_PROP,
                              rva_data,
                              'json',
                              ref)
-      @@log_data_store.encode_collection(
-          @config.verification_api['collection_name'],
-          rva_id,
-          data )
+      save_log(rva_id, data)
 
       return data
     end
@@ -95,9 +103,7 @@ module Meda
     def add_ga_data(ref)
 
       rva_id = get_rva_id()
-      rva_data =  @@log_data_store.decode_collection_filter_by_key(
-          @config.verification_api['collection_name'],
-          rva_id)
+      rva_data = get_log(rva_id)
       rva_data = parse_log(rva_data)
 
       data = add_data_source(DATA_OUTPUT_PROP,
@@ -105,36 +111,14 @@ module Meda
                              'ga',
                              ref)
 
-      @@log_data_store.encode_collection(
-          @config.verification_api['collection_name'],
-          rva_id,
-          data)
-
+      save_log(rva_id, data)
       return data
     end
 
-    def get_rva_id()
-      id = nil
-      if Meda.features.is_enabled(FEATURE_NAME, false)
-        id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
-      end
-      return id
-    end
-
-    def set_rva_id(id = nil)
-      uuid = nil
-      if Meda.features.is_enabled(FEATURE_NAME, false)
-        uuid = id || generate_rva_id()
-        Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
-      end
-      return uuid
-    end
-
-    def build_rva_log
+    def build_rva_log(pattern)
       built_list = []
       all_json = get_all_json_data(@config.data_path)
-      all_rva_data =  @@log_data_store.decode_collection(
-          @config.verification_api['collection_name'] )
+      all_rva_data =  get_logs(pattern)
 
       all_rva_data.each { |rva_data|
         rva_data = parse_log(rva_data)
@@ -149,19 +133,175 @@ module Meda
     end
 
     def clear_rva_log
-      @@log_data_store.delete(@config.verification_api['collection_name'])
+      delete_logs(@config.verification_api['collection_name'])
       return true
+    end
+
+    def get_rva_id()
+      id = nil
+      if Meda.features.is_enabled(FEATURE_NAME, false)
+        id =   Thread.current.thread_variable_get(@config.verification_api['thread_id_key'])
+      end
+      id
+    end
+
+    def set_rva_id(id = nil)
+      uuid = nil
+      if Meda.features.is_enabled(FEATURE_NAME, false)
+        uuid = id
+        Thread.current.thread_variable_set(@config.verification_api['thread_id_key'], uuid)
+      end
+      return uuid
     end
 
 
     #################
     ### private ###
 
+    def save_log(log_key, rva_data)
+      @@log_data_store.set(log_key, rva_data.to_json)
+    end
+
+    def get_log(log_key)
+      @@log_data_store.get(log_key)
+    end
+
+    def get_logs(pattern)
+      # pattern = get_all_logs_pattern
+      data = get_log_keys(pattern)
+      @@log_data_store.multi_decode(data)
+    end
+
+    def get_pattern(filter)
+      prefix = get_all_logs_pattern
+      if !filter.nil?
+        if !filter['filter_key'].nil? &&
+            !filter['filter_key'].empty? &&
+            !filter['filter_value'].nil? &&
+            !filter['filter_value'].empty?
+          filter_pattern = "#{filter['filter_key']}(#{filter['filter_value']})"
+          template = "#{prefix}#{filter_pattern}*"
+          return template
+        end
+      end
+      prefix
+    end
+
+    def get_log_keys(pattern)
+      @@log_data_store.scan_keys(pattern, 0, @config.verification_api['limit'])
+    end
+
     def parse_log(log)
       if !log.nil? && log.is_a?(String)
-        return eval(log)
+        return JSON.parse(log)
       end
       log
+    end
+
+    def sort_log_keys(values, asc=true)
+      if !values.nil? && !values.empty?
+        values.sort! { |a, b|
+          a = get_value_from_log_key(a, LOG_KEY_IDS[:sort])
+          b = get_value_from_log_key(b, LOG_KEY_IDS[:sort])
+          # a.to_i <=> b.to_i
+          (asc) ?  a.to_i <=> b.to_i :  b.to_i <=> a.to_i
+        }
+        # return (asc) ? values : values.reverse
+      end
+      values
+    end
+
+    def get_ids_for_logs_outside_limit(org_list)
+      limit = @config.verification_api['limit']
+      values = []
+      if !org_list.nil? && org_list.length > limit
+        num_items_to_delete = org_list.length - limit
+        return org_list[0...(num_items_to_delete)]
+      end
+      values
+    end
+    def delete_logs_outside_limit
+      pattern = get_all_logs_pattern
+      puts pattern
+      data = sort_log_keys(get_log_keys(pattern))
+      list_to_delete = get_ids_for_logs_outside_limit(data)
+      puts list_to_delete
+      if !list_to_delete.empty?
+        delete_logs(list_to_delete)
+      end
+    end
+
+    def get_all_logs_pattern
+      "#{@config.verification_api['collection_name']}|*"
+    end
+
+    def delete_logs(ids)
+      @@log_data_store.delete(ids)
+    end
+
+    def eval_log_key_value(value)
+      result = 'none'
+      if !value.nil?
+        value = value.to_s
+        if !value.empty?
+          return value
+        end
+      end
+      return result
+    end
+
+    # eg. rva|pid(none)|cid(456)|rid(rva-789)|sort(1433992503)|
+    def create_log_key(collection, profile_id, client_id, rva_id, sort_key)
+      delim = '|'
+      collection = collection || 'rva'
+      key_template = "#{(collection)}" +
+          "#{delim}" +
+          "#{LOG_KEY_IDS[:pid]}(#{eval_log_key_value(profile_id)})" +
+          "#{delim}" +
+          "#{LOG_KEY_IDS[:cid]}(#{eval_log_key_value(client_id)})" +
+          "#{delim}" +
+          "#{LOG_KEY_IDS[:rid]}(#{eval_log_key_value(rva_id)})" +
+          "#{delim}" +
+          "#{LOG_KEY_IDS[:sort]}(#{eval_log_key_value(sort_key)})" +
+          "#{delim}"
+    end
+
+    def get_value_from_log_key(log_key, key_id)
+      result = get_key_value_pair_from_log_key(key_id, log_key)
+      value = string_between_markers(result, '(', ')')
+    end
+
+    def get_key_value_pair_from_log_key(key_id, log_key)
+      regex_str = "((?:(#{key_id})[^\\|]*))"
+      regex = Regexp.new regex_str
+      result = log_key.scan(regex).last.first
+    end
+
+    def string_between_markers (str, marker1, marker2)
+      str[/#{Regexp.escape(marker1)}(.*?)#{Regexp.escape(marker2)}/m, 1]
+    end
+
+    def get_hash_from_log_key(log_key)
+      keys = LOG_KEY_IDS.values
+      hash = {}
+      keys.each { |key_id|
+        value = get_value_from_log_key(log_key, key_id)
+        hash.merge!(key_id => value)
+      }
+      hash
+    end
+
+    def get_profile_id_from_request(input)
+      profile_id = nil
+      if !input.nil?
+        if input.key?(:profile_id)
+          profile_id = input[:profile_id]
+        else if input.key?('profile_id')
+               profile_id = input['profile_id']
+             end
+        end
+      end
+      profile_id
     end
 
     def add_data_source(operation_key, rva_data, type, ref)
@@ -169,12 +309,12 @@ module Meda
 
       if rva_data != nil && ref != nil
         temp = {}
-        if rva_data.has_key?(operation_key.to_sym)
-          temp = temp.merge(rva_data[operation_key.to_sym])
+        if rva_data.has_key?(operation_key)
+          temp = temp.merge(rva_data[operation_key])
         end
-        ref_hash = { type.to_sym => ref }
+        ref_hash = { type => ref }
         temp = temp.merge(ref_hash)
-        rva_data = rva_data.merge!(operation_key.to_sym => temp)
+        rva_data = rva_data.merge!(operation_key => temp)
       end
       return rva_data
     end
@@ -224,8 +364,8 @@ module Meda
       match = {}
       found = false
       json_list.each { |json_data|
-        if rva_data.has_key?(:transaction_ids)
-          if json_data['id'].eql? rva_data[:transaction_ids][source_type.to_sym]
+        if rva_data.has_key?('transaction_ids')
+          if json_data['id'].eql? rva_data['transaction_ids'][source_type]
             match = json_data
             found = true
           end

@@ -110,6 +110,7 @@ module Meda
       :env => 'development',
       :verification_api => {
           :private_keys => [],
+          :limit => 1000,
           :collection_name => 'rva',
           :id_prefix => 'rva-',
           :thread_id_key => 'meda_rva_id'
