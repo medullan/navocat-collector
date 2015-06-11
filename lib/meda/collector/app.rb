@@ -468,13 +468,33 @@ module Meda
       # Request Verification API (RVA) Endpoints
       ############################################
 
+      def parse_param_for_rva_logs(filter)
+        prefix = get_all_logs_pattern
+        if !filter.nil?
+          if !filter['filter_key'].nil? &&
+              !filter['filter_key'].empty? &&
+              !filter['filter_value'].nil? &&
+              !filter['filter_value'].empty?
+
+            value = filter['filter_value']
+            if filter['filter_key'] == 'mid'
+              filter['filter_value'] = @@profile_id_service.stringToHash(value)
+              filter['filter_key'] = 'pid'
+            end
+            return filter
+          end
+        end
+        filter
+      end
+
       # Endpoint to retrieve qa logs
       get '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            logs_pattern = @@request_verification_service.get_pattern(params)
+            filter = parse_param_for_rva_logs(params)
+            logs_pattern = @@request_verification_service.get_pattern(filter)
             logs = @@request_verification_service.build_rva_log(logs_pattern)
             puts "# of logs: #{logs.length}"
             json(logs)

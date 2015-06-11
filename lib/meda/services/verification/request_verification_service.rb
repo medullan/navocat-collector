@@ -1,5 +1,6 @@
 require_relative '../profile/profile_service.rb'
 require_relative '../datastore/redisdb/redisdb_store.rb'
+require 'meda/services/profile/one_key/profile_id_service'
 require 'uuidtools'
 require 'logger'
 require 'meda'
@@ -19,8 +20,8 @@ module Meda
 
     def initialize(config)
       @config=config
+      helper_config = {}
       @@log_data_store = Meda::RedisDbStore.new(config)
-      @ALL_LOGS_PATTERN = get_all_logs_pattern
     end
 
     ### public ###
@@ -179,7 +180,9 @@ module Meda
             !filter['filter_key'].empty? &&
             !filter['filter_value'].nil? &&
             !filter['filter_value'].empty?
-          filter_pattern = "#{filter['filter_key']}(#{filter['filter_value']})"
+          value = filter['filter_value']
+          key = filter['filter_key']
+          filter_pattern = "#{key}(#{value})"
           template = "#{prefix}#{filter_pattern}*"
           return template
         end
