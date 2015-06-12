@@ -39,12 +39,13 @@ angular.module('core').controller('DoneCtrl', [
     function($scope, UserService, $state, $log, LogStoreService, CoreConstants, toastr) {
         $scope.UserService = UserService;
         $scope.archivedLogs = LogStoreService.deleteActiveLogs();
-        LogStoreService.deleteRemoteLogs().then(function(data){
-            //cleanup
-            UserService.deleteStores();
-            LogStoreService.deleteStores();
-            $log.log('logs deleted?', data);
-        });
+        UserService.deleteStores();
+        LogStoreService.deleteStores();
+        //LogStoreService.deleteRemoteLogs().then(function(data){
+        //    //cleanup
+        //
+        //    $log.log('logs deleted?', data);
+        //});
 
         $scope.jsonToString = function(val){
             return JSON.stringify(val);
@@ -330,13 +331,14 @@ angular.module('core').controller('LogCtrl', [
         $scope.getOutputKeys= CoreService.getOutputKeys;
 
         $scope.searchOptions = [
-            {id:1, val:'Member ID', prop:'member_id'},
-            {id:2, val:'Collector Hit Type', prop:'type'},
-            {id:3, val:'Endpoint Type', prop:'end_point_type'},
-            {id:4, val:'Client ID', prop:'client_id'},
-            {id:5, val:'Outputs' , prop:'outputs'},
-            {id:6, val:'Date' , prop:'start_time'},
-            {id:7, val:'RVA ID' , prop:'id'},
+            {val:'Contain', prop:'contain'},
+            {val:'Member ID', prop:'member_id'},
+            {val:'Collector Hit Type', prop:'type'},
+            {val:'Client ID', prop:'client_id'},
+            {val:'Endpoint Type', prop:'end_point_type'},
+            {val:'Outputs' , prop:'outputs'},
+            {val:'Date' , prop:'start_time'},
+            {val:'RVA ID' , prop:'id'},
         ];
         $scope.selected =  $scope.searchOptions[0] ;
 
@@ -358,8 +360,9 @@ angular.module('core').controller('LogCtrl', [
                 cfpLoadingBar.start();
                 cfpLoadingBar.inc();
                 CoreService.filter(updateLogs(), criteria, value).then(function(data){
-                    $scope.logs = data;
+                    $scope.logs = data.results;
                     cfpLoadingBar.complete();
+                    $scope.searchValue = value;
                 },function(){
                     cfpLoadingBar.complete();
                 });
@@ -368,8 +371,6 @@ angular.module('core').controller('LogCtrl', [
             }
         };
 
-
-//datepicker
         $scope.advancedFilter = false;
 
         $scope.datepickers = {

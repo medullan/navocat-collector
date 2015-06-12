@@ -188,6 +188,7 @@ table {
 .date-conjunc{
     margin: 0 5px;
 }
+
 /*custom json human css*/
 pre.renderjson{background: #eeeeee; margin:0;border: 0; border-radius:0;}
 .renderjson a { text-decoration: none; }
@@ -212,3 +213,12 @@ pre.renderjson{background: #eeeeee; margin:0;border: 0; border-radius:0;}
 .rj-dark .renderjson .keyword       { color: lightgoldenrodyellow; }
 .rj-dark .renderjson .object.syntax { color: lightseagreen; }
 .rj-dark .renderjson .array.syntax  { color: lightsalmon; }
+
+.match.srch-match.srch-match-key,
+.string.match.srch-match.srch-match-value,
+.number.match.srch-match.srch-match-value,
+.boolean.match.srch-match.srch-match-value,
+.keyword.match.srch-match.srch-match-value{
+    font-weight:bold;
+    color:tomato;
+}

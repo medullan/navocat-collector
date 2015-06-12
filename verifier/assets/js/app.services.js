@@ -246,6 +246,10 @@ angular.module('core').service('CoreService', [
             'outputs': function(item, crit, val){
                 var outs = self.getOutputKeys(item).toLowerCase();
                 return _.contains(outs , val);
+            },
+            'contain': function(item, crit, val){
+                var outs = JSON.stringify(item).toLowerCase();
+                return _.contains(outs , val);
             }
         };
         var extraData = {
@@ -258,7 +262,7 @@ angular.module('core').service('CoreService', [
             }
         };
         function query(json, criteria, value) {
-            var custom = ['end_point_type', 'member_id', 'outputs'];
+            var custom = ['end_point_type', 'member_id', 'outputs', 'contain'];
             return Enumerable.From(json)
                 .Where(function (item) {
                     var result = false;
@@ -278,11 +282,13 @@ angular.module('core').service('CoreService', [
             if(_.contains(data, criteria)){
                 extraData[criteria](criteria, value).then(function(data){
                     var result = query(json, criteria, data.hash);
-                    deferred.resolve(result) ;
+                    var data = {results: result, data:data}
+                    deferred.resolve(data) ;
                 });
             }else{
                 var result = query(json, criteria, value);
-                deferred.resolve(result) ;
+                var data = {results: result, data:{value:value, criteria: criteria}}
+                deferred.resolve(data) ;
             }
 
             return deferred.promise;
