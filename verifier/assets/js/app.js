@@ -140,7 +140,9 @@ angular.module('core').constant('CoreConstants', (function(){
             archivedLogs: 'archivedLogs',
             includeArchive: 'includeArchive',
             token: 'token',
-            recentLogOut: 'recentLogOut'
+            recentLogOut: 'recentLogOut',
+            filterOptions: 'filterOptions',
+            filterToggle: 'filterToggle',
         }
     };
     return constant;

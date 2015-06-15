@@ -1,159 +1,184 @@
 <div class="container">
-    <di id="logs-container" class="logs">
-        <h1 class="page-heading">Logs <span class="log-count">(<span ng-bind="activeLogs.length"></span>)</span></h1>
-        <div class="log-toolbelt" >
-            <a href="" ng-click="openImport('lg')">Import Logs</a>
-            <a href="" ng-click="toggleIncludeArchive()" ng-show="archivedLogs.length>0" ><span ng-bind="toggleIncludeText"></span> (<span ng-bind="archivedLogs.length"></span>)</a>
-            <a href="" ng-click="refreshLogs()">Reload Logs</a>
-            <a href="" ng-click="confirmClear()"  ng-show="activeLogs.length>0">Clear Logs</a>
-        </div>
-        <div class="search-cont" ng-show="activeLogs.length >0 || archivedLogs.length>0">
+    <di id="logs-container" >
+        <h1 class="page-heading">Logs <span class="log-count" ng-show="LogStoreService.getFilterToggle()">(<span ng-bind="activeLogs.length"></span>)</span></h1>
 
-            <form class="form-inline" name="form">
-                <div class="form-group">
-                    <!--<label for="filterOpts">Filter</label>-->
-                    <select id="filterOpts" ng-model="selected"
-                            ng-options="option.val for option in searchOptions"></select>
+        <div>
 
-                </div>
-                <div class="form-group">
-                    <!--<label for="logfilter">Email</label>-->
-                    <input type="text" class="form-control filter-input" ng-model="logfilter" id="logfilter" placeholder="type filter here...." ng-keyup="clearFilter(logfilter)">
-                </div>
-                <button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter)" >Filter</button>
-
-
-                <div class="">
-                    <div class="checkbox">
-                        <label>
-                            <input ng-model="advancedFilter" type="checkbox"> Date Filtering
-                        </label>
+            <div ng-switch="LogStoreService.getFilterToggle()">
+                <div ng-switch-when="false" class="text-center">
+                    <div class="row">
+                        <h3 class="text-center">Getting Started</h3>
+                    </div>
+                    <div>
+                        Set up your main filter to get started
+                    </div>
+                    <div>
+                        <a href="" ng-click="openMainFilterModal()">create filter</a>
                     </div>
                 </div>
 
+                <div ng-switch-when="true" class="logs">
+                    <div>
+                        <div class="log-toolbelt" >
+                            <a href="" ng-click="openMainFilterModal()">Update Main Filter</a>
+                            <a href="" ng-click="openImport('lg')">Import Logs</a>
+                            <a href="" ng-click="toggleIncludeArchive()" ng-show="archivedLogs.length>0" >
+                                <span ng-bind="toggleIncludeText"></span>
+                                <!--<span >(<span ng-bind="archivedLogs.length"></span>)</span>-->
+                            </a>
+                            <a href="" ng-click="refreshLogs()">Reload Logs</a>
+                            <!--<a href="" ng-click="confirmClear()"  ng-show="activeLogs.length>0">Clear Logs</a>-->
+                        </div>
+                        <div class="search-cont" ng-show="activeLogs.length >0 || archivedLogs.length>0">
+
+                            <form class="form-inline" name="form">
+                                <div class="form-group">
+                                    <!--<label for="filterOpts">Filter</label>-->
+                                    <select id="filterOpts" ng-model="selected"
+                                            ng-options="option.val for option in searchOptions"></select>
+
+                                </div>
+                                <div class="form-group">
+                                    <!--<label for="logfilter">Email</label>-->
+                                    <input type="text" class="form-control filter-input" ng-model="logfilter" id="logfilter" placeholder="type filter here...." ng-keyup="clearFilter(logfilter)">
+                                </div>
+                                <button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter, form)" >Filter</button>
+
+                                <div class="">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input name="advancedFilterToggle" ng-model="advancedFilter" type="checkbox"> Date Filtering
+                                        </label>
+                                    </div>
+                                </div>
 
 
-                <div class="ad-filter" ng-show="advancedFilter">
-                    <div class="form-group item">
-                        <select id="dateOpts" ng-model="selectedDatePred"
-                                ng-options="option.val for option in datePredOptions"></select>
+
+                                <div class="ad-filter" ng-show="advancedFilter">
+                                    <div class="form-group item">
+                                        <select name="selectedDatePred" id="dateOpts" ng-model="selectedDatePred"
+                                                ng-options="option.val for option in datePredOptions"></select>
 
 
-                    </div>
-                    <div class="form-group item">
-                        <div class="row dpickers">
-                            <div class="col-md-6 item">
-                                <p class="input-group">
-                                    <input type="date" class="form-control date-input" datepicker-popup ng-model="dt" is-open="datepickers.one.opened"
-                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
+                                    </div>
+                                    <div class="form-group item">
+                                        <div class="row dpickers">
+                                            <div class="col-md-6 item">
+                                                <p class="input-group">
+                                                    <input name="firstDate" type="date" class="form-control date-input" datepicker-popup ng-model="dt" is-open="datepickers.one.opened"
+                                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
                                   <span class="input-group-btn">
                                     <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'one')"><i class="glyphicon glyphicon-calendar"></i></button>
                                   </span>
-                                </p>
-                            </div>
+                                                </p>
+                                            </div>
                             <span class="date-conjunc" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
                                     AND
                                 </span>
 
-                            <div class="col-md-6 item" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
+                                            <div class="col-md-6 item" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
 
-                                <p class="input-group">
-                                    <input type="date" class="form-control date-input" datepicker-popup ng-model="secondDate" is-open="datepickers.two.opened" min-date="dt"
-                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
+                                                <p class="input-group">
+                                                    <input name="secondDate" type="date" class="form-control date-input" datepicker-popup ng-model="secondDate" is-open="datepickers.two.opened" min-date="dt"
+                                                           datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
                                       <span class="input-group-btn">
                                         <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'two')"><i class="glyphicon glyphicon-calendar"></i></button>
                                       </span>
-                                </p>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!--<button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter)" ng-show="advancedFilter">Filter</button>-->
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div ng-switch="pageStatus">
+                        <div ng-switch-when="loading">
+                            loading.....
+                        </div>
+                        <div ng-switch-when="error">
+                            There was an error retrieving the logs
+                        </div>
+                        <div ng-switch-when="done">
+                            <div ng-switch="logs.length > 0">
+                                <div class="logs-zero-state" ng-switch-when="false">
+                                    No logs were found. Send some hits to the collector!
+                                </div>
+
+                                <div ng-switch-when="true">
+                                    <span>
+                                        <span>Showing </span> <span ng-bind="logs.length"></span> <span> logs</span>
+                                    </span>
+
+                                    <accordion class="clearfix" close-others="settings.onlyOne">
+                                        <div class="">
+                                            <table class="log-table-headers heading table">
+                                                <tr>
+                                                    <th class=" log-type  ">
+                                                        <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
+                                                            <span>Collector Hit Type</span>
+                                                            <span ng-show="sortType == 'type' && !sortReverse" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType == 'type' && sortReverse" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th class=" log-etype ">
+                                                        <a href="" ng-click="sortType = 'http.end_point_type'; sortReverse = !sortReverse">
+                                                            <span>EndPoint Type</span>
+                                                            <span ng-show="sortType == 'http.end_point_type' && !sortReverse" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType == 'http.end_point_type' && sortReverse" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                    <th class=" log-outs  ">
+                                                        <span>Outputs</span>
+                                                    </th>
+                                                    <th class=" log-date  ">
+                                                        <a href="" ng-click="sortType = 'http.start_time'; sortReverse = !sortReverse">
+                                                            <span>Date</span>
+                                                            <span ng-show="sortType == 'http.start_time' && !sortReverse" class="fa fa-caret-down"></span>
+                                                            <span ng-show="sortType == 'http.start_time' && sortReverse" class="fa fa-caret-up"></span>
+                                                        </a>
+                                                    </th>
+                                                </tr>
+
+                                            </table>
+                                        </div>
+
+                                        <accordion-group is-open="status.open" ng-class="{'accord-active': status.open, 'archived': log.$archived}" ng-repeat="log in logs | orderBy:sortType:sortReverse">
+                                            <accordion-heading >
+                                                <table class="table">
+                                                    <tr>
+                                                        <th class="text-uppercase log-type " ng-bind="log.type">Type</th>
+                                                        <th class="text-uppercase log-etype" ng-bind="log.http.end_point_type">End Point Type</th>
+                                                        <th class="text-uppercase log-outs " ng-bind="getOutputKeys(log)"></th>
+                                                        <th class=" log-date" ng-bind="log.http.start_time | date: 'medium'">Date</th>
+                                                    </tr>
+
+                                                </table>
+                                                <!--<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>-->
+
+                                            </accordion-heading>
+                                            <tabset class="">
+                                                <tab class="tab" heading="Details" ><div ng-include=" 'verifier/assets/views/partials/logdetail.html' "></div></tab>
+                                                <tab class="tab" heading="HTTP" ><div ng-include=" 'verifier/assets/views/partials/httpdetail.html' "></div></tab>
+                                                <tab class="tab" heading="JSON Data" ng-show="outputPresent(log, 'json')"><div ng-include=" 'verifier/assets/views/partials/jsondetail.html' "></div></tab>
+                                                <tab class="tab" heading="GA Data" ng-show="outputPresent(log, 'ga')"><div ng-include=" 'verifier/assets/views/partials/gadetail.html' "></div></tab>
+                                                <tab class="tab" heading="Raw Data" ><div ng-include=" 'verifier/assets/views/partials/rawdetail.html' "></div></tab>
+                                            </tabset>
+                                        </accordion-group>
+                                    </accordion>
+
+                                </div>
                             </div>
                         </div>
 
-                    </div>
-                    <!--<button type="submit" class="btn btn-info filter-btn" ng-click="filter(selected.prop, logfilter)" ng-show="advancedFilter">Filter</button>-->
 
-                </div>
-            </form>
-        </div>
-        <div>
-            <div ng-switch="pageStatus">
-                <div ng-switch-when="loading">
-                    loading.....
-                </div>
-                <div ng-switch-when="error">
-                    There was an error retrieving the logs
-                </div>
-                <div ng-switch-when="done">
-                    <div ng-switch="logs.length > 0">
-                        <div class="logs-zero-state" ng-switch-when="false">
-                            No logs were found. Send some hits to the collector!
-                        </div>
-
-                        <div ng-switch-when="true">
-
-                            <accordion class="clearfix" close-others="settings.onlyOne">
-                                <div class="">
-                                    <table class="log-table-headers heading table">
-                                        <tr>
-                                            <th class=" log-type  ">
-                                                <a href="" ng-click="sortType = 'type'; sortReverse = !sortReverse">
-                                                    <span>Collector Hit Type</span>
-                                                    <span ng-show="sortType == 'type' && !sortReverse" class="fa fa-caret-down"></span>
-                                                    <span ng-show="sortType == 'type' && sortReverse" class="fa fa-caret-up"></span>
-                                                </a>
-                                            </th>
-                                            <th class=" log-etype ">
-                                                <a href="" ng-click="sortType = 'http.end_point_type'; sortReverse = !sortReverse">
-                                                    <span>EndPoint Type</span>
-                                                    <span ng-show="sortType == 'http.end_point_type' && !sortReverse" class="fa fa-caret-down"></span>
-                                                    <span ng-show="sortType == 'http.end_point_type' && sortReverse" class="fa fa-caret-up"></span>
-                                                </a>
-                                            </th>
-                                            <th class=" log-outs  ">
-                                                <span>Outputs</span>
-                                            </th>
-                                            <th class=" log-date  ">
-                                                <a href="" ng-click="sortType = 'http.start_time'; sortReverse = !sortReverse">
-                                                    <span>Date</span>
-                                                    <span ng-show="sortType == 'http.start_time' && !sortReverse" class="fa fa-caret-down"></span>
-                                                    <span ng-show="sortType == 'http.start_time' && sortReverse" class="fa fa-caret-up"></span>
-                                                </a>
-                                            </th>
-                                        </tr>
-
-                                    </table>
-                                </div>
-
-                                <accordion-group is-open="status.open" ng-class="{'accord-active': status.open}" ng-repeat="log in logs | orderBy:sortType:sortReverse">
-                                    <accordion-heading >
-                                        <table class="table">
-                                            <tr>
-                                                <th class="text-uppercase log-type " ng-bind="log.type">Type</th>
-                                                <th class="text-uppercase log-etype" ng-bind="log.http.end_point_type">End Point Type</th>
-                                                <th class="text-uppercase log-outs " ng-bind="getOutputKeys(log)"></th>
-                                                <th class=" log-date" ng-bind="log.http.start_time">Date</th>
-                                            </tr>
-
-                                        </table>
-                                        <!--<i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>-->
-
-                                    </accordion-heading>
-                                    <tabset class="">
-                                        <tab class="tab" heading="Details" ><div ng-include=" 'verifier/assets/views/partials/logdetail.html' "></div></tab>
-                                        <tab class="tab" heading="HTTP" ><div ng-include=" 'verifier/assets/views/partials/httpdetail.html' "></div></tab>
-                                        <tab class="tab" heading="JSON Data" ng-show="outputPresent(log, 'json')"><div ng-include=" 'verifier/assets/views/partials/jsondetail.html' "></div></tab>
-                                        <tab class="tab" heading="GA Data" ng-show="outputPresent(log, 'ga')"><div ng-include=" 'verifier/assets/views/partials/gadetail.html' "></div></tab>
-                                        <tab class="tab" heading="Raw Data" ><div ng-include=" 'verifier/assets/views/partials/rawdetail.html' "></div></tab>
-                                    </tabset>
-                                </accordion-group>
-                            </accordion>
-
-                        </div>
                     </div>
                 </div>
-
-
             </div>
-
-
         </div>
 
     </div>

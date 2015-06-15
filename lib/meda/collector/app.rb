@@ -468,25 +468,6 @@ module Meda
       # Request Verification API (RVA) Endpoints
       ############################################
 
-      def parse_param_for_rva_logs(filter)
-        prefix = get_all_logs_pattern
-        if !filter.nil?
-          if !filter['filter_key'].nil? &&
-              !filter['filter_key'].empty? &&
-              !filter['filter_value'].nil? &&
-              !filter['filter_value'].empty?
-
-            value = filter['filter_value']
-            if filter['filter_key'] == 'mid'
-              filter['filter_value'] = @@profile_id_service.stringToHash(value)
-              filter['filter_key'] = 'pid'
-            end
-            return filter
-          end
-        end
-        filter
-      end
-
       # Endpoint to retrieve qa logs
       get '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
@@ -505,13 +486,16 @@ module Meda
           respond_with_not_found
         end
       end
+
       # Endpoint to delete qa logs
       delete '/meda/verification/logs' do
         if Meda.features.is_enabled("verification_api", false)
           token = get_http_header_from_env('Authorization')
           result = @@request_verification_service.private_key_present?(token)
           if result
-            @@request_verification_service.clear_rva_log
+            filter = parse_param_for_rva_logs(params)
+            logs_pattern = @@request_verification_service.get_pattern(filter)
+            @@request_verification_service.clear_rva_log(logs_pattern)
             respond_with_ok
           else
             respond_with_unauthorized
@@ -528,6 +512,7 @@ module Meda
           if result
             body = json_from_request
             if body.key?('member_id') && !body['member_id'].nil?
+    
               result = @@profile_id_service.stringToHash(body['member_id'])
               json(:hash => result)
             else
@@ -559,7 +544,6 @@ module Meda
         end
       end
 
-      ###
       get '/meda/verifier' do
         if Meda.features.is_enabled("verification_api", false)
           file = 'index.html'
@@ -569,6 +553,9 @@ module Meda
           status 404
         end
       end
+        
+    
+      ### Helper Methods
 
       # Endpoint to add qa logs
       post '/meda/verification/logs/add' do
@@ -599,6 +586,26 @@ module Meda
         else
           respond_with_not_found
         end
+      end
+        
+      def parse_param_for_rva_logs(filter)
+        if !filter.nil?
+          if !filter['filter_key'].nil? &&
+              !filter['filter_key'].empty? &&
+              !filter['filter_value'].nil? &&
+              !filter['filter_value'].empty?
+
+            if filter['filter_key'] == 'mid'
+#                if filter['filter_value'].downcase != 'none'
+#                    filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
+#                end
+              filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
+              filter['filter_key'] = 'pid'
+            end
+            return filter
+          end
+        end
+        filter
       end
       ############################################
 

@@ -29,9 +29,12 @@ angular.module('core').directive('jsonHuman', [
         function link(scope, element, attrs) {
             var input = omit(scope.log, scope.omit);
 
+            var hasSrchVal = angular.isString(scope.searchval) && scope.searchval.length > 0;
+            var level = 1;
+            level = (hasSrchVal) ? 'all' : level;
             var node = renderjson
                 //.set_show_by_default(true)
-                .set_show_to_level('all')
+                .set_show_to_level(level)
                 //.set_sort_objects(true)
                 .set_icons('+', '-')
                 .set_max_string_length(50)(input);
@@ -47,7 +50,7 @@ angular.module('core').directive('jsonHuman', [
                 return contains;
             }
 
-            if(angular.isString(scope.searchval) && scope.searchval.length > 0){
+            if(hasSrchVal){
                 element.find("span").filter(filter).toArray();
             }
         }

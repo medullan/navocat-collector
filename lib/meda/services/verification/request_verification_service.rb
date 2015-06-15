@@ -16,7 +16,7 @@ module Meda
     TRANS_IDS_PROP = 'transaction_ids'
     FEATURE_NAME = 'verification_api'
     LOG_KEY_IDS = { :cid => 'cid', :rid => 'rid', :pid => 'pid', :sort => 'sort' }
-    LOG_KEY_COUNTER = 'log_key_counter'
+    LOG_KEY_COUNTER = 'rva_log_key_counter'
 
     def initialize(config)
       @config=config
@@ -37,7 +37,7 @@ module Meda
         if profile_id == nil
           profile_id = get_profile_id_from_request(input)
         end
-
+          
         end_point_type = data.key?(:end_point_type) ? data[:end_point_type] : nil
         rva_data = {
             :id => rva_id,
@@ -45,7 +45,7 @@ module Meda
             :profile_id => profile_id, :client_id => client_id,
             :type => type,
             :http => {
-                :start_time => data[:start_time].to_s, :end_time => nil,:url => request.url,
+                :start_time => data[:start_time].iso8601.to_s, :end_time => nil,:url => request.url,
                 :method => request.request_method, :request_input => input, :response => nil, :end_point_type => end_point_type
             }
         }
@@ -70,7 +70,7 @@ module Meda
           rva_data = parse_log(rva_data)
           puts rva_data
           if rva_data != nil
-            rva_data['http']['end_time'] = Time.now.to_s
+            rva_data['http']['end_time'] = Time.now.iso8601.to_s
             rva_data['http']['response'] = response
             save_log(rva_id, rva_data)
           end
@@ -133,8 +133,10 @@ module Meda
       built_list
     end
 
-    def clear_rva_log
-      delete_logs(@config.verification_api['collection_name'])
+    def clear_rva_log(filter=nil)
+      data = get_log_keys(pattern)
+      data.push(LOG_KEY_COUNTER)
+      delete_logs(data)
       return true
     end
 

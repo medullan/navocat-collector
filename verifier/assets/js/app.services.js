@@ -109,12 +109,23 @@ angular.module('core').service('LogStoreService', [
                 }
             };
             if(angular.isArray(logs) && angular.isArray(ids)){
-                return _.remove(logs, checkDuplicate);
+                var toRemove =  _.remove(angular.copy(logs), checkDuplicate);
+                return toRemove;
             }
         };
         self.storeLogs = function(logs){
             store.set(CoreConstants.storeKeys.logs, logs);
             return logs;
+        };
+        self.storeFilterOptions = function(filterKey, filterValue){
+            var opt = {key: filterKey || '', value: filterValue || ''};
+            store.set(CoreConstants.storeKeys.filterOptions, opt);
+            return opt;
+        };
+
+        self.getFilterOptions = function(){
+            var opt = store.get(CoreConstants.storeKeys.filterOptions);
+            return opt;
         };
         self.setIncludeArchive = function(bool){
             store.set(CoreConstants.storeKeys.includeArchive, bool);
@@ -123,6 +134,15 @@ angular.module('core').service('LogStoreService', [
         self.includeArchive = function(){
             return store.get(CoreConstants.storeKeys.includeArchive);
         };
+
+        self.setFilterToggle = function(bool){
+            store.set(CoreConstants.storeKeys.filterToggle, bool);
+            return bool;
+        };
+        self.getFilterToggle = function(){
+            return store.get(CoreConstants.storeKeys.filterToggle);
+        };
+
         self.getActiveLogs = function(){
             var logs = store.get(CoreConstants.storeKeys.logs);
             return logs;
@@ -133,18 +153,25 @@ angular.module('core').service('LogStoreService', [
             arch =  _.union(logs,arch);
             var archLogs = self.removeDuplicates(self.getLogIds(self.getActiveLogs()), arch);
             arch =  _.uniq(archLogs, 'id');
+            angular.forEach(arch, function(value, key){
+                if(angular.isObject(value)){
+                    value.$archived = true;
+                    arch[key] = value;
+                }
+            });
             store.set(CoreConstants.storeKeys.archivedLogs, arch);
             return arch;
         };
         self.getArchivedLogs = function(){
-            var arch = store.get(CoreConstants.storeKeys.archivedLogs);
-            return arch;
+            var archLogs = store.get(CoreConstants.storeKeys.archivedLogs);
+            //var archLogs = self.removeDuplicates(self.getLogIds(self.getActiveLogs()), arch);
+            return archLogs;
         };
 
         self.getAllLogs = function(){
             var arch = store.get(CoreConstants.storeKeys.archivedLogs);
             var logs = store.get(CoreConstants.storeKeys.logs);
-            var all = _.uniq(_.union(logs,arch), 'id');
+            var all = (_.union(logs,arch));
             return all;
         };
 
@@ -159,7 +186,9 @@ angular.module('core').service('LogStoreService', [
             var keys = [
                 CoreConstants.storeKeys.archivedLogs,
                 CoreConstants.storeKeys.logs,
-                CoreConstants.storeKeys.includeArchive
+                CoreConstants.storeKeys.includeArchive,
+                CoreConstants.storeKeys.filterOptions,
+                CoreConstants.storeKeys.filterToggle
             ];
             angular.forEach(keys, function(val){
                 store.remove(val);
@@ -188,7 +217,11 @@ angular.module('core').service('LogStoreService', [
 
         self.getRemoteLogs= function(){
             var deferred = $q.defer();
-            $http.get(  '/meda/verification/logs').
+            var filterOpt = self.getFilterOptions();
+            filterOpt = filterOpt || {key: '', value: ''};
+            var apiUrl = '/meda/verification/logs?filter_key='+ filterOpt.key +'&filter_value='+ filterOpt.value +'';
+
+            $http.get(apiUrl).
                 success(function(data, status, headers, config) {
                     // this callback will be called asynchronously
                     // when the response is available
@@ -256,38 +289,70 @@ angular.module('core').service('CoreService', [
             'member_id': function( crit, val){
                 var deferred = $q.defer();
                 self.verify(val).then(function(data){
-                    deferred.resolve(data);
+                    var result = {value: data.hash};
+                    deferred.resolve(result);
                 });
                 return deferred.promise;
             }
         };
-        function query(json, criteria, value) {
+
+        var advancedFilter = {
+            'date': function(item, pred){
+                var logDate = item.http.start_time;
+                if(pred){
+                    var result = true;
+                    if(pred.criteria == 'before'){
+                        result = moment(logDate).isBefore(pred.firstValue, 'day');
+                    }else if(pred.criteria == 'after'){
+                        result = moment(logDate).isAfter(pred.firstValue, 'day');
+                    }else if(pred.criteria == 'between'){
+                        result = moment(logDate).isAfter(pred.firstValue) && moment(logDate).isBefore(moment(pred.secondValue).add(1,'d'));
+                    }
+                    console.log('date pred', logDate, pred.firstValue, result);
+                    return result;
+                }
+
+
+                return true;
+            }
+        };
+
+        var getPredValue = function(item, pred){
+            if(pred && pred.advancedFilterToggle && pred.type){
+                var result = advancedFilter[pred.type](item, pred);
+                //console.log('pred: ', result);
+                return result;
+            }
+            return true;
+        };
+        function query(json, criteria, value, pred) {
             var custom = ['end_point_type', 'member_id', 'outputs', 'contain'];
             return Enumerable.From(json)
                 .Where(function (item) {
                     var result = false;
+                    var predValue = getPredValue(item, pred);
                     if (_.contains(custom, criteria)) {
-                        result = customFilter[criteria](item, criteria, value);
+                        result = customFilter[criteria](item, criteria, value, pred) && predValue;
                     } else {
-                        result = _.contains(item[criteria].toLowerCase(), value.toLowerCase());
+                        result = _.contains(item[criteria].toLowerCase(), value.toLowerCase()) && predValue;
                     }
                     return result;
                 })
                 .ToArray();
         }
 
-        self.filter= function(json, criteria, value, isXhr){
+        self.filter= function(json, criteria, value, pred){
             var deferred = $q.defer();
             var data = ['member_id'];
             if(_.contains(data, criteria)){
                 extraData[criteria](criteria, value).then(function(data){
-                    var result = query(json, criteria, data.hash);
-                    var data = {results: result, data:data}
+                    var result = query(json, criteria, data.value, pred);
+                    var data = {results: result, data:data};
                     deferred.resolve(data) ;
                 });
             }else{
-                var result = query(json, criteria, value);
-                var data = {results: result, data:{value:value, criteria: criteria}}
+                var result = query(json, criteria, value, pred);
+                var data = {results: result, data:{value:value, criteria: criteria}};
                 deferred.resolve(data) ;
             }
 
