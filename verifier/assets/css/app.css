@@ -9,8 +9,12 @@ body .logs{
 a{
     outline:0
 }
-td {
+.styled-log-data td {
     min-width: 115px;
+    max-width: 273px;
+}
+.styled-props{
+    margin-bottom:10px;
 }
 .panel-default>.panel-heading+.panel-collapse>.panel-body {
     border-top-color: #ddd;
@@ -133,9 +137,7 @@ pre{
 .detail-val{
     color: #000;
 }
-.styled-props{
-    margin-bottom:10px;
-}
+
 .logs-zero-state,
 .search-cont,
 .more-info{
@@ -246,55 +248,3 @@ pre.renderjson{background: #eeeeee; margin:0;border: 0; border-radius:0;}
 .main-filter .modal-body  {
     padding-bottom: 0;
 }
-
-/* The CSS */
-/*select {*/
-    /*padding:0 12px;*/
-    /*margin: 0 10px;*/
-    /*-webkit-border-radius:4px;*/
-    /*-moz-border-radius:4px;*/
-    /*border-radius:4px;*/
-    /*-webkit-box-shadow: 0 1px 0 #ccc, 0 -1px #fff inset;*/
-    /*-moz-box-shadow: 0 1px 0 #ccc, 0 -1px #fff inset;*/
-    /*box-shadow: 0 1px 0 #ccc, 0 -1px #fff inset;*/
-    /*background: #f8f8f8;*/
-    /*color:#000;*/
-    /*border:none;*/
-    /*outline:none;*/
-    /*display: inline-block;*/
-    /*-webkit-appearance:none;*/
-    /*-moz-appearance:none;*/
-    /*appearance:none;*/
-    /*cursor:pointer;*/
-/*}*/
-
-/* Targetting Webkit browsers only. FF will show the dropdown arrow with so much padding. */
-/*@media screen and (-webkit-min-device-pixel-ratio:0) {*/
-    /*select {padding-right:18px}*/
-/*}*/
-
-/*label {position:relative}*/
-/*label:after {*/
-    /*content:'<>';*/
-    /*font:11px "Consolas", monospace;*/
-    /*color:#000;*/
-    /*-webkit-transform:rotate(90deg);*/
-    /*-moz-transform:rotate(90deg);*/
-    /*-ms-transform:rotate(90deg);*/
-    /*transform:rotate(90deg);*/
-    /*right:8px; top:2px;*/
-    /*padding:0 0 2px;*/
-    /*border-bottom:1px solid #ddd;*/
-    /*position:absolute;*/
-    /*pointer-events:none;*/
-/*}*/
-/*label:before {*/
-    /*content:'';*/
-    /*right:6px; top:0px;*/
-    /*width:20px;*/
-    /*height:20px;*/
-    /*background:#f8f8f8;*/
-    /*position:absolute;*/
-    /*pointer-events:none;*/
-    /*display:block;*/
-/*}*/

@@ -67,23 +67,23 @@
                                                 <p class="input-group">
                                                     <input name="firstDate" type="date" class="form-control date-input" datepicker-popup ng-model="dt" is-open="datepickers.one.opened"
                                                            datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
-                                  <span class="input-group-btn">
-                                    <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'one')"><i class="glyphicon glyphicon-calendar"></i></button>
-                                  </span>
+                                                      <span class="input-group-btn">
+                                                        <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'one')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                                      </span>
                                                 </p>
                                             </div>
-                            <span class="date-conjunc" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
-                                    AND
-                                </span>
+                                        <span class="date-conjunc" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
+                                                AND
+                                        </span>
 
                                             <div class="col-md-6 item" ng-show="selectedDatePred.val.toLowerCase() === 'between'">
 
                                                 <p class="input-group">
                                                     <input name="secondDate" type="date" class="form-control date-input" datepicker-popup ng-model="secondDate" is-open="datepickers.two.opened" min-date="dt"
                                                            datepicker-options="dateOptions" ng-required="true" close-text="Close" show-button-bar="false"/>
-                                      <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'two')"><i class="glyphicon glyphicon-calendar"></i></button>
-                                      </span>
+                                                  <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-default date-icon" ng-click="open($event, 'two')"><i class="glyphicon glyphicon-calendar"></i></button>
+                                                  </span>
                                                 </p>
                                             </div>
                                         </div>
