@@ -135,7 +135,7 @@ module Meda
 
     def clear_rva_log(filter=nil)
       data = get_log_keys(pattern)
-      data.push(LOG_KEY_COUNTER)
+#      data.push(LOG_KEY_COUNTER)
       delete_logs(data)
       return true
     end
@@ -177,6 +177,7 @@ module Meda
 
     def get_pattern(filter)
       prefix = get_all_logs_pattern
+      wildcard = "#{prefix}wildcard(0)"
       if !filter.nil?
         if !filter['filter_key'].nil? &&
             !filter['filter_key'].empty? &&
@@ -189,7 +190,7 @@ module Meda
           return template
         end
       end
-      prefix
+      wildcard
     end
 
     def get_log_keys(pattern)
