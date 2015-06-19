@@ -131,7 +131,7 @@ pre{
 }
 .detail-title{
     color: black;
-    background-color: #31b0d5;
+    background-color: #dcd7d1;
     font-weight:bolder;
 }
 .detail-val{
@@ -165,7 +165,7 @@ li.tab.active {
     display: none;
     text-decoration: none;
     color: #ffffff;
-    background-color: #31b0d5;
+    background-color: #DCD7BF;
 }
 
 .back-to-top i {
