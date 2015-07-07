@@ -19,57 +19,7 @@ describe Meda::RequestVerificationService do
   LOG_KEY_IDS = { :cid => 'cid', :rid => 'rid', :pid => 'pid', :sort => 'sort' }
   @@request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
 
-  describe 'test uuid generation' do
-
-    xit 'should start with prefix' do
-
-      request_validation_service = Meda::RequestVerificationService.new(Meda.configuration)
-      uuid = request_validation_service.generate_transaction_id()
-      expect(uuid.to_s).to start_with(Meda.configuration.verification_api['id_prefix'])
-      # Meda.configuration.verification_api.collection_name
-    end
-
-    xit 'should be saved in the thread' do
-      request_validation_service = Meda::RequestVerificationService.new(Meda.configuration)
-      uuid = request_validation_service.set_transaction_id()
-
-      expect(Thread.current[Meda.configuration.verification_api['thread_id_key']]).to equal(uuid)
-    end
-
-
-
-  end
-
   describe 'test storing an rva log' do
-
-    xit 'should be saved in the data' do
-
-      # test_config = Meda.configuration.deep_dup
-      # test_config.features = {}
-
-      test_id = "#{Meda.configuration.verification_api['id_prefix']}87238723-323232332"
-      log_data_store= Meda::RedisDbStore.new(Meda.configuration)
-
-      uuid = UUIDTools::UUID.random_create.to_s
-      uuid = "#{Meda.configuration.verification_api['id_prefix']}#{uuid}"
-      # result = profile_service.decode('rva')
-      # profile_service.encode("rva:#{test_id}5", {:id => test_id})
-      # puts result
-
-      log_data_store.encode_collection('rva', uuid, {:id => uuid})
-      list = log_data_store.decode_collection('rva')
-      filter = log_data_store.decode_collection_filter_by_key('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
-      exists = log_data_store.key_in_collection?('rva', 'rva-54ffccec-be33-4125-b920-e646184313b1')
-      deleted = log_data_store.delete_key_within_collection('rva', 'rva-a46ddda3-38e9-4eb2-9569-4cdef8a5f883')
-
-      puts list
-      puts filter
-      puts "key exists: #{exists}"
-      puts "deleted?: #{deleted}"
-      expect(true).to be_truthy
-
-    end
-
     it 'should find json that relates to a unique collector hit' do
       request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
       page_rva_data = {'id'=> 'rva-232323232', 'type'=> 'page', 'transaction_ids' => {'json' => '0f1c2f70f99b11e4ae05003ee1fffe52'}}

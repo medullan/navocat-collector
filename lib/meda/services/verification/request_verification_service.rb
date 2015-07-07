@@ -55,7 +55,6 @@ module Meda
             client_id,
             rva_id,
             sort_key.to_s)
-        # puts log_key
         set_rva_id(log_key)
         delete_logs_outside_limit
         save_log(log_key, rva_data)
@@ -179,10 +178,8 @@ module Meda
       prefix = get_all_logs_pattern
       wildcard = "#{prefix}wildcard(0)"
       if !filter.nil?
-        if !filter['filter_key'].nil? &&
-            !filter['filter_key'].empty? &&
-            !filter['filter_value'].nil? &&
-            !filter['filter_value'].empty?
+        if !filter['filter_key'].blank? &&
+            !filter['filter_value'].blank? 
           value = filter['filter_value']
           key = filter['filter_key']
           filter_pattern = "#{key}(#{value})"

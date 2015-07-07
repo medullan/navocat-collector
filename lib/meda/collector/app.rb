@@ -590,15 +590,10 @@ module Meda
         
       def parse_param_for_rva_logs(filter)
         if !filter.nil?
-          if !filter['filter_key'].nil? &&
-              !filter['filter_key'].empty? &&
-              !filter['filter_value'].nil? &&
-              !filter['filter_value'].empty?
+          if !filter['filter_key'].blank? &&
+              !filter['filter_value'].blank? 
 
             if filter['filter_key'] == 'mid'
-#                if filter['filter_value'].downcase != 'none'
-#                    filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
-#                end
               filter['filter_value'] = @@profile_id_service.stringToHash(filter['filter_value'])
               filter['filter_key'] = 'pid'
             end

@@ -92,59 +92,6 @@ module Meda
 
 
     #Collection APIs
-    def key_in_collection?(list, key)
-      redis do |r|
-        return r.hexists(list, key)
-      end
-    end
-    def collection_size(list)
-      redis do |r|
-        return r.hlen(list)
-      end
-    end
-    def encode_collection(list, key, value)
-      redis do |r|
-        result = nil
-        if list != nil && key != nil
-          result = r.hset( list, key, value)
-        end
-        return result
-      end
-    end
-
-    def decode_collection_filter_by_key(list, key)
-      redis do |r|
-        result = nil
-        if list != nil && key != nil
-          result = r.hget(list, key)
-          if !result.nil?
-            result = eval(result)
-          end
-        end
-        return result
-      end
-    end
-
-    def delete_key_within_collection(list, key)
-      redis do |r|
-        return !!r.hdel( list, key)
-
-      end
-    end
-
-    def decode_collection(list)
-      redis do |r|
-        result = []
-        if list != nil
-          result = r.hvals(list)
-          # result.each { |key, val|
-          #   returnVal.push(eval(val))
-          # }
-        end
-        return result
-      end
-    end
-
     def scan_keys(pattern, cursor=0, count=1000)
       redis do |r|
         keys = []
@@ -163,9 +110,6 @@ module Meda
         result = []
         if !keys.nil? && !keys.empty?
           result = r.mget(keys)
-          # result.each { |key, val|
-          #   returnVal.push(JSON.parse(key))
-          # }
         end
         return result
       end
