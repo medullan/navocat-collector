@@ -2,6 +2,7 @@ require 'json'
 require 'logger'
 require 'meda'
 require 'meda/services/logging/logging_meta_data_service'
+require 'meda/services/verification/request_verification_service'
 
 module Meda
 
@@ -11,6 +12,7 @@ module Meda
       helperConfig = {}
       helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
+      @@request_verification_service = Meda::RequestVerificationService.new(helperConfig["config"])
     end
 
     def debug_ga_info(debug_ga_response)
@@ -27,6 +29,10 @@ module Meda
 
           if !params_sent_to_ga.blank? && ga_response_code == "200"
             ga_response = construct_ga_debug_object(ga_response_json)
+            if Meda.features.is_enabled("verification_api", false)
+              ga_data = ga_response_json.merge(ga_response).merge({:response_code => ga_response_code}).merge(params_sent_to_ga)
+              @@request_verification_service.add_ga_data(ga_data)
+            end
             @logging_meta_data_service.add_to_mdc("ga_debug_validity", ga_response[:validity])
             @logging_meta_data_service.add_to_mdc("ga_debug_message", ga_response[:parser_message])
             @logging_meta_data_service.add_to_mdc_hash("ga_debug", params_sent_to_ga)
@@ -34,8 +40,11 @@ module Meda
         end
 
       rescue StandardError => e
-        Meda.logger.error("Failure logging ga debug information")
+        msg = "Failure logging ga debug information"
+        Meda.logger.error(msg)
         Meda.logger.error(e)
+        data = {:message => e.message, :status_code=> 500, :status_text=> 'Internal Error', :log_msg => msg}
+        @@request_verification_service.end_rva_log(data)
       end
     end
 

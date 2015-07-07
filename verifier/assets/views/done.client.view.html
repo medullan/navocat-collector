@@ -1,0 +1,48 @@
+<div id="logs-container" class="done-page container">
+
+    <div id="" class="row  text-center">
+        <div class="toolbelt">
+            <a class="btn btn-info" href="" clip-copy="getJsonString()" clip-click="copyDone()">Copy JSON</a>
+            <a class="btn btn-danger" href="" ui-sref="home" >Done</a>
+        </div>
+
+        <div class="text-bold">
+            <p>
+                You have successfully ended your session.
+            </p>
+            <p>
+                There is no guarantee that the logs from this session will remain on the server.
+                Please save a copy of the logs before you select
+                <span class="error">Done</span> or navigate away from this page.
+            </p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div >
+            <span>
+                <span>Showing </span> <span ng-bind="archivedLogs.length"></span> <span> logs</span>
+            </span>
+        </div>
+        <tabset class="">
+            <tab class="tab" heading="JSON: Formatted" >
+                <div>
+                    <div data-json-human log="archivedLogs" omit=" '$$hashKey' "></div>
+                </div>
+            </tab>
+            <tab class="tab" heading="JSON: Plain Text" >
+                <div>
+                    <textarea class="ta-json" ng-bind="jsonToString(archivedLogs)"></textarea>
+
+                </div>
+            </tab>
+        </tabset>
+
+    </div>
+
+    <a href="#logs-container" offset="80" du-smooth-scroll="logs-container" class="back-to-top" style="display: inline;">
+        <i class="fa fa-arrow-circle-up"></i>
+    </a>
+    <span id="hidden-elem" ng-bind="jsonToString(archivedLogs)" class="hidden"></span>
+
+</div>

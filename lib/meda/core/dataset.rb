@@ -8,6 +8,8 @@ require 'logger'
 require 'meda'
 require 'meda/services/logging/logging_meta_data_service'
 require 'meda/services/ga_debug/ga_debug_service'
+require 'meda/services/verification/request_verification_service'
+# require 'sinatra/json'
 
 module Meda
 
@@ -33,6 +35,7 @@ module Meda
       helperConfig["config"] = Meda.configuration
       @logging_meta_data_service = Meda::LoggingMetaDataService.new(helperConfig)
       @@ga_debug_service = Meda::GAHitDebugService.new()
+      @@request_verification_service = Meda::RequestVerificationService.new(@meda_config)
     end
 
     def identify_profile(info)
@@ -126,6 +129,10 @@ module Meda
           f.puts(hit.to_json)
         end
 
+        if Meda.features.is_enabled("verification_api", false)
+          @@request_verification_service.add_json_ref( hit.id)
+        end
+
         @last_disk_hit = {
           :hit => hit, :path => path, :data => hit.to_json
         }
@@ -134,8 +141,11 @@ module Meda
         @logging_meta_data_service.add_to_mdc("disk_hit_path", path)
         logger.info("wrote hit to disk")
       rescue StandardError => e
-        logger.error("Failure writing hit #{hit.id} to #{path}")
+        msg = "Failure writing hit #{hit.id} to #{path}"
+        logger.error(msg)
         logger.error(e)
+        data = {:message => e.message, :status_code=> 500, :status_text=> 'Internal Error', :log_msg => msg}
+        @@request_verification_service.end_rva_log(data)
       end
       true
     end
@@ -148,7 +158,7 @@ module Meda
         return unless stream_to_ga?
 
         tracker = Staccato.tracker(hit.tracking_id, hit.client_id)
-      
+
         if hit.hit_type == 'pageview'
           ga_hit = Staccato::Pageview.new(tracker, hit.as_ga)
         elsif hit.hit_type == 'event'

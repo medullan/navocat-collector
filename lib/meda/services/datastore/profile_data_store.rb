@@ -25,7 +25,6 @@ module Meda
       end 
     end
 
-
     def encode(key,value)
       Meda.logger.debug("starting encode")
       startBenchmark = Time.now.to_f
@@ -71,6 +70,7 @@ module Meda
       Meda.logger.warn("key size #{@store.key_size}")
       @store.key_size
     end
+
   end
 end
 

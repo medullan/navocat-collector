@@ -2,8 +2,6 @@ require 'uuidtools'
 require 'digest'
 require 'logger'
 
-require_relative '../../datastore/profile_data_store.rb'
-
 module Meda
 
   # Implements hashing with salt for profile ids

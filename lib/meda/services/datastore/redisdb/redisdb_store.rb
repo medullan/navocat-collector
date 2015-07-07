@@ -1,4 +1,5 @@
 require 'redis'
+require 'json'
 require "connection_pool"
 
 module Meda
@@ -40,6 +41,7 @@ module Meda
       end
     end
 
+
     def decode(key)
        returnVal = nil
        values = nil
@@ -47,13 +49,14 @@ module Meda
           #return r.get(key)
           if key.include? "lookup"
               values=r.sinter(key)
-              if values.length > 0 
+              if values.length > 0
                 returnVal=values.first
               end
           else
               values=r.hgetall(key)
               if not values.empty?
                 returnVal=values
+
               end
           end
        end
@@ -86,6 +89,55 @@ module Meda
         yield(conn) if block_given?
       end
     end
+
+
+    #Collection APIs
+    def scan_keys(pattern, cursor=0, count=1000)
+      redis do |r|
+        keys = []
+        if !pattern.nil?
+          cursor = cursor || 0
+          count = count || 100
+          count = (count + 10)
+          keys = r.scan(cursor, :match => pattern, :count => count )[1]
+        end
+        return keys
+      end
+    end
+
+    def multi_decode(keys)
+      redis do |r|
+        result = []
+        if !keys.nil? && !keys.empty?
+          result = r.mget(keys)
+        end
+        return result
+      end
+    end
+
+    def set(key,value)
+      redis do |r|
+        r.set(key, value)
+      end
+    end
+
+    def get(key)
+      returnVal = nil
+      redis do |r|
+       result = r.get(key)
+        if !result.nil? && !result.empty?
+          return JSON.parse(result)
+        end
+       returnVal
+      end
+    end
+
+    def increment(key)
+      redis do |r|
+        r.incr(key)
+      end
+    end
+
   end
 end
 
