@@ -546,13 +546,18 @@ module Meda
 
       get '/meda/verifier' do
         if Meda.features.is_enabled("verification_api", false)
-          file = 'index.html'
-          path = File.join('verifier', file)
+          file = 'verifier/index.html'
+          path = File.expand_path("..", File.dirname(__FILE__))
+          path = File.expand_path("..", path)
+          path = File.expand_path("..", path)
+          path = File.join(path,file)
+          
           send_file(path)
         else
           status 404
         end
       end
+
         
     
       ### Helper Methods
