@@ -18,8 +18,9 @@ class CustomHitFilter
     #hit = filter_ip_from_referrer(hit)
     hit = filter_campaign(hit)
     hit = filter_age(hit)
-    hit = filter_path(hit)
     hit = filter_profile_data(hit)
+    hit = filter_path(hit)
+
   end
 
   def filter_ip_from_referrer(hit)
