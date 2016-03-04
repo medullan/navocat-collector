@@ -18,7 +18,6 @@ class CustomHitFilter
     full_url = hit.props[:path]
     #hit = filter_ip_from_referrer(hit)
     hit = filter_campaign(hit)
-    hit = filter_robot_user(hit)
     hit = filter_age(hit)
     hit = filter_path(hit)
     hit = filter_query_strings(hit)
