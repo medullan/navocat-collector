@@ -43,7 +43,6 @@ development:
     error_file_logger: true
     stdout_logger: true
     error_email_logger: false
-    google_analytics_debug: true
     p3p: true
     config_check: false
     google_analytics_debug: true
