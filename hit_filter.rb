@@ -5,14 +5,13 @@ require 'ipaddr'
 
 class CustomHitFilter
 
-  attr_accessor :hit, :whitelisted_urls, :google_analytics, :full_path
+  attr_accessor :hit, :google_analytics, :full_path
 
   def filter_hit(hit, dataset)
     if(dataset)
       logger.info("start of hit filter")
       @dataset = dataset
       @google_analytics = dataset.google_analytics
-      @whitelisted_urls = dataset.whitelisted_urls
     end
 
     full_url = hit.props[:path]
@@ -20,7 +19,6 @@ class CustomHitFilter
     hit = filter_campaign(hit)
     hit = filter_age(hit)
     hit = filter_path(hit)
-    hit = filter_query_strings(hit)
     hit = filter_profile_data(hit)
   end
 
@@ -117,24 +115,6 @@ class CustomHitFilter
       logger.error(e)
     rescue StandardError => e
       logger.error("StandardError filtering path: #{original_path} ")
-      logger.error(e)
-    end
-    hit
-  end
-
-  def filter_query_strings(hit)
-    begin
-      if hit && hit.props && hit.props[:path] && whitelisted_urls
-        current_path = hit.props[:path]
-        if current_path.include? "?"
-          regex_of_paths = Regexp.union(whitelisted_urls)
-          if (!regex_of_paths.match(current_path))
-            hit.props[:path] = current_path[0..(current_path.index("?")-1)]
-          end
-        end
-      end
-    rescue StandardError => e
-      logger.error("Failure filtering query strings: ")
       logger.error(e)
     end
     hit

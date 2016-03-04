@@ -4,7 +4,7 @@ production:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-58408341-1
+    tracking_id: UA-74192553-1
     custom_dimensions:
       age:
         index: 1
@@ -23,10 +23,6 @@ development:
   token: c2e02c92c73211e3aaf844fb42fffe8c
   filter_file_name: hit_filter.rb
   filter_class_name: CustomHitFilter
-  whitelisted_urls:
-      - !ruby/regexp '/utm_source=[^&]+/'
-      - !ruby/regexp '/utm_campaign=[^&]+/'
-      - !ruby/regexp '/utm_medium=[^&]+/'
   enable_data_retrivals: true
   google_analytics:
     record: true
@@ -104,7 +100,7 @@ test:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-58408341-1
+    tracking_id: UA-74192553-1
     custom_dimensions:
       age:
         index: 1
