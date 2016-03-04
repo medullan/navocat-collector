@@ -25,3 +25,4 @@ datasets.yml
 meda.yml
 .idea/
 spec/tmp
+nohup.out
