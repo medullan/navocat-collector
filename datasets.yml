@@ -2,22 +2,156 @@
 production:
   token: afc0a6c8c73211e3aaf844fb42fffe8c
   enable_data_retrivals: true
+  filter_file_name: hit_filter.rb
+  filter_class_name: CustomHitFilter
+  enable_data_retrivals: true
   google_analytics:
     record: true
     tracking_id: UA-74192553-1
     custom_dimensions:
       age:
-        index: 1
-      gender:
         index: 2
-      segment:
+        mappingRange:
+          18: <18
+          45: 18-44
+          65: 45-64
+          1000: 65+
+      gender:
+        index: 1
+        mapping:
+          m: male
+          M: male
+          Male: male
+          f: female
+          F: female
+          Female: female
+          u: unknown
+          U: unknown
+      memberType:
+        index: 4
+        mapping:
+          O: contract owner
+          o: contract owner
+          D: dependent
+          d: dependent
+          S: spouse
+          s: spouse
+          T: terminated
+          t: terminated
+          C: dependent
+          c: dependent
+      Option:
         index: 3
+        mapping:
+          b: basic
+          s: standard
+          B: basic
+          S: standard
+          Basic: basic
+          Standard: standard
+      heathAndConsumerSegmentation:
+        index: 5
+        mapping:
+          A102: healthy and engaged
+          A112: healthy and not engaged
+          A111: not healthy and engaged
+          A113: not healthy and not engaged
+      healthSegmentation:
+        index: 6
+        mapping:
+          A114: healthy independent
+          A115: health risk factors
+          A116: early stage chronic
+          A117: complex
+          A118: late stage chronic
+          A119: chronic copper
+          A120: healthy independent
+      consumerSegmentation:
+        index: 7
+        mapping:
+          A119: fast trackers
+          A120: movers and she-kers
+          A121: show me the way
+          A122: senior tour loyalists
+          A123: sedentary solos
+          A124: mature traditionalists
 
 staging:
   token: b6822676c73211e3aaf844fb42fffe8c
   enable_data_retrivals: true
+  filter_file_name: hit_filter.rb
+  filter_class_name: CustomHitFilter
+  enable_data_retrivals: true
   google_analytics:
-    record: false
+    record: true
+    tracking_id: UA-74192553-1
+    custom_dimensions:
+      age:
+        index: 2
+        mappingRange:
+          18: <18
+          45: 18-44
+          65: 45-64
+          1000: 65+
+      gender:
+        index: 1
+        mapping:
+          m: male
+          M: male
+          Male: male
+          f: female
+          F: female
+          Female: female
+          u: unknown
+          U: unknown
+      memberType:
+        index: 4
+        mapping:
+          O: contract owner
+          o: contract owner
+          D: dependent
+          d: dependent
+          S: spouse
+          s: spouse
+          T: terminated
+          t: terminated
+          C: dependent
+          c: dependent
+      Option:
+        index: 3
+        mapping:
+          b: basic
+          s: standard
+          B: basic
+          S: standard
+          Basic: basic
+          Standard: standard
+      heathAndConsumerSegmentation:
+        index: 5
+        mapping:
+          A102: healthy and engaged
+          A112: healthy and not engaged
+          A111: not healthy and engaged
+          A113: not healthy and not engaged
+      healthSegmentation:
+        index: 6
+        mapping:
+          A114: healthy independent
+          A115: health risk factors
+          A116: early stage chronic
+          A117: complex
+          A118: late stage chronic
+          A119: chronic copper
+          A120: healthy independent
+      consumerSegmentation:
+        index: 7
+        mapping:
+          A119: fast trackers
+          A120: movers and she-kers
+          A121: show me the way
+          A122: senior tour loyalists
+          A123: sedentary solos
+          A124: mature traditionalists
 
 development:
   token: c2e02c92c73211e3aaf844fb42fffe8c
@@ -98,13 +232,76 @@ development:
 test:
   token: c2e02c92c73211e3aaf8sds44fb42fffe8c
   enable_data_retrivals: true
+  filter_file_name: hit_filter.rb
+  filter_class_name: CustomHitFilter
+  enable_data_retrivals: true
   google_analytics:
     record: true
     tracking_id: UA-74192553-1
     custom_dimensions:
       age:
-        index: 1
-      gender:
         index: 2
-      segment:
+        mappingRange:
+          18: <18
+          45: 18-44
+          65: 45-64
+          1000: 65+
+      gender:
+        index: 1
+        mapping:
+          m: male
+          M: male
+          Male: male
+          f: female
+          F: female
+          Female: female
+          u: unknown
+          U: unknown
+      memberType:
+        index: 4
+        mapping:
+          O: contract owner
+          o: contract owner
+          D: dependent
+          d: dependent
+          S: spouse
+          s: spouse
+          T: terminated
+          t: terminated
+          C: dependent
+          c: dependent
+      Option:
         index: 3
+        mapping:
+          b: basic
+          s: standard
+          B: basic
+          S: standard
+          Basic: basic
+          Standard: standard
+      heathAndConsumerSegmentation:
+        index: 5
+        mapping:
+          A102: healthy and engaged
+          A112: healthy and not engaged
+          A111: not healthy and engaged
+          A113: not healthy and not engaged
+      healthSegmentation:
+        index: 6
+        mapping:
+          A114: healthy independent
+          A115: health risk factors
+          A116: early stage chronic
+          A117: complex
+          A118: late stage chronic
+          A119: chronic copper
+          A120: healthy independent
+      consumerSegmentation:
+        index: 7
+        mapping:
+          A119: fast trackers
+          A120: movers and she-kers
+          A121: show me the way
+          A122: senior tour loyalists
+          A123: sedentary solos
+          A124: mature traditionalists
