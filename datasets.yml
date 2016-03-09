@@ -65,7 +65,10 @@ production:
           A117: complex
           A118: late stage chronic
           A119: chronic copper
-          A120: healthy independent
+          A120: healthy striver
+          A121: family supporter
+          A122: dependant and growing
+          A123: retired and healthy
       consumerSegmentation:
         index: 7
         mapping:
