@@ -201,6 +201,17 @@ module Meda
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
         start_time = Time.now
+
+        uuid = UUIDTools::UUID.random_create.to_s
+        logger.info("Generated UUID for etag " + uuid)
+
+        if headers['If-None-Match'].blank?
+          logger.info("Setting etag with uuid")
+          etag uuid
+        else
+          logger.info("If-None-Match is blank")
+        end
+
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
@@ -679,14 +690,11 @@ module Meda
 
       def set_client_id_cookie(client_id)
         @@logging_meta_data_service.add_to_mdc("new__collector_client_id", client_id)
-        etag client_id
         response.set_cookie :__collector_client_id, {:value => client_id, :max_age => "31536000"}
       end
 
       def get_client_id_from_cookie
         cookies[:'__collector_client_id']
-        headers['ETag'] = "8ad9ee1a-d444-4608-8d8e-2e8ea962b11e"
-        headers['ETag']
       end
 
       def set_client_id_param(client_id)
