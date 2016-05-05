@@ -679,11 +679,14 @@ module Meda
 
       def set_client_id_cookie(client_id)
         @@logging_meta_data_service.add_to_mdc("new__collector_client_id", client_id)
+        etag client_id
         response.set_cookie :__collector_client_id, {:value => client_id, :max_age => "31536000"}
       end
 
       def get_client_id_from_cookie
         cookies[:'__collector_client_id']
+        headers['ETag'] = "8ad9ee1a-d444-4608-8d8e-2e8ea962b11e"
+        headers['ETag']
       end
 
       def set_client_id_param(client_id)
