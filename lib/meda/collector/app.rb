@@ -68,6 +68,20 @@ module Meda
       end
 
       before do
+        cache_control :max_age => 36000
+        logger.info(params)
+        uuid = "d5a25c2d-e8d8-42d2-a93c-748e4213b055"
+        logger.info("Generated UUID for etag " + uuid)
+
+        if headers['If-None-Match'].blank?
+          logger.info("Setting etag with uuid")
+          etag uuid
+        else
+          logger.info("If-None-Match is blank")
+        end
+      end
+
+      before do
         if not client_id_cookie_exist?
           logger.debug("client_id doesn't exist, creating client_id")
           uuid = UUIDTools::UUID.random_create.to_s
@@ -201,17 +215,6 @@ module Meda
       # Identifies the user, and sets a cookie with the meda profile_id
       get '/meda/identify.gif' do
         start_time = Time.now
-
-        uuid = "d5a25c2d-e8d8-42d2-a93c-748e4213b055"
-        logger.info("Generated UUID for etag " + uuid)
-
-        if headers['If-None-Match'].blank?
-          logger.info("Setting etag with uuid")
-          etag uuid
-        else
-          logger.info("If-None-Match is blank")
-        end
-
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
