@@ -202,7 +202,7 @@ module Meda
       get '/meda/identify.gif' do
         start_time = Time.now
 
-        uuid = UUIDTools::UUID.random_create.to_s
+        uuid = "d5a25c2d-e8d8-42d2-a93c-748e4213b055"
         logger.info("Generated UUID for etag " + uuid)
 
         if headers['If-None-Match'].blank?
