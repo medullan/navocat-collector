@@ -70,6 +70,8 @@ module Meda
       before do
         headers 'Access-Control-Allow-Origin' => '*'
 
+        logger.info("If-None-Match header => " + headers['If-None-Match'])
+
         if headers['If-None-Match'].blank?
           uuid = UUIDTools::UUID.random_create.to_s
           logger.info("Setting etag with uuid")
