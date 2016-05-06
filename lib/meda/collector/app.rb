@@ -68,16 +68,15 @@ module Meda
       end
 
       before do
-        cache_control :max_age => 36000
-        logger.info(params)
-        uuid = "d5a25c2d-e8d8-42d2-a93c-748e4213b055"
-        logger.info("Generated UUID for etag " + uuid)
+        headers 'Access-Control-Allow-Origin' => '*'
 
         if headers['If-None-Match'].blank?
+          uuid = UUIDTools::UUID.random_create.to_s
           logger.info("Setting etag with uuid")
           etag uuid
         else
-          logger.info("If-None-Match is blank")
+          etag headers['If-None-Match']
+          logger.info("If-None-Match is not blank")
         end
       end
 
