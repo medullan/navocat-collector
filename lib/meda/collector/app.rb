@@ -68,15 +68,11 @@ module Meda
       end
 
       before do
+        cache_control :must_revalidate, :max_age => 0
         headers 'Access-Control-Allow-Origin' => '*'
 
-        if headers['If-None-Match'].blank?
-          uuid = UUIDTools::UUID.random_create.to_s
-          logger.info("Setting etag with uuid")
-          etag uuid
-        else
-          etag headers['If-None-Match']
-          logger.info("If-None-Match is not blank")
+        if request.env['HTTP_IF_NONE_MATCH'].blank?
+
         end
       end
 
@@ -217,6 +213,7 @@ module Meda
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
+        etag get_current_etag
         @@request_verification_service.start_rva_log('identify', data, request, cookies)
         if  !profile_id.nil?
           set_profile_id_in_cookie(profile['id'])
@@ -743,6 +740,15 @@ module Meda
       def remote_ip
         request.env['HTTP_X_FORWARDED_FOR'].present? ?
           request.env['HTTP_X_FORWARDED_FOR'].strip.split(/[,\s]+/)[0] : request.ip
+      end
+
+      # Get ID from user etag
+      def get_current_etag
+        if request.env['HTTP_IF_NONE_MATCH'].blank?
+          return UUIDTools::UUID.random_create.to_s
+        else
+          return request.env['HTTP_IF_NONE_MATCH']
+        end
       end
 
       # Extracts pageview hit params from __utm request
