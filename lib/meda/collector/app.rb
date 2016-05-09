@@ -744,10 +744,14 @@ module Meda
 
       # Get ID from user etag
       def get_current_etag
-        if request.env['HTTP_IF_NONE_MATCH'].blank?
-          return UUIDTools::UUID.random_create.to_s
+        etag = request.env['HTTP_IF_NONE_MATCH']
+        if etag.blank?
+          uuid = UUIDTools::UUID.random_create.to_s
+          logger.info("creating new etag #{uuid}")
+          return uuid
         else
-          return request.env['HTTP_IF_NONE_MATCH']
+          logger.info("etag exist returning etag: #{uuid}")
+          return etag
         end
       end
 
