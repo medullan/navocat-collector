@@ -750,7 +750,7 @@ module Meda
           logger.info("creating new etag #{uuid}")
           return uuid
         else
-          logger.info("etag exist returning etag: #{uuid}")
+          logger.info("etag exist, returning etag: #{etag}")
           return etag
         end
       end
