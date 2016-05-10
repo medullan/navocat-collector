@@ -1,5 +1,6 @@
 require 'sinatra/base'
 require 'sinatra/cookies'
+require 'json'
 require 'sinatra/json'
 require 'meda'
 require 'meda/collector/connection'
@@ -68,12 +69,9 @@ module Meda
       end
 
       before do
+        # TODO: Add feature toggle
         cache_control :must_revalidate, :max_age => 0
         headers 'Access-Control-Allow-Origin' => '*'
-
-        if request.env['HTTP_IF_NONE_MATCH'].blank?
-
-        end
       end
 
       before do
@@ -225,6 +223,116 @@ module Meda
           logger.error(msg)
           @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
+        end
+      end
+
+      get '/meda/hit.gif' do
+        if !params[:member_id].blank?
+          logger.info("etag: start of identifying")
+
+          profile_id = identify(params)
+          client_id = get_client_id_from_etag(get_current_etag)
+          params['profile_id'] = profile_id
+          profile(params, client_id)
+        end
+
+        page(params)
+      end
+
+      def identify(params)
+        start_time = Time.now
+        profile = settings.connection.identify(params)
+        profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
+        data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
+        @@request_verification_service.start_rva_log('identify', data, request, cookies)
+        if !profile_id.nil?
+          etag set_etag_profile_id(profile_id, get_current_etag)
+          response = { 'profile_id' => profile_id, :status => 'ok' }
+          @@request_verification_service.end_rva_log(response)
+          return profile_id
+        else
+          msg = "get /meda/hit.gif ==> Unable to find profile"
+          logger.error(msg)
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
+        end
+      end
+
+      def profile(params, client_id)
+        start_time = Time.now
+        get_profile_id_from_cookie
+        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
+        @@request_verification_service.start_rva_log('profile', data, request, cookies)
+        if @@validation_service.valid_profile_request?(client_id, params)
+          settings.connection.profile(params)
+          @@request_verification_service.end_rva_log(:status => 'ok')
+        else
+          msg = "profile.gif bad request request"
+          logger.error(msg)
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
+          respond_with_bad_request
+        end
+      end
+
+      def page(params)
+        start_time = Time.now
+        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
+        @@request_verification_service.start_rva_log('page', data, request, cookies)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
+          settings.connection.page(request_environment.merge(params))
+          @@request_verification_service.end_rva_log(:status => 'ok')
+        else
+          msg = "get /meda/page.gif ==> Invalid hit request"
+          logger.error(msg)
+          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
+          respond_with_bad_request
+        end
+      end
+
+      def set_etag_profile_id(profile_id, json_str)
+        if !json_str.blank? && !profile_id.blank?
+          etag_hash = JSON.parse(json_str)
+          etag_hash["__profile_id"] = profile_id
+          logger.info("updated etag with profile id #{etag_hash}")
+          return etag_hash.to_json
+        else
+          logger.warn("profile_id or json_str is empty")
+        end
+      end
+
+      # Get ID from user etag, if
+      def get_current_etag
+        etag = request.env['HTTP_IF_NONE_MATCH']
+        if etag.blank?
+          new_etag = create_etag_hash.to_json
+          logger.info("creating new etag #{new_etag}")
+          return new_etag
+        else
+          logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
+          return etag
+        end
+      end
+
+      def create_etag_hash
+        etag = Hash.new
+        etag["__client_id"] = UUIDTools::UUID.random_create.to_s
+        etag["__profile_id"] = ''
+        return etag
+      end
+
+
+      def get_profile_id_from_etag(json_str)
+        if !json_str.blank?
+          return JSON.parse(json_str)["__profile_id"]
+        else
+          logger.warn("tried to get profile id from json_str, but it's empty")
+        end
+      end
+
+      def get_client_id_from_etag(json_str)
+        if !json_str.blank?
+          return JSON.parse(json_str)["__client_id"]
+        else
+          logger.warn("tried to get client_id from json_str, but it's empty")
         end
       end
 
@@ -740,19 +848,6 @@ module Meda
       def remote_ip
         request.env['HTTP_X_FORWARDED_FOR'].present? ?
           request.env['HTTP_X_FORWARDED_FOR'].strip.split(/[,\s]+/)[0] : request.ip
-      end
-
-      # Get ID from user etag
-      def get_current_etag
-        etag = request.env['HTTP_IF_NONE_MATCH']
-        if etag.blank?
-          uuid = UUIDTools::UUID.random_create.to_s
-          logger.info("creating new etag #{uuid}")
-          return uuid
-        else
-          logger.info("etag exist, returning etag: #{etag}")
-          return etag
-        end
       end
 
       # Extracts pageview hit params from __utm request
