@@ -227,10 +227,15 @@ module Meda
       end
 
       get '/meda/hit.gif' do
-        if !params[:member_id].blank?
-          logger.info("etag: start of identifying")
+        if etag_client_id_exist?(get_current_etag)
+          params[:client_id] = get_client_id_from_etag(get_current_etag)
+          logger.info("client_id param overwritten by etag client_id")
+        end
 
+        if !params[:member_id].blank?
+          logger.info("etag: member_id exist, starting identify")
           profile_id = identify(params)
+          logger.info("etag: end of identify")
           client_id = get_client_id_from_etag(get_current_etag)
           params['profile_id'] = profile_id
           profile(params, client_id)
@@ -353,6 +358,13 @@ module Meda
         else
           logger.warn("tried to get profile id from json_str, but it's empty")
         end
+      end
+
+      def etag_client_id_exist?(etag_hash)
+        if etag_hash["client_id"].blank?
+          return false
+        end
+        return true
       end
 
       def get_client_id_from_etag(etag_hash)
