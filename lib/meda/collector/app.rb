@@ -238,8 +238,7 @@ module Meda
 
         page(params)
 
-        etag set_etag_profile_id(profile_id, get_current_etag)
-        # etag get_current_etag
+        etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
       end
 
       def identify(params)
@@ -289,13 +288,13 @@ module Meda
         end
       end
 
-      def set_etag_profile_id(profile_id, etag_str)
-        if !etag_str.blank? && !profile_id.blank?
-          logger.info("about to parse etag string #{etag_str}")
-          etag_hash = etag_str
-          etag_hash["__profile_id"] = profile_id
+      def set_etag_profile_id(profile_id, etag_hash)
+        if !etag_hash.blank? && !profile_id.blank?
+          logger.info("about to parse etag string #{etag_hash}")
+          etag_hash = etag_hash
+          etag_hash["profile_id"] = profile_id
           logger.info("updated etag with profile id #{etag_hash}")
-          return etag_hash.to_json
+          return etag_hash
         else
           logger.warn("profile_id or json_str is empty")
         end
@@ -311,7 +310,7 @@ module Meda
           return new_etag
         end
         logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
-        etag
+        string_to_hash(etag)
       end
 
       # Accepts a string in the following format
@@ -322,14 +321,15 @@ module Meda
         Hash[
             str.split(';').map do |pair|
               k, v = pair.split('=', 2)
-              [k, v.to_i]
+              [k, v]
             end]
       end
 
       # Convert has in the form
       # { 'client_id' => 123, 'profile_id', 321}
       # to string "client_id=123;profile_id=321"
-      def hash_to_string(str)
+      def hash_to_string(hash)
+        # TODO lookup more efficient string builder
         str = ''
         hash.each do |key, value|
           str << key.to_s + '=' + value.to_s + ';'
@@ -338,22 +338,26 @@ module Meda
       end
 
       def create_etag_hash
-        etag = "clieny_id=#{UUIDTools::UUID.random_create.to_s};profile_id=#{''}"
+        string_to_hash(create_etag_string)
+      end
+
+      def create_etag_string
+        etag = "client_id=#{UUIDTools::UUID.random_create.to_s};profile_id=#{" "};"
         return etag
       end
 
 
-      def get_profile_id_from_etag(json_str)
-        if !json_str.blank?
-          return JSON.parse(json_str)["__profile_id"]
+      def get_profile_id_from_etag(etag_hash)
+        if !etag_hash.blank?
+          return etag_hash["profile_id"]
         else
           logger.warn("tried to get profile id from json_str, but it's empty")
         end
       end
 
-      def get_client_id_from_etag(json_str)
-        if !json_str.blank?
-          return JSON.parse(json_str)["__client_id"]
+      def get_client_id_from_etag(etag_hash)
+        if !etag_hash.blank?
+          return etag_hash["client_id"]
         else
           logger.warn("tried to get client_id from json_str, but it's empty")
         end
