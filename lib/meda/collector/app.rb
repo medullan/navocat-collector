@@ -289,10 +289,10 @@ module Meda
         end
       end
 
-      def set_etag_profile_id(profile_id, json_str)
-        if !json_str.blank? && !profile_id.blank?
-          logger.info("about to parse json #{json_str}")
-          etag_hash = JSON.parse(json_str)
+      def set_etag_profile_id(profile_id, etag_str)
+        if !etag_str.blank? && !profile_id.blank?
+          logger.info("about to parse etag string #{etag_str}")
+          etag_hash = etag_str
           etag_hash["__profile_id"] = profile_id
           logger.info("updated etag with profile id #{etag_hash}")
           return etag_hash.to_json
@@ -308,16 +308,37 @@ module Meda
         if etag.blank?
           new_etag = create_etag_hash
           logger.info("creating new etag #{new_etag}")
-          return new_etag.to_json
+          return new_etag
         end
         logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
         etag
       end
 
+      # Accepts a string in the following format
+      # client_id=123;profile_id=321 and converts
+      # it to a ruby hash in the form
+      # { 'client_id' => 123, 'profile_id', 321}
+      def string_to_hash(str)
+        Hash[
+            str.split(';').map do |pair|
+              k, v = pair.split('=', 2)
+              [k, v.to_i]
+            end]
+      end
+
+      # Convert has in the form
+      # { 'client_id' => 123, 'profile_id', 321}
+      # to string "client_id=123;profile_id=321"
+      def hash_to_string(str)
+        str = ''
+        hash.each do |key, value|
+          str << key.to_s + '=' + value.to_s + ';'
+        end
+        str
+      end
+
       def create_etag_hash
-        etag = Hash.new
-        etag["__client_id"] = UUIDTools::UUID.random_create.to_s
-        etag["__profile_id"] = ''
+        etag = "clieny_id=#{UUIDTools::UUID.random_create.to_s};profile_id=#{''}"
         return etag
       end
 
