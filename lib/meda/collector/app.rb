@@ -238,14 +238,14 @@ module Meda
 
         page(params)
 
-        etag get_current_etag
+        etag set_etag_profile_id(profile_id, get_current_etag)
+        # etag get_current_etag
       end
 
       def identify(params)
         start_time = Time.now
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
-        # etag set_etag_profile_id(profile_id, get_current_etag)
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('identify', data, request, cookies)
         if !profile_id.nil?
@@ -303,22 +303,20 @@ module Meda
 
       # Get ID from user etag, if
       def get_current_etag
-        etag = request.env['HTTP_IF_NONE_MATCH']
+        origin_etag = request.env['HTTP_IF_NONE_MATCH'].to_s.clone
+        etag = origin_etag.gsub!(/\A"|"\Z/, '')
         if etag.blank?
           new_etag = create_etag_hash
           logger.info("creating new etag #{new_etag}")
           return new_etag.to_json
         end
         logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
-        # etag
-        # TODO: test code
-        create_etag_hash.to_json
+        etag
       end
 
       def create_etag_hash
         etag = Hash.new
-        # etag["__client_id"] = UUIDTools::UUID.random_create.to_s
-        etag["__client_id"] = "d3a68337-a2f0-4029-9175-1235e9dbe71b"
+        etag["__client_id"] = UUIDTools::UUID.random_create.to_s
         etag["__profile_id"] = ''
         return etag
       end
