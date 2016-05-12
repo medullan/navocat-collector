@@ -69,10 +69,11 @@ module Meda
       end
 
       before do
-        # TODO: Add feature toggle
-        cache_control :must_revalidate, :max_age => 0
-        headers 'Access-Control-Allow-Origin' => '*'
-        headers 'Access-Control-Expose-Headers' => 'ETag'
+        if Meda.features.is_enabled('etag', false)
+          cache_control :must_revalidate, :max_age => 0
+          headers 'Access-Control-Allow-Origin' => '*'
+          headers 'Access-Control-Expose-Headers' => 'ETag'
+        end
       end
 
       before do
@@ -84,12 +85,18 @@ module Meda
         else
           logger.debug("client_id already created")
         end
-        client_id = get_client_id_from_cookie
-        # validate that cookie was set on the browser
-        if client_id.blank?
-          # fallback on etags
+
+        if Meda.features.is_enabled("etag", false)
+          logger.info("etag is enabled")
           client_id = get_client_id_from_etag(get_current_etag)
+          if client_id.blank?
+            client_id = get_client_id_from_cookie
+          end
+        else
+          logger.info("etag is disabled")
+          client_id = get_client_id_from_cookie
         end
+
         set_client_id_param(client_id)
       end
 
@@ -806,7 +813,11 @@ module Meda
       end
 
       def get_client_id_from_cookie
-        cookies[:'__collector_client_id']
+        if Meda.features.is_enabled('etag', false)
+          return params[:client_id] ||= cookies[:'__collector_client_id']
+        else
+          return cookies[:'__collector_client_id']
+        end
       end
 
       def set_client_id_param(client_id)

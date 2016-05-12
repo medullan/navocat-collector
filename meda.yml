@@ -48,6 +48,7 @@ development:
     config_check: false
     google_analytics_debug: true
     verification_api: true
+    etag: false
 
 
 production:
@@ -70,6 +71,7 @@ production:
     logs_postgres: false
     profile_store: mapdb
     verification_api: false
+    etag: false
 
 performance:
   disk_pool: 4
@@ -90,6 +92,7 @@ performance:
     post_request_log: true
     logs_postgres: false
     profile_store: mapdb
+    etag: false
 
 test:
   disk_pool: 2
@@ -137,3 +140,4 @@ test:
     config_check: false
     google_analytics_debug: true
     verification_api: true
+    etag: true
