@@ -72,6 +72,8 @@ module Meda
         # TODO: Add feature toggle
         cache_control :must_revalidate, :max_age => 0
         headers 'Access-Control-Allow-Origin' => '*'
+        headers 'Access-Control-Allow-Headers' => 'ETag'
+        headers 'Access-Control-Allow-Headers' => 'Etag'
       end
 
       before do
