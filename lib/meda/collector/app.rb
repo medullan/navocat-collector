@@ -83,6 +83,7 @@ module Meda
         else
           logger.debug("client_id already created")
         end
+
         set_client_id_param(get_client_id_from_cookie)
       end
 
@@ -216,6 +217,7 @@ module Meda
           set_profile_id_in_cookie(profile['id'])
           response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
+          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
           respond_with_pixel
         else
           msg = "get /meda/identify.gif ==> Unable to find profile"
@@ -485,12 +487,26 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         start_time = Time.now
-        get_profile_id_from_cookie
+
+        profile_id = get_profile_id_from_cookie
+        if profile_id.blank?
+          profile_id = get_profile_id_from_etag(get_current_etag)
+        end
+
+        params[:profile_id] = profile_id
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
         @@request_verification_service.start_rva_log('profile', data, request, cookies)
-        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
+
+        client_id = get_client_id_from_cookie
+        if client_id.blank?
+          client_id = get_client_id_from_etag(get_current_etag)
+        end
+
+        if @@validation_service.valid_profile_request?(client_id, params)
           settings.connection.profile(params)
           @@request_verification_service.end_rva_log(:status => 'ok')
+          etag hash_to_string(set_etag_profile_id(params[:profile_id], get_current_etag))
           respond_with_pixel
         else
           msg = "profile.gif bad request request"
@@ -555,12 +571,25 @@ module Meda
       get '/meda/page.gif' do
         start_time = Time.now
 
-        get_profile_id_from_cookie
+        profile_id = get_profile_id_from_cookie
+        if profile_id.blank?
+          profile_id = get_profile_id_from_etag(get_current_etag)
+        end
+
+        params[:profile_id] = profile_id
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('page', data, request, cookies)
-        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
+
+        client_id = get_client_id_from_cookie
+        if client_id.blank?
+          client_id = get_client_id_from_etag(get_current_etag)
+        end
+
+        if @@validation_service.valid_hit_request?(client_id, params)
           settings.connection.page(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
+          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
           respond_with_pixel
         else
           msg = "get /meda/page.gif ==> Invalid hit request"
@@ -596,13 +625,25 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         start_time = Time.now
-        get_profile_id_from_cookie
+        profile_id = get_profile_id_from_cookie
+        if profile_id.blank?
+          profile_id = get_profile_id_from_etag(get_current_etag)
+        end
+
+        params[:profile_id] = profile_id
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('track', data, request, cookies)
 
-        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
+        client_id = get_client_id_from_cookie
+        if client_id.blank?
+          client_id = get_client_id_from_etag(get_current_etag)
+        end
+
+        if @@validation_service.valid_hit_request?(client_id, params)
           settings.connection.track(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
+          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
           respond_with_pixel
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
