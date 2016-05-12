@@ -373,6 +373,13 @@ module Meda
         end
       end
 
+      def etag_client_id_exist?(etag_hash)
+        if etag_hash["client_id"].blank?
+          return false
+        end
+        return true
+      end
+
       def get_client_id_from_etag(etag_hash)
         if !etag_hash.blank?
           return etag_hash["client_id"]
