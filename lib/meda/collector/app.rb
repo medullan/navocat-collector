@@ -83,8 +83,13 @@ module Meda
         else
           logger.debug("client_id already created")
         end
-
-        set_client_id_param(get_client_id_from_cookie)
+        client_id = get_client_id_from_cookie
+        # validate that cookie was set on the browser
+        if client_id.blank?
+          # fallback on etags
+          client_id = get_client_id_from_etag(get_current_etag)
+        end
+        set_client_id_param(client_id)
       end
 
       after do
@@ -498,12 +503,7 @@ module Meda
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
         @@request_verification_service.start_rva_log('profile', data, request, cookies)
 
-        client_id = get_client_id_from_cookie
-        if client_id.blank?
-          client_id = get_client_id_from_etag(get_current_etag)
-        end
-
-        if @@validation_service.valid_profile_request?(client_id, params)
+        if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           @@request_verification_service.end_rva_log(:status => 'ok')
           etag hash_to_string(set_etag_profile_id(params[:profile_id], get_current_etag))
@@ -581,15 +581,14 @@ module Meda
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('page', data, request, cookies)
 
-        client_id = get_client_id_from_cookie
-        if client_id.blank?
-          client_id = get_client_id_from_etag(get_current_etag)
-        end
-
-        if @@validation_service.valid_hit_request?(client_id, params)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
-          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          if profile_id.blank?
+            etag hash_to_string(get_current_etag)
+          else
+            etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          end
           respond_with_pixel
         else
           msg = "get /meda/page.gif ==> Invalid hit request"
@@ -635,15 +634,14 @@ module Meda
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('track', data, request, cookies)
 
-        client_id = get_client_id_from_cookie
-        if client_id.blank?
-          client_id = get_client_id_from_etag(get_current_etag)
-        end
-
-        if @@validation_service.valid_hit_request?(client_id, params)
+        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
-          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          if profile_id.blank?
+            etag hash_to_string(get_current_etag)
+          else
+            etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          end
           respond_with_pixel
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
