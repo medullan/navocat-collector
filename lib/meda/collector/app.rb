@@ -211,7 +211,6 @@ module Meda
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
         data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
-        etag get_current_etag
         @@request_verification_service.start_rva_log('identify', data, request, cookies)
         if  !profile_id.nil?
           set_profile_id_in_cookie(profile['id'])
@@ -226,23 +225,41 @@ module Meda
         end
       end
 
+      # Etag Endpoint
       get '/meda/hit.gif' do
-        if !params[:member_id].blank?
-          logger.info("etag: start of identifying")
+        logger.info("start of hit.git endpoint")
 
-          profile_id = identify(params)
-          client_id = get_client_id_from_etag(get_current_etag)
-          params['profile_id'] = profile_id
-          profile(params, client_id)
+        logger.info("client_id from params #{params[:client_id]}")
+        params[:client_id] = get_client_id_from_etag(get_current_etag)
+        logger.info("client_id in params overwritten by etag client_id #{params[:client_id]}")
+
+        client_id = get_client_id_from_etag(get_current_etag)
+        profile_id = ""
+
+        if !params[:member_id].blank?
+          logger.info("member_id exist, starting identify user")
+          profile_id = identify_etag(params)
+          logger.info("got the profile_id from identify #{profile_id}")
+          params[:profile_id] = profile_id
+          logger.info("added profile_id to params object #{params[:profile_id]}")
+
+          profile_etag(params, client_id)
         end
 
-        page(params)
+        page_etag(params, client_id)
 
-        etag set_etag_profile_id(profile_id, get_current_etag)
-        # etag get_current_etag
+        if profile_id.blank?
+          etag hash_to_string(get_current_etag)
+        else
+          updated_etag = hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          etag updated_etag
+          logger.info("update etag with profile_id #{updated_etag}")
+        end
+
+        respond_with_pixel
       end
 
-      def identify(params)
+      def identify_etag(params)
         start_time = Time.now
         profile = settings.connection.identify(params)
         profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
@@ -259,7 +276,7 @@ module Meda
         end
       end
 
-      def profile(params, client_id)
+      def profile_etag(params, client_id)
         start_time = Time.now
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
         @@request_verification_service.start_rva_log('profile', data, request, cookies)
@@ -274,11 +291,11 @@ module Meda
         end
       end
 
-      def page(params)
+      def page_etag(params, client_id)
         start_time = Time.now
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('page', data, request, cookies)
-        if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
+        if @@validation_service.valid_hit_request?(client_id, params)
           settings.connection.page(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
         else
@@ -289,13 +306,13 @@ module Meda
         end
       end
 
-      def set_etag_profile_id(profile_id, json_str)
-        if !json_str.blank? && !profile_id.blank?
-          logger.info("about to parse json #{json_str}")
-          etag_hash = JSON.parse(json_str)
-          etag_hash["__profile_id"] = profile_id
+      def set_etag_profile_id(profile_id, etag_hash)
+        if !etag_hash.blank? && !profile_id.blank?
+          logger.info("about to parse etag string #{etag_hash}")
+          etag_hash = etag_hash
+          etag_hash["profile_id"] = profile_id
           logger.info("updated etag with profile id #{etag_hash}")
-          return etag_hash.to_json
+          return etag_hash
         else
           logger.warn("profile_id or json_str is empty")
         end
@@ -308,31 +325,64 @@ module Meda
         if etag.blank?
           new_etag = create_etag_hash
           logger.info("creating new etag #{new_etag}")
-          return new_etag.to_json
+          return new_etag
         end
         logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
-        etag
+        string_to_hash(etag)
+      end
+
+      # Accepts a string in the following format
+      # client_id=123;profile_id=321 and converts
+      # it to a ruby hash in the form
+      # { 'client_id' => 123, 'profile_id', 321}
+      def string_to_hash(str)
+        Hash[
+            str.split(';').map do |pair|
+              k, v = pair.split('=', 2)
+              [k, v]
+            end]
+      end
+
+      # Convert has in the form
+      # { 'client_id' => 123, 'profile_id', 321}
+      # to string "client_id=123;profile_id=321"
+      def hash_to_string(hash)
+        # TODO lookup more efficient string builder
+        str = ''
+        hash.each do |key, value|
+          str << key.to_s + '=' + value.to_s + ';'
+        end
+        str
       end
 
       def create_etag_hash
-        etag = Hash.new
-        etag["__client_id"] = UUIDTools::UUID.random_create.to_s
-        etag["__profile_id"] = ''
+        string_to_hash(create_etag_string)
+      end
+
+      def create_etag_string
+        etag = "client_id=#{UUIDTools::UUID.random_create.to_s};profile_id=#{" "};"
         return etag
       end
 
 
-      def get_profile_id_from_etag(json_str)
-        if !json_str.blank?
-          return JSON.parse(json_str)["__profile_id"]
+      def get_profile_id_from_etag(etag_hash)
+        if !etag_hash.blank?
+          return etag_hash["profile_id"]
         else
           logger.warn("tried to get profile id from json_str, but it's empty")
         end
       end
 
-      def get_client_id_from_etag(json_str)
-        if !json_str.blank?
-          return JSON.parse(json_str)["__client_id"]
+      def etag_client_id_exist?(etag_hash)
+        if etag_hash["client_id"].blank?
+          return false
+        end
+        return true
+      end
+
+      def get_client_id_from_etag(etag_hash)
+        if !etag_hash.blank?
+          return etag_hash["client_id"]
         else
           logger.warn("tried to get client_id from json_str, but it's empty")
         end
