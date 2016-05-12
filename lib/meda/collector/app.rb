@@ -267,9 +267,9 @@ module Meda
       end
 
       # Accepts a string in the following format
-      # client_id=123;profile_id=321 and converts
+      # "client_id=123;profile_id=321;" and converts
       # it to a ruby hash in the form
-      # { 'client_id' => 123, 'profile_id', 321}
+      # { "client_id" => 123, "profile_id", 321}
       def string_to_hash(str)
         Hash[
             str.split(';').map do |pair|
@@ -279,7 +279,7 @@ module Meda
       end
 
       # Convert has in the form
-      # { 'client_id' => 123, 'profile_id', 321}
+      # { "client_id" => 123, "profile_id", 321}
       # to string "client_id=123;profile_id=321"
       def hash_to_string(hash)
         # TODO lookup more efficient string builder
