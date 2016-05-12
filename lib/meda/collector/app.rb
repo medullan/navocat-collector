@@ -499,12 +499,14 @@ module Meda
       get '/meda/page.gif' do
         start_time = Time.now
 
-        profile_id = get_profile_id_from_cookie
-        if profile_id.blank?
+        if Meda.features.is_enabled('etag', false)
           profile_id = get_profile_id_from_etag(get_current_etag)
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
         end
-
-        params[:profile_id] = profile_id
 
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('page', data, request, cookies)
@@ -552,12 +554,15 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         start_time = Time.now
-        profile_id = get_profile_id_from_cookie
-        if profile_id.blank?
-          profile_id = get_profile_id_from_etag(get_current_etag)
-        end
 
-        params[:profile_id] = profile_id
+        if Meda.features.is_enabled('etag', false)
+          profile_id = get_profile_id_from_etag(get_current_etag)
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
+        end
 
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('track', data, request, cookies)
