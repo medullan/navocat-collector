@@ -29,6 +29,7 @@ module Meda
         hash["user_agent"] = request.user_agent
         hash["rack_cache_control"] = request.env['HTTP_CACHE_CONTROL']
         hash["rack_remote_address"] = Digest::SHA1.hexdigest(request.env['REMOTE_ADDR'].split(',').first)
+        hash["http_if_none_match"] = request.env['HTTP_IF_NONE_MATCH']
         
         cookies_hash = prefix_hash("cookie",cookies) 
         hash = hash.merge(cookies_hash)

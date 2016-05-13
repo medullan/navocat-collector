@@ -6,6 +6,7 @@ require 'meda'
 require 'meda/collector/connection'
 require 'logger'
 require 'uuidtools'
+require 'browser'
 require 'meda/services/loader/profile_loader'
 require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
@@ -13,6 +14,7 @@ require 'meda/services/validation/validation_service'
 require 'meda/services/config/dynamic_config_service'
 require 'meda/services/verification/request_verification_service'
 require 'meda/services/profile/one_key/profile_id_service'
+require 'meda/services/etag/etag_service'
 
 module Meda
   module Collector
@@ -41,6 +43,7 @@ module Meda
 
       @@logging_meta_data_service = Meda::LoggingMetaDataService.new(helper_config)
       @@validation_service = Meda::ValidationService.new
+      @@etag_service = Meda::EtagService.new
       @@dynamic_config_service = Meda::DynamicConfigService.new(Meda.configuration)
       @@request_verification_service = Meda::RequestVerificationService.new(Meda.configuration)
       @@profile_id_service = Meda::ProfileIdService.new(helper_config)
@@ -69,9 +72,13 @@ module Meda
       end
 
       before do
-        # TODO: Add feature toggle
-        cache_control :must_revalidate, :max_age => 0
-        headers 'Access-Control-Allow-Origin' => '*'
+
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          cache_control :must_revalidate, :max_age => 0
+          headers 'Access-Control-Allow-Origin' => '*'
+          headers 'Access-Control-Expose-Headers' => 'ETag'
+        end
       end
 
       before do
@@ -83,7 +90,20 @@ module Meda
         else
           logger.debug("client_id already created")
         end
-        set_client_id_param(get_client_id_from_cookie)
+
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          logger.info("etag is enabled")
+          client_id = @@etag_service.get_client_id_from_etag(@@etag_service.get_current_etag(request))
+          if client_id.blank?
+            client_id = get_client_id_from_cookie
+          end
+        else
+          logger.info("etag is disabled")
+          client_id = get_client_id_from_cookie
+        end
+
+        set_client_id_param(client_id)
       end
 
       after do
@@ -216,175 +236,18 @@ module Meda
           set_profile_id_in_cookie(profile['id'])
           response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
+          end
+
           respond_with_pixel
         else
           msg = "get /meda/identify.gif ==> Unable to find profile"
           logger.error(msg)
           @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
           respond_with_bad_request
-        end
-      end
-
-      # Etag Endpoint
-      get '/meda/hit.gif' do
-        logger.info("start of hit.git endpoint")
-
-        logger.info("client_id from params #{params[:client_id]}")
-        params[:client_id] = get_client_id_from_etag(get_current_etag)
-        logger.info("client_id in params overwritten by etag client_id #{params[:client_id]}")
-
-        client_id = get_client_id_from_etag(get_current_etag)
-        profile_id = ""
-
-        if !params[:member_id].blank?
-          logger.info("member_id exist, starting identify user")
-          profile_id = identify_etag(params)
-          logger.info("got the profile_id from identify #{profile_id}")
-          params[:profile_id] = profile_id
-          logger.info("added profile_id to params object #{params[:profile_id]}")
-
-          profile_etag(params, client_id)
-        end
-
-        page_etag(params, client_id)
-
-        if profile_id.blank?
-          etag hash_to_string(get_current_etag)
-        else
-          updated_etag = hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
-          etag updated_etag
-          logger.info("update etag with profile_id #{updated_etag}")
-        end
-
-        respond_with_pixel
-      end
-
-      def identify_etag(params)
-        start_time = Time.now
-        profile = settings.connection.identify(params)
-        profile_id = (!profile.nil? && profile.key?(:id)) ? profile['id'] : nil
-        data = { :start_time => start_time, :profile_id => profile_id, :request_input => params, :end_point_type => GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('identify', data, request, cookies)
-        if !profile_id.nil?
-          response = { 'profile_id' => profile_id, :status => 'ok' }
-          @@request_verification_service.end_rva_log(response)
-          return profile_id
-        else
-          msg = "get /meda/hit.gif ==> Unable to find profile"
-          logger.error(msg)
-          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
-        end
-      end
-
-      def profile_etag(params, client_id)
-        start_time = Time.now
-        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
-        @@request_verification_service.start_rva_log('profile', data, request, cookies)
-        if @@validation_service.valid_profile_request?(client_id, params)
-          settings.connection.profile(params)
-          @@request_verification_service.end_rva_log(:status => 'ok')
-        else
-          msg = "profile.gif bad request request"
-          logger.error(msg)
-          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
-          respond_with_bad_request
-        end
-      end
-
-      def page_etag(params, client_id)
-        start_time = Time.now
-        data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
-        @@request_verification_service.start_rva_log('page', data, request, cookies)
-        if @@validation_service.valid_hit_request?(client_id, params)
-          settings.connection.page(request_environment.merge(params))
-          @@request_verification_service.end_rva_log(:status => 'ok')
-        else
-          msg = "get /meda/page.gif ==> Invalid hit request"
-          logger.error(msg)
-          @@request_verification_service.end_rva_log(:status => 'bad_request', :message => msg)
-          respond_with_bad_request
-        end
-      end
-
-      def set_etag_profile_id(profile_id, etag_hash)
-        if !etag_hash.blank? && !profile_id.blank?
-          logger.info("about to parse etag string #{etag_hash}")
-          etag_hash = etag_hash
-          etag_hash["profile_id"] = profile_id
-          logger.info("updated etag with profile id #{etag_hash}")
-          return etag_hash
-        else
-          logger.warn("profile_id or json_str is empty")
-        end
-      end
-
-      # Get ID from user etag, if
-      def get_current_etag
-        origin_etag = request.env['HTTP_IF_NONE_MATCH'].to_s.clone
-        etag = origin_etag.gsub!(/\A"|"\Z/, '')
-        if etag.blank?
-          new_etag = create_etag_hash
-          logger.info("creating new etag #{new_etag}")
-          return new_etag
-        end
-        logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
-        string_to_hash(etag)
-      end
-
-      # Accepts a string in the following format
-      # client_id=123;profile_id=321 and converts
-      # it to a ruby hash in the form
-      # { 'client_id' => 123, 'profile_id', 321}
-      def string_to_hash(str)
-        Hash[
-            str.split(';').map do |pair|
-              k, v = pair.split('=', 2)
-              [k, v]
-            end]
-      end
-
-      # Convert has in the form
-      # { 'client_id' => 123, 'profile_id', 321}
-      # to string "client_id=123;profile_id=321"
-      def hash_to_string(hash)
-        # TODO lookup more efficient string builder
-        str = ''
-        hash.each do |key, value|
-          str << key.to_s + '=' + value.to_s + ';'
-        end
-        str
-      end
-
-      def create_etag_hash
-        string_to_hash(create_etag_string)
-      end
-
-      def create_etag_string
-        etag = "client_id=#{UUIDTools::UUID.random_create.to_s};profile_id=#{" "};"
-        return etag
-      end
-
-
-      def get_profile_id_from_etag(etag_hash)
-        if !etag_hash.blank?
-          return etag_hash["profile_id"]
-        else
-          logger.warn("tried to get profile id from json_str, but it's empty")
-        end
-      end
-
-      def etag_client_id_exist?(etag_hash)
-        if etag_hash["client_id"].blank?
-          return false
-        end
-        return true
-      end
-
-      def get_client_id_from_etag(etag_hash)
-        if !etag_hash.blank?
-          return etag_hash["client_id"]
-        else
-          logger.warn("tried to get client_id from json_str, but it's empty")
         end
       end
 
@@ -492,12 +355,31 @@ module Meda
       # Sets attributes on the given profile
       get '/meda/profile.gif' do
         start_time = Time.now
-        get_profile_id_from_cookie
+
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
+        end
+
+        params[:profile_id] = profile_id
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT  }
         @@request_verification_service.start_rva_log('profile', data, request, cookies)
+
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           @@request_verification_service.end_rva_log(:status => 'ok')
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag(request)))
+          end
+
           respond_with_pixel
         else
           msg = "profile.gif bad request request"
@@ -562,12 +444,31 @@ module Meda
       get '/meda/page.gif' do
         start_time = Time.now
 
-        get_profile_id_from_cookie
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
+        end
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('page', data, request, cookies)
+
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+              if profile_id.blank?
+                etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
+              else
+                etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
+              end
+          end
           respond_with_pixel
         else
           msg = "get /meda/page.gif ==> Invalid hit request"
@@ -603,13 +504,32 @@ module Meda
       # Record an event
       get '/meda/track.gif' do
         start_time = Time.now
-        get_profile_id_from_cookie
+
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
+        end
+
         data = { :start_time => start_time, :request_input => params, :end_point_type => GIF_ENDPOINT }
         @@request_verification_service.start_rva_log('track', data, request, cookies)
 
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            if profile_id.blank?
+              etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
+            else
+              etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
+            end
+          end
           respond_with_pixel
         else
           msg = "get /meda/track.gif ==> Invalid hit request"
@@ -853,7 +773,12 @@ module Meda
       end
 
       def get_client_id_from_cookie
-        cookies[:'__collector_client_id']
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+          return params[:client_id] ||= cookies[:'__collector_client_id']
+        else
+          return cookies[:'__collector_client_id']
+        end
       end
 
       def set_client_id_param(client_id)
