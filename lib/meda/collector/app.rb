@@ -234,7 +234,12 @@ module Meda
           set_profile_id_in_cookie(profile['id'])
           response = { 'profile_id' => profile_id, :status => 'ok' }
           @@request_verification_service.end_rva_log(response)
-          etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+          end
+
           respond_with_pixel
         else
           msg = "get /meda/identify.gif ==> Unable to find profile"
@@ -425,10 +430,16 @@ module Meda
       get '/meda/profile.gif' do
         start_time = Time.now
 
-        profile_id = get_profile_id_from_cookie
-        if profile_id.blank?
+        if Meda.features.is_enabled("etag", false) &&
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           profile_id = get_profile_id_from_etag(get_current_etag)
+          if profile_id.blank?
+            profile_id = get_profile_id_from_cookie
+          end
+        else
+          profile_id = get_profile_id_from_cookie
         end
+
 
         params[:profile_id] = profile_id
 
@@ -438,7 +449,12 @@ module Meda
         if @@validation_service.valid_profile_request?(get_client_id_from_cookie, params)
           settings.connection.profile(params)
           @@request_verification_service.end_rva_log(:status => 'ok')
-          etag hash_to_string(set_etag_profile_id(params[:profile_id], get_current_etag))
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            etag hash_to_string(set_etag_profile_id(params[:profile_id], get_current_etag))
+          end
+
           respond_with_pixel
         else
           msg = "profile.gif bad request request"
@@ -519,10 +535,14 @@ module Meda
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.page(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
-          if profile_id.blank?
-            etag hash_to_string(get_current_etag)
-          else
-            etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+              if profile_id.blank?
+                etag hash_to_string(get_current_etag)
+              else
+                etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+              end
           end
           respond_with_pixel
         else
@@ -576,10 +596,14 @@ module Meda
         if @@validation_service.valid_hit_request?(get_client_id_from_cookie, params)
           settings.connection.track(request_environment.merge(params))
           @@request_verification_service.end_rva_log(:status => 'ok')
-          if profile_id.blank?
-            etag hash_to_string(get_current_etag)
-          else
-            etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+
+          if Meda.features.is_enabled("etag", false) &&
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
+            if profile_id.blank?
+              etag hash_to_string(get_current_etag)
+            else
+              etag hash_to_string(set_etag_profile_id(profile_id, get_current_etag))
+            end
           end
           respond_with_pixel
         else
