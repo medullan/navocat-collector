@@ -258,7 +258,7 @@ module Meda
           logger.info("updated etag with profile id #{etag_hash}")
           return etag_hash
         else
-          logger.warn("profile_id or json_str is empty")
+          logger.warn("profile_id or etag_hash is empty")
         end
       end
 
@@ -310,18 +310,18 @@ module Meda
 
 
       def get_profile_id_from_etag(etag_hash)
-        if !etag_hash.blank?
+        if !etag_hash.blank? && etag_hash.key?("profile_id")
           return etag_hash["profile_id"]
         else
-          logger.warn("tried to get profile id from json_str, but it's empty")
+          logger.warn("tried to get profile id from json_str, but it's empty, or key does not exist")
         end
       end
 
       def get_client_id_from_etag(etag_hash)
-        if !etag_hash.blank?
+        if !etag_hash.blank? && etag_hash.key?("client_id")
           return etag_hash["client_id"]
         else
-          logger.warn("tried to get client_id from json_str, but it's empty")
+          logger.warn("tried to get client_id from json_str, but it's empty, or key does not exist")
         end
       end
 
