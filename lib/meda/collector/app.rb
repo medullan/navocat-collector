@@ -6,6 +6,7 @@ require 'meda'
 require 'meda/collector/connection'
 require 'logger'
 require 'uuidtools'
+require 'browser'
 require 'meda/services/loader/profile_loader'
 require 'meda/services/filter/request_url_filter_service'
 require 'meda/services/logging/logging_meta_data_service'
@@ -69,7 +70,8 @@ module Meda
       end
 
       before do
-        if Meda.features.is_enabled('etag', false)
+
+        if Meda.features.is_enabled("etag", false) && Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           cache_control :must_revalidate, :max_age => 0
           headers 'Access-Control-Allow-Origin' => '*'
           headers 'Access-Control-Expose-Headers' => 'ETag'
@@ -86,7 +88,7 @@ module Meda
           logger.debug("client_id already created")
         end
 
-        if Meda.features.is_enabled("etag", false)
+        if Meda.features.is_enabled("etag", false) && Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           logger.info("etag is enabled")
           client_id = get_client_id_from_etag(get_current_etag)
           if client_id.blank?
@@ -499,7 +501,7 @@ module Meda
       get '/meda/page.gif' do
         start_time = Time.now
 
-        if Meda.features.is_enabled('etag', false)
+        if Meda.features.is_enabled("etag", false) && Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           profile_id = get_profile_id_from_etag(get_current_etag)
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
@@ -555,7 +557,7 @@ module Meda
       get '/meda/track.gif' do
         start_time = Time.now
 
-        if Meda.features.is_enabled('etag', false)
+        if Meda.features.is_enabled("etag", false) && Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           profile_id = get_profile_id_from_etag(get_current_etag)
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
@@ -818,7 +820,7 @@ module Meda
       end
 
       def get_client_id_from_cookie
-        if Meda.features.is_enabled('etag', false)
+        if Meda.features.is_enabled("etag", false) && Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           return params[:client_id] ||= cookies[:'__collector_client_id']
         else
           return cookies[:'__collector_client_id']

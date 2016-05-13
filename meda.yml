@@ -48,7 +48,7 @@ development:
     config_check: false
     google_analytics_debug: true
     verification_api: true
-    etag: false
+    etag: true
 
 
 production:
