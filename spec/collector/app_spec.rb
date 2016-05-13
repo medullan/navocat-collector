@@ -23,6 +23,7 @@ describe "Collector Application" do
   client_id = 'abcd1234abcd1234'
 
   before(:all) do
+    Meda.configuration.features["etag"] = true
     dataset = Meda::Dataset.new('test', Meda.configuration)
     dataset.token = token
     dataset.whitelisted_urls  = [/\/hra\/lobby\.aspx\?toolid=3563/,/\/web\/guest\/myblue\?.*Fcreate_account$/]
@@ -54,6 +55,84 @@ describe "Collector Application" do
     it 'says hello world' do
       get '/meda'
       expect(last_response).to be_ok
+    end
+  end
+
+  describe 'identify.gif' do
+    context 'when the browser is Safari' do
+      it 'should set the Etag header with the client_id and profile_id' do
+        params = {'dataset' => token, 'member_id' => member_id}
+        get '/meda/identify.gif', params, { "HTTP_USER_AGENT" => "Safari" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to include("client_id")
+        expect(last_response.header["ETag"]).to include("profile_id")
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
+    end
+
+    context 'when the browser is not Safari' do
+      it 'should not set the Etag header with client_id and profile_id' do
+        params = {'dataset' => token, 'member_id' => member_id}
+        get '/meda/identify.gif', params, { "HTTP_USER_AGENT" => "Chrome" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to eql(nil)
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
+    end
+  end
+
+  describe 'profile.gif' do
+    context 'when the browser is Safari' do
+      it 'should set the Etag header with the client_id and profile_id' do
+        params = {'dataset' => token, 'profile_id' => '123'}
+        get '/meda/profile.gif', params, { "HTTP_USER_AGENT" => "Safari" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to include("client_id")
+        expect(last_response.header["ETag"]).to include("profile_id")
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
+    end
+
+    context 'when the browser is not Safari' do
+      it 'should not set the Etag header with client_id and profile_id' do
+        params = {'dataset' => token, 'profile_id' => '123'}
+        get '/meda/profile.gif', params, { "HTTP_USER_AGENT" => "Chrome" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to eql(nil)
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
+    end
+  end
+
+  describe 'track.gif' do
+    context 'when the browser is Safari' do
+      it 'should set the Etag header with the client_id and profile_id' do
+        params = {'dataset' => token, 'profile_id' => '123',
+                  'hostname' => 'example.com',
+                  'path' => 'index.html',
+                  'title' => 'Test',
+                  'client_id' => '484138aa-232e-4e0e-8fe7-b438539e9e81'}
+        get '/meda/track.gif', params, { "HTTP_USER_AGENT" => "Safari" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to include("client_id")
+        expect(last_response.header["ETag"]).to include("profile_id")
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
+    end
+
+    context 'when the browser is not Safari' do
+      it 'should not set the Etag header with client_id and profile_id' do
+        params = {'dataset' => token, 'profile_id' => '123',
+                  'hostname' => 'example.com',
+                  'path' => 'index.html',
+                  'title' => 'Test',
+                  'client_id' => '484138aa-232e-4e0e-8fe7-b438539e9e81'}
+
+        get '/meda/track.gif', params, { "HTTP_USER_AGENT" => "Chrome" }
+        expect(last_response).to be_ok
+        expect(last_response.header["ETag"]).to eql(nil)
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+      end
     end
   end
 

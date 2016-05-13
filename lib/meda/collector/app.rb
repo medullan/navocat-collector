@@ -94,7 +94,7 @@ module Meda
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           logger.info("etag is enabled")
-          client_id = @@etag_service.get_client_id_from_etag(@@etag_service.get_current_etag)
+          client_id = @@etag_service.get_client_id_from_etag(@@etag_service.get_current_etag(request))
           if client_id.blank?
             client_id = get_client_id_from_cookie
           end
@@ -239,7 +239,7 @@ module Meda
 
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag))
+            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
           end
 
           respond_with_pixel
@@ -358,7 +358,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag)
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -377,7 +377,7 @@ module Meda
 
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag))
+            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag(request)))
           end
 
           respond_with_pixel
@@ -446,7 +446,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag)
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -464,9 +464,9 @@ module Meda
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
               if profile_id.blank?
-                etag @@etag_service.hash_to_string(@@etag_service.get_current_etag)
+                etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
               else
-                etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag))
+                etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
               end
           end
           respond_with_pixel
@@ -507,7 +507,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag)
+          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -525,9 +525,9 @@ module Meda
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
             if profile_id.blank?
-              etag @@etag_service.hash_to_string(@@etag_service.get_current_etag)
+              etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
             else
-              etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag))
+              etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
             end
           end
           respond_with_pixel

@@ -6,26 +6,25 @@ module Meda
 
     def set_etag_profile_id(profile_id, etag_hash)
       if !etag_hash.blank? && !profile_id.blank?
-        logger.info("about to parse etag string #{etag_hash}")
+        Meda.logger.info("about to parse etag string #{etag_hash}")
         etag_hash = etag_hash
         etag_hash["profile_id"] = profile_id
-        logger.info("updated etag with profile id #{etag_hash}")
+        Meda.logger.info("updated etag with profile id #{etag_hash}")
         return etag_hash
       else
-        logger.warn("profile_id or etag_hash is empty")
+        Meda.logger.warn("profile_id or etag_hash is empty")
       end
     end
 
-    # Get ID from user etag, if
-    def get_current_etag
+    def get_current_etag(request)
       origin_etag = request.env['HTTP_IF_NONE_MATCH'].to_s.clone
       etag = origin_etag.gsub!(/\A"|"\Z/, '')
       if etag.blank?
         new_etag = create_etag_hash
-        logger.info("creating new etag #{new_etag}")
+        Meda.logger.info("creating new etag #{new_etag}")
         return new_etag
       end
-      logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
+      Meda.logger.info("etag exist in the HTTP_IF_NONE_MATCH header, returning etag: #{etag}")
       string_to_hash(etag)
     end
 
@@ -45,7 +44,6 @@ module Meda
     # { "client_id" => 123, "profile_id", 321}
     # to string "client_id=123;profile_id=321"
     def hash_to_string(hash)
-      # TODO lookup more efficient string builder
       str = ''
       hash.each do |key, value|
         str << key.to_s + '=' + value.to_s + ';'
@@ -54,7 +52,7 @@ module Meda
     end
 
     def create_etag_hash
-      EtagService.string_to_hash(create_etag_string)
+      string_to_hash(create_etag_string)
     end
 
     def create_etag_string
@@ -66,7 +64,7 @@ module Meda
       if !etag_hash.blank? && etag_hash.key?("profile_id")
         return etag_hash["profile_id"]
       else
-        logger.warn("tried to get profile id from json_str, but it's empty, or key does not exist")
+        Meda.logger.warn("tried to get profile id from json_str, but it's empty, or key does not exist")
       end
     end
 
@@ -74,7 +72,7 @@ module Meda
       if !etag_hash.blank? && etag_hash.key?("client_id")
         return etag_hash["client_id"]
       else
-        logger.warn("tried to get client_id from json_str, but it's empty, or key does not exist")
+        Meda.logger.warn("tried to get client_id from json_str, but it's empty, or key does not exist")
       end
     end
   end
