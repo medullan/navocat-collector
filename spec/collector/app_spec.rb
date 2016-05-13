@@ -341,12 +341,24 @@ describe "Collector Application" do
       end
     end
 
+    context 'when the browser is Safari and profile_id is missing' do
+      it 'should set the Etag header with the client_id and profile_id' do
+        get request_path + '&profile_id=123', {}, { "HTTP_USER_AGENT" => "Safari" }
+        #app.settings.connection.join_threads
+        expect(dataset.last_hit.props[:path]).to eq('/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account')
+        expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+        expect(last_response.header["ETag"]).to include("client_id")
+        expect(last_response.header["ETag"]).to include("profile_id")
+      end
+    end
+
     context 'with qa params and path in white-list' do
       it 'should return a full path including query string params' do
         get request_path
         #app.settings.connection.join_threads
         expect(dataset.last_hit.props[:path]).to eq('/web/guest/myblue?p_p_id=58&p_p_lifecycle=0&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_58_struts_action=%2Flogin%2Fcreate_account')
         expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+        expect(last_response.header["ETag"]).to eql(nil)
       end
     end
 
@@ -356,6 +368,7 @@ describe "Collector Application" do
         #app.settings.connection.join_threads
         expect(dataset.last_hit.props[:path]).to eq('/web/guest/myblue')
         expect(last_response.header['Set-Cookie'].include?("__collector_client_id")).to be_eql(true)
+        expect(last_response.header["ETag"]).to eql(nil)
       end
     end
 
