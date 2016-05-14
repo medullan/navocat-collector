@@ -101,7 +101,7 @@ test:
   mapdb_path: db
   data_path: meda_data
   log_path: log/test.log
-  log_level: 0
+  log_level: 4
   hash_salt: b03dac7c42cc49ac805dcbbd0902e660
   config_check_interval: 1 # Intervals in seconds
   p3p: CP=\"DSP\"
