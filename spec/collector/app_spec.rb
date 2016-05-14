@@ -341,7 +341,7 @@ describe "Collector Application" do
       end
     end
 
-    context 'when the browser is Safari and profile_id is missing' do
+    context 'when the browser is Safari' do
       it 'should set the Etag header with the client_id and profile_id' do
         get request_path + '&profile_id=123', {}, { "HTTP_USER_AGENT" => "Safari" }
         #app.settings.connection.join_threads

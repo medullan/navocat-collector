@@ -73,10 +73,11 @@ module Meda
 
       before do
 
+        headers 'Access-Control-Allow-Origin' => '*'
+
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           cache_control :must_revalidate, :max_age => 0
-          headers 'Access-Control-Allow-Origin' => '*'
           headers 'Access-Control-Expose-Headers' => 'ETag'
         end
       end
