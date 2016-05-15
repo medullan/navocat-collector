@@ -80,6 +80,7 @@ module Meda
           cache_control :must_revalidate, :max_age => 0
           headers 'Access-Control-Expose-Headers' => 'ETag'
           headers 'Access-Control-Expose-Headers' => 'If-None-Match'
+          headers 'Access-Control-Allow-Headers' => 'If-None-Match'
         end
       end
 
