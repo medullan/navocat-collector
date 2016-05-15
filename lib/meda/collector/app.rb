@@ -79,6 +79,7 @@ module Meda
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           cache_control :must_revalidate, :max_age => 0
           headers 'Access-Control-Expose-Headers' => 'ETag'
+          headers 'Access-Control-Expose-Headers' => 'If-None-Match'
         end
       end
 
