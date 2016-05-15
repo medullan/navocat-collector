@@ -6,13 +6,25 @@ module Meda
 
     def set_etag_profile_id(profile_id, etag_hash)
       if !etag_hash.blank? && !profile_id.blank?
-        Meda.logger.info("about to parse etag string #{etag_hash}")
         etag_hash = etag_hash
         etag_hash["profile_id"] = profile_id
         Meda.logger.info("updated etag with profile id #{etag_hash}")
         return etag_hash
       else
         Meda.logger.warn("profile_id or etag_hash is empty")
+        return etag_hash
+      end
+    end
+
+    def set_etag_client_id(client_id, etag_hash)
+      if !etag_hash.blank? && !client_id.blank?
+        etag_hash = etag_hash
+        etag_hash["client_id"] = client_id
+        Meda.logger.info("updated etag with client_id #{etag_hash}")
+        return etag_hash
+      else
+        Meda.logger.warn("client_id or etag_hash is empty")
+        return etag_hash
       end
     end
 
@@ -60,19 +72,21 @@ module Meda
       return etag
     end
 
-    def get_profile_id_from_etag(etag_hash)
-      if !etag_hash.blank? && etag_hash.key?("profile_id")
-        return etag_hash["profile_id"]
+    def get_profile_id_from_etag(params, etag_hash)
+      if !etag_hash["profile_id"].blank? || !params[:profile_id].blank?
+        return params[:profile_id] ||= etag_hash["profile_id"]
       else
-        Meda.logger.warn("tried to get profile id from json_str, but it's empty, or key does not exist")
+        Meda.logger.warn("tried to get profile_id from params and etag_hash, but it's empty")
+        return nil
       end
     end
 
-    def get_client_id_from_etag(etag_hash)
-      if !etag_hash.blank? && etag_hash.key?("client_id")
-        return etag_hash["client_id"]
+    def get_client_id_from_etag(params, etag_hash)
+      if !etag_hash["client_id"].blank? || !params[:client_id].blank?
+        return params[:client_id] ||= etag_hash["client_id"]
       else
-        Meda.logger.warn("tried to get client_id from json_str, but it's empty, or key does not exist")
+        Meda.logger.warn("tried to get client_id from params and etag_hash, but they're empty")
+        return nil
       end
     end
   end

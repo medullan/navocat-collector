@@ -79,8 +79,6 @@ module Meda
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           cache_control :must_revalidate, :max_age => 0
           headers 'Access-Control-Expose-Headers' => 'ETag'
-          headers 'Access-Control-Expose-Headers' => 'If-None-Match'
-          headers 'Access-Control-Allow-Headers' => 'If-None-Match'
         end
       end
 
@@ -97,9 +95,13 @@ module Meda
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
           logger.info("etag is enabled")
-          client_id = @@etag_service.get_client_id_from_etag(@@etag_service.get_current_etag(request))
+
+          client_id = @@etag_service.get_client_id_from_etag(params, @@etag_service.get_current_etag(request))
+          logger.info("got client_id from etag #{client_id}")
+
           if client_id.blank?
             client_id = get_client_id_from_cookie
+            logger.info("got client from cookie instead of etag #{client_id}")
           end
         else
           logger.info("etag is disabled")
@@ -361,7 +363,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -380,7 +382,9 @@ module Meda
 
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-            etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag(request)))
+            curr_etag = @@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag(request))
+            curr_etag = @@etag_service.set_etag_client_id(params[:client_id], curr_etag)
+            etag @@etag_service.hash_to_string(curr_etag)
           end
 
           respond_with_pixel
@@ -449,7 +453,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -467,9 +471,11 @@ module Meda
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
               if profile_id.blank?
-                etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
+                etag @@etag_service.hash_to_string(@@etag_service.set_etag_client_id(params[:client_id], @@etag_service.get_current_etag(request)))
               else
-                etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
+                curr_etag = @@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request))
+                curr_etag = @@etag_service.set_etag_client_id(params[:client_id], curr_etag)
+                etag @@etag_service.hash_to_string(curr_etag)
               end
           end
           respond_with_pixel
@@ -510,7 +516,7 @@ module Meda
 
         if Meda.features.is_enabled("etag", false) &&
             Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          profile_id = @@etag_service.get_profile_id_from_etag(@@etag_service.get_current_etag(request))
+          profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
           end
@@ -528,9 +534,11 @@ module Meda
           if Meda.features.is_enabled("etag", false) &&
               Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
             if profile_id.blank?
-              etag @@etag_service.hash_to_string(@@etag_service.get_current_etag(request))
+              etag @@etag_service.hash_to_string(@@etag_service.set_etag_client_id(params[:client_id], @@etag_service.get_current_etag(request)))
             else
-              etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
+              curr_etag = @@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request))
+              curr_etag = @@etag_service.set_etag_client_id(params[:client_id], curr_etag)
+              etag @@etag_service.hash_to_string(curr_etag)
             end
           end
           respond_with_pixel
@@ -776,12 +784,7 @@ module Meda
       end
 
       def get_client_id_from_cookie
-        if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari?
-          return params[:client_id] ||= cookies[:'__collector_client_id']
-        else
-          return cookies[:'__collector_client_id']
-        end
+          cookies[:'__collector_client_id']
       end
 
       def set_client_id_param(client_id)
