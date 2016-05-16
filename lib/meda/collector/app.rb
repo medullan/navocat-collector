@@ -76,8 +76,8 @@ module Meda
         headers 'Access-Control-Allow-Origin' => '*'
 
         if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+            (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
           cache_control :must_revalidate, :max_age => 0
           headers 'Access-Control-Expose-Headers' => 'ETag'
         end
@@ -94,8 +94,8 @@ module Meda
         end
 
         if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+            (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
           logger.info("etag is enabled")
 
           client_id = @@etag_service.get_client_id_from_etag(params, @@etag_service.get_current_etag(request))
@@ -245,8 +245,8 @@ module Meda
           @@request_verification_service.end_rva_log(response)
 
           if Meda.features.is_enabled("etag", false) &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+              (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
             etag @@etag_service.hash_to_string(@@etag_service.set_etag_profile_id(profile_id, @@etag_service.get_current_etag(request)))
           end
 
@@ -365,8 +365,8 @@ module Meda
         start_time = Time.now
 
         if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+            (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
           profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
@@ -385,8 +385,8 @@ module Meda
           @@request_verification_service.end_rva_log(:status => 'ok')
 
           if Meda.features.is_enabled("etag", false) &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+              (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
             curr_etag = @@etag_service.set_etag_profile_id(params[:profile_id], @@etag_service.get_current_etag(request))
             curr_etag = @@etag_service.set_etag_client_id(params[:client_id], curr_etag)
             etag @@etag_service.hash_to_string(curr_etag)
@@ -457,8 +457,8 @@ module Meda
         start_time = Time.now
 
         if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+            (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
           profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
@@ -475,8 +475,8 @@ module Meda
           @@request_verification_service.end_rva_log(:status => 'ok')
 
           if Meda.features.is_enabled("etag", false) &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+              (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
               if profile_id.blank?
                 etag @@etag_service.hash_to_string(@@etag_service.set_etag_client_id(params[:client_id], @@etag_service.get_current_etag(request)))
               else
@@ -522,8 +522,8 @@ module Meda
         start_time = Time.now
 
         if Meda.features.is_enabled("etag", false) &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+            (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+            Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
           profile_id = @@etag_service.get_profile_id_from_etag(params, @@etag_service.get_current_etag(request))
           if profile_id.blank?
             profile_id = get_profile_id_from_cookie
@@ -540,8 +540,8 @@ module Meda
           @@request_verification_service.end_rva_log(:status => 'ok')
 
           if Meda.features.is_enabled("etag", false) &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? &&
-              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?
+              (Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).safari? ||
+              Browser.new({:ua => request.env["HTTP_USER_AGENT"].to_s}).chrome?)
             if profile_id.blank?
               etag @@etag_service.hash_to_string(@@etag_service.set_etag_client_id(params[:client_id], @@etag_service.get_current_etag(request)))
             else
