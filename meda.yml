@@ -48,6 +48,7 @@ development:
     config_check: false
     google_analytics_debug: true
     verification_api: true
+    etag: true
 
 
 production:
@@ -70,6 +71,7 @@ production:
     logs_postgres: false
     profile_store: mapdb
     verification_api: false
+    etag: false
 
 performance:
   disk_pool: 4
@@ -90,6 +92,7 @@ performance:
     post_request_log: true
     logs_postgres: false
     profile_store: mapdb
+    etag: false
 
 test:
   disk_pool: 2
@@ -98,7 +101,7 @@ test:
   mapdb_path: db
   data_path: meda_data
   log_path: log/test.log
-  log_level: 0
+  log_level: 4
   hash_salt: b03dac7c42cc49ac805dcbbd0902e660
   config_check_interval: 1 # Intervals in seconds
   p3p: CP=\"DSP\"
@@ -137,3 +140,4 @@ test:
     config_check: false
     google_analytics_debug: true
     verification_api: true
+    etag: true

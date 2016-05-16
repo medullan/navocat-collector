@@ -4,7 +4,7 @@ production:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-58408341-1
+    tracking_id: UA-74192553-1
     custom_dimensions:
       age:
         index: 1
@@ -24,7 +24,7 @@ development:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-58395143-1
+    tracking_id: UA-74192553-1
     custom_dimensions:
       age:
         index: 1
@@ -37,7 +37,7 @@ test:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-58408341-1
+    tracking_id: UA-74192553-1
     custom_dimensions:
       age:
         index: 1

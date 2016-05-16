@@ -107,6 +107,7 @@ module Meda
       :hash_salt => '',
       :p3p => '',
       :config_check_interval => 600,
+      :etag => true,
       :env => 'development',
       :verification_api => {
           :private_keys => [],
@@ -122,7 +123,8 @@ module Meda
                   :features, :db_url, :loggly_url, :loggly_pool,
                   :postgres_thread_pool, :postgres_logger,
                   :redis, :h2, :logs, :hash_salt, :p3p,
-                  :config_check_interval, :env, :verification_api
+                  :config_check_interval, :env, :verification_api,
+                  :etag
 
     def initialize
       DEFAULTS.each do |key,val|
