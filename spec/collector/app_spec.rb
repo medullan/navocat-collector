@@ -2,7 +2,7 @@ require File.expand_path '../spec_helper.rb', __FILE__
 
 # These examples have dependencies, and need to be run in order
 
-describe "Collector Application" do
+xdescribe "Collector Application" do
 
   Meda.configuration.features = {}
   Meda.configuration.features["profile_store"] = "mapdb"
