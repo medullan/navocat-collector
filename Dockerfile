@@ -1,7 +1,7 @@
-FROM jruby:1.7.19
+FROM jruby:1.7
 
 RUN apt-get update \
-        && apt-get install -y git
+    && apt-get install -y git
 
 ENV MEDA_LOCATION /usr/src/app/meda_configs/meda.yml
 ENV DATASET_LOCATION /usr/src/app/meda_configs/datasets.yml
