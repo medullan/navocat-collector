@@ -21,4 +21,4 @@ RUN bundle install && gem install puma
 
 EXPOSE 8000
 
-CMD puma --config /usr/src/app/config.rb
+CMD puma --environment development --port 8000 --threads 0:4
