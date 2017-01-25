@@ -82,7 +82,7 @@ performance:
   log_path: log/performance.log
   log_level: 1
   redis:
-    host: localhost
+    host: redis-server
     port: 6379
     password: nil
     pool: 10

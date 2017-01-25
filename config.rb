@@ -1,7 +1,7 @@
 #!/usr/bin/env puma
 
 #This variable determines what config is selected in meda.yml
-meda_env = 'development'
+meda_env = 'production'
 environment meda_env
 ENV['RACK_ENV'] = meda_env
 
