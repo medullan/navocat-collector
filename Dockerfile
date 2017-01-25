@@ -17,7 +17,7 @@ VOLUME /usr/src/app/log
 VOLUME /usr/src/app/meda_data
 VOLUME /usr/src/app/meda_configs
 
-RUN bundle install --without development && gem install puma
+RUN bundle install && gem install puma
 
 EXPOSE 8000
 
