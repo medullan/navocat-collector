@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "thor", "~> 0.18.1"
   spec.add_runtime_dependency "uuidtools", "~> 2.1.4"
-  spec.add_runtime_dependency "activesupport"
+  spec.add_runtime_dependency "activesupport", "~> 4.2"
   spec.add_runtime_dependency "sinatra", "~> 1.4.4"
   spec.add_runtime_dependency "sinatra-contrib", " ~> 1.4.2"
   spec.add_runtime_dependency 'staccato'
