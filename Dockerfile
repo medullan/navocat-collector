@@ -1,4 +1,4 @@
-FROM jruby:1.7.19
+FROM jruby:9
 
 RUN apt-get update \
     && apt-get install -y git
