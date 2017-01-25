@@ -18,7 +18,7 @@ development:
     error_email_from_account_password: update
     error_email_to_account: [x@medullan.com,x@medullan.com]
   redis:
-    host: localhost
+    host: redis-server
     port: 6379
     password: nil
     pool: 10
