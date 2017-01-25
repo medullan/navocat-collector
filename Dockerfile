@@ -1,17 +1,3 @@
-#FROM jruby:1.7
-#
-#RUN mkdir -p /app
-#WORKDIR /app
-#
-#COPY . ./
-#RUN gem install bundler --version=1.12.2
-#RUN bundler -v
-#RUN bundle install && gem install puma
-#
-#
-#
-#CMD puma --environment production --port 80 --threads 32:32
-
 FROM jruby:1.7.19
 
 RUN apt-get update \
