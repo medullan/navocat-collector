@@ -20,7 +20,6 @@ development:
   redis:
     host: localhost
     port: 6379
-    password: nil
     pool: 10
     time_out: 15
   verification_api:

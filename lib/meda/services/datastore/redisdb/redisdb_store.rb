@@ -76,9 +76,6 @@ module Meda
         redis_host = ENV['REDIS_HOST'] || @config.redis['host']
         redis_port = ENV['REDIS_PORT'] || @config.redis['port']
         redis_pwd = ENV['REDIS_PWD'] || @config.redis['password']
-        print redis_host
-        print redis_port
-        print redis_pwd
         @redis_pool = ConnectionPool.new(size: pool_size, timeout: time_out) do
           Redis.new(:host => redis_host, :port => redis_port, :password => redis_pwd)
         end
