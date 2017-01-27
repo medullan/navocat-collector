@@ -1,7 +1,6 @@
-FROM jruby:9
+FROM jruby:9-alpine
 
-RUN apt-get update \
-    && apt-get install -y git
+RUN apk add --no-cache make gcc g++ python bash git openssh
 
 ENV MEDA_LOCATION /usr/src/app/meda_configs/meda.yml
 ENV DATASET_LOCATION /usr/src/app/meda_configs/datasets.yml
