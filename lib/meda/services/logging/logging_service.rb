@@ -81,8 +81,8 @@ module Meda
 
     def setup_logstash_logger(config)
       if features.is_enabled("logstash_logger", false)
-        host = config.logs['logstash_host'] || ENV['LOGSTASH_HOST']
-        port = config.logs['logstash_port'] || ENV['LOGSTASH_PORT']
+        host = ENV['LOGSTASH_HOST'] || config.logs['logstash_host']
+        port = ENV['LOGSTASH_PORT'] || config.logs['logstash_port']
         @logstash_logger = LogStashLogger.new(type: :tcp, host: host, port: port)
         @loggers.push(@logstash_logger)
         puts "logstash logger setup"
