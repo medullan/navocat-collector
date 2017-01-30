@@ -2,8 +2,9 @@ FROM jruby:9-alpine
 
 RUN apk add --no-cache make gcc g++ python bash git openssh
 
-ENV MEDA_LOCATION /usr/src/app/meda_configs/meda.yml
-ENV DATASET_LOCATION /usr/src/app/meda_configs/datasets.yml
+ENV MEDA_THREADS 0:4
+ENV MEDA_PORT 8000
+ENV MEDA_ENV development
 ENV JRUBY_OPTS -J-Xmx1g
 
 RUN mkdir -p /usr/src/app
@@ -12,12 +13,8 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-VOLUME /usr/src/app/log
-VOLUME /usr/src/app/meda_data
-VOLUME /usr/src/app/meda_configs
-
 RUN bundle install && gem install puma
 
-EXPOSE 8000
+EXPOSE ${MEDA_PORT}
 
-CMD puma --environment development --port 8000 --threads 0:4
+CMD puma --environment ${MEDA_ENV} --port ${MEDA_PORT} --threads ${MEDA_THREADS}
