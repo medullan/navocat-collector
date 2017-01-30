@@ -85,7 +85,7 @@ module Meda
         port = ENV['LOGSTASH_PORT'] || config.logs['logstash_port']
         @logstash_logger = LogStashLogger.new(type: :tcp, host: host, port: port)
         @loggers.push(@logstash_logger)
-        puts "logstash logger setup"
+        puts "logstash logger setup, sending logs to HOST: #{host} and PORT: #{port}"
       end
     end
 
