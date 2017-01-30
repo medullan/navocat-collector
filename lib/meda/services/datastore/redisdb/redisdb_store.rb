@@ -71,11 +71,11 @@ module Meda
     
     def redis_conn
       if @redis_pool.nil? && @config.redis.present?
-        pool_size = @config.redis['pool'] || REDIS_POOL_DEFAULT
-        time_out = @config.redis['time_out'] || REDIS_TIMEOUT_DEFAULT
-        redis_host = ENV['REDIS_HOST'] || @config.redis['host']
-        redis_port = ENV['REDIS_PORT'] || @config.redis['port']
-        redis_pwd = ENV['REDIS_PWD'] || @config.redis['password']
+        pool_size = ENV['REDIS_POOL_DEFAULT'] || @config.redis['pool'] || REDIS_POOL_DEFAULT
+        time_out = ENV['REDIS_TIMEOUT_DEFAULT'] || @config.redis['time_out'] || REDIS_TIMEOUT_DEFAULT
+        redis_host =  ENV['REDIS_HOST'] || @config.redis['host']
+        redis_port =  ENV['REDIS_PORT'] || @config.redis['port']
+        redis_pwd =   ENV['REDIS_PWD'] || @config.redis['password']
         @redis_pool = ConnectionPool.new(size: pool_size, timeout: time_out) do
           Redis.new(:host => redis_host, :port => redis_port, :password => redis_pwd)
         end
