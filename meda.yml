@@ -17,6 +17,7 @@ development:
     error_email_from_account: x@gmail.com
     error_email_from_account_password: update
     error_email_to_account: [x@medullan.com,x@medullan.com]
+    logstash_port: 5601
   redis:
     host: localhost
     port: 6379
@@ -48,6 +49,7 @@ development:
     google_analytics_debug: true
     verification_api: true
     etag: true
+    logstash_logger: false
 
 
 production:
@@ -58,6 +60,8 @@ production:
   data_path: meda_data
   log_path: log/production.log
   log_level: 0
+  logs:
+    logstash_port: 5601
   redis:
     host: localhost
     port: 6379
@@ -71,6 +75,7 @@ production:
     profile_store: mapdb
     verification_api: false
     etag: false
+    logstash_logger: true
 
 performance:
   disk_pool: 4
@@ -80,6 +85,8 @@ performance:
   data_path: meda_data
   log_path: log/performance.log
   log_level: 1
+  logs:
+    logstash_port: 5601
   redis:
     host: redis-server
     port: 6379
@@ -92,6 +99,7 @@ performance:
     logs_postgres: false
     profile_store: mapdb
     etag: false
+    logstash_logger: false
 
 test:
   disk_pool: 2
@@ -113,6 +121,7 @@ test:
     error_email_from_account: collector@gmail.com
     error_email_from_account_password: update
     error_email_to_account: [x@medullan.com,x@medullan.com]
+    logstash_port: 5601
   redis:
     host: localhost
     port: 6379
@@ -140,3 +149,4 @@ test:
     google_analytics_debug: true
     verification_api: true
     etag: true
+    logstash_logger: false

@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "logging", "~> 1.8.2"
   spec.add_runtime_dependency "mail", "~> 2.6.3"
   spec.add_runtime_dependency "browser", "~> 1.1.0"
+  spec.add_runtime_dependency "logstash-logger", "~> 0.22.1"
   
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
