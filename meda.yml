@@ -49,7 +49,7 @@ development:
     google_analytics_debug: true
     verification_api: true
     etag: true
-    logstash_logger: false
+    logstash_logger: true
 
 
 production:
