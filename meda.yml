@@ -91,7 +91,7 @@ performance:
     logstash_host: localhost
     logstash_port: 5601
   redis:
-    host: redis-server
+    host: localhost
     port: 6379
     password: nil
     pool: 10
