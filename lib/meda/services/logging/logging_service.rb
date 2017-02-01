@@ -1,6 +1,7 @@
 require 'logger'
 require 'logging'
 require 'json'
+require 'logstash-logger'
 require_relative './email_logging_service.rb'
 module Meda
 
@@ -20,6 +21,7 @@ module Meda
       setup_file_logger(config)
       setup_additional_error_logger(config)
       setup_console_logger(config)
+      setup_logstash_logger(config)
       puts "#{@loggers.length.to_s} loggers have been setup"
     end
 
@@ -74,6 +76,16 @@ module Meda
         @console_logger.level = loggingLevel
         @loggers.push(@console_logger)
         puts "console logger setup"
+      end
+    end
+
+    def setup_logstash_logger(config)
+      if features.is_enabled("logstash_logger", false)
+        host = ENV['LOGSTASH_HOST'] || config.logs['logstash_host']
+        port = ENV['LOGSTASH_PORT'] || config.logs['logstash_port']
+        @logstash_logger = LogStashLogger.new(type: :tcp, host: host.to_s, port: port)
+        @loggers.push(@logstash_logger)
+        puts "logstash logger setup, sending logs to HOST: #{host} and PORT: #{port}"
       end
     end
 

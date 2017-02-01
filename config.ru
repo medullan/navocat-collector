@@ -24,11 +24,12 @@ Meda.configure do |config|
   if not config.verification_api.empty?
     config.verification_api['collection_name'] = "#{config.verification_api['collection_name']}-#{config.env}"
 
-    config.verification_api['private_keys'].each_with_index do |value , index|
-      config.verification_api['private_keys'][index] = (value != nil)? value.to_s: nil
+    if not config.verification_api['private_keys'].blank?
+      config.verification_api['private_keys'].each_with_index do |value , index|
+        config.verification_api['private_keys'][index] = (value != nil)? value.to_s: nil
+      end
     end
   end
-
 end
 
 dataset = Meda::Dataset.new("perf_#{Time.now.to_i}", Meda.configuration)

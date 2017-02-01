@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "thor", "~> 0.18.1"
   spec.add_runtime_dependency "uuidtools", "~> 2.1.4"
-  spec.add_runtime_dependency "activesupport"
+  spec.add_runtime_dependency "activesupport", "~> 4.2"
   spec.add_runtime_dependency "sinatra", "~> 1.4.4"
   spec.add_runtime_dependency "sinatra-contrib", " ~> 1.4.2"
   spec.add_runtime_dependency 'staccato'
@@ -35,6 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "logging", "~> 1.8.2"
   spec.add_runtime_dependency "mail", "~> 2.6.3"
   spec.add_runtime_dependency "browser", "~> 1.1.0"
+  spec.add_runtime_dependency "logstash-logger", "~> 0.22.1"
   
   spec.add_development_dependency "bundler", "~> 1.5"
   spec.add_development_dependency "rake"
