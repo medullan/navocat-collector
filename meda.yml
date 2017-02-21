@@ -37,7 +37,7 @@ development:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: redis
+    profile_store: redisdb
     profile_loader: true
     profile_service: onekey
     all_log_file_logger: true
@@ -73,7 +73,7 @@ production:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: redis
+    profile_store: redisdb
     profile_loader: true
     profile_service: onekey
     all_log_file_logger: false
