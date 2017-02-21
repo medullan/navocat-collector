@@ -47,7 +47,6 @@ development:
     google_analytics_debug: false
     p3p: true
     config_check: false
-    google_analytics_debug: true
     verification_api: true
     etag: true
     logstash_logger: false
@@ -74,10 +73,20 @@ production:
     pre_request_log: true
     post_request_log: true
     logs_postgres: false
-    profile_store: mapdb
+    profile_store: hashdb
+    profile_loader: true
+    profile_service: onekey
+    all_log_file_logger: false
+    error_file_logger: false
+    stdout_logger: true
+    error_email_logger: false
+    google_analytics_debug: false
+    p3p: true
+    config_check: false
     verification_api: false
     etag: false
     logstash_logger: true
+
 
 performance:
   disk_pool: 4
