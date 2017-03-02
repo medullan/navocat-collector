@@ -20,11 +20,11 @@ staging:
     record: false
 
 development:
-  token: c2e02c92c73211e3aaf844fb42fffe8c
+  token: c2e02c92c73211e3aaf844fb42fargus
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-74192553-1
+    tracking_id: UA-92916951-1
     custom_dimensions:
       age:
         index: 1
@@ -45,11 +45,4 @@ test:
         index: 2
       segment:
         index: 3
-
-argus_staging:
-  token: c2e02c92c73211e3aaf844fb42fargus
-  enable_data_retrivals: true
-  google_analytics:
-    record: true
-    tracking_id: UA-92916951-1
 
