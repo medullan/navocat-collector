@@ -32,6 +32,7 @@ development:
         index: 2
       segment:
         index: 3
+
 test:
   token: c2e02c92c73211e3aaf8sds44fb42fffe8c
   enable_data_retrivals: true
@@ -45,4 +46,3 @@ test:
         index: 2
       segment:
         index: 3
-
