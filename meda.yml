@@ -84,7 +84,7 @@ production:
     config_check: false
     verification_api: false
     etag: false
-    logstash_logger: true
+    logstash_logger: false
 
 
 performance:
