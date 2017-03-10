@@ -33,6 +33,20 @@ development:
       segment:
         index: 3
 
+wellbridge:
+  token: c2e02c92c73211e3aaf844fb42fffe8c
+  enable_data_retrivals: true
+  google_analytics:
+    record: true
+    tracking_id: UA-74192553-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+
 test:
   token: c2e02c92c73211e3aaf8sds44fb42fffe8c
   enable_data_retrivals: true
