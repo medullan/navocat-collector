@@ -1,4 +1,4 @@
-FROM jruby:9-alpine
+FROM jruby:9.1.13.0-alpine
 
 RUN apk add --no-cache make gcc g++ python bash git openssh
 
