@@ -7,7 +7,7 @@ IMG_TAG=$IMG_TAG_PREFIX$GIT_BRANCH
 IMG_REPO=navocat-collector
 WORKING_DIR=$PWD
 
-IMG_TAG=${CIRCLE_TAG:-$IMG_TAG}
+IMG_TAG=${CUSTOM_TAG:-$IMG_TAG}
 
 function buildImage() {
   echo "building image..."
