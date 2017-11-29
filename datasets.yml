@@ -51,7 +51,21 @@ argus:
   enable_data_retrivals: true
   google_analytics:
     record: true
-    tracking_id: UA-92916951-1
+    tracking_id: UA-110455069-1
+    custom_dimensions:
+      age:
+        index: 1
+      gender:
+        index: 2
+      segment:
+        index: 3
+
+argusprod:
+  token: bj9kevhg1009991bck1kveyjp
+  enable_data_retrivals: true
+  google_analytics:
+    record: true
+    tracking_id: UA-110460523-1
     custom_dimensions:
       age:
         index: 1
